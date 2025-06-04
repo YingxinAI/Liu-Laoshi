@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>刘老师的餐馆点餐教学体验馆</title>
+  <style>
+    body {
+      font-family: KaiTi, 楷体, serif;
+      background-color: #fff8f0;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #d35400;
+    }
+    #welcome-message {
+      font-size: 20px;
+      color: #d35400;
+      margin-bottom: 30px;
+    }
+    #game-container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fdf6e3;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .input-section,
+    .menu-container,
+    .submit-group {
+      display: block;
+      margin-top: 20px;
+    }
+    .menu-container,
+    .submit-group {
+      display: none;
+    }
+    select,
+    input[type="text"],
+    input[type="number"] {
+      font-family: KaiTi, 楷体, serif;
+      padding: 8px;
+      width: auto;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    label {
+      font-size: 16px;
+      display: inline-block;
+      margin-bottom: 10px;
+      font-family: KaiTi, 楷体, serif;
+    }
+    .menu-box {
+      flex: 1;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .menu-container {
+      display: flex;
+      gap: 30px;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+      justify-content: flex-start;
+    }
+    .price {
+      white-space: nowrap;
+      min-width: 70px;
+      text-align: right;
+    }
+    button[type="button"] {
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: KaiTi, 楷体, serif;
+    }
+    button:hover {
+      background-color: #cf711f;
+    }
+    .submit-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .submit-group label {
+      font-size: 16px;
+      color: #333;
+    }
+    .menu-box h3 {
+      color: #d35400;
+    }
+    #orderDisplayArea {
+      text-align: left;
+      max-width: 600px;
+      margin: auto;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: none;
+    }
+    .order-line {
+      font-size: 16px;
+      padding: 5px 0;
+    }
+    #totalLine {
+      font-weight: bold;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    #gold {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>刘老师的餐馆点餐教学体验馆</h1>
+
+    <!-- 始终显示的欢迎信息 -->
+  <div id="welcome-message">
+    <span class="welcome-icon">🍜</span>
+    <span class="welcome-text">欢迎光临刘老师的小餐馆！</span>
+    <span class="welcome-icon">🍚</span>
+  </div>
+
+  <div id="game-container">
+
+    <!-- 名字和人数输入区域 -->
+    <div class="input-section" id="nameInputSection">
+      <select id="customerGender">
+        <option value="先生">先生</option>
+        <option value="女士">女士</option>
+      </select>
+      <input type="text" id="customerName">
+      <br><br>
+      <label for="customerCount">请输入几位顾客：</label>
+      <input type="number" id="customerCount" min="1" max="20" style="display: inline-block; width: 60px;">
+      <br><br>
+      <button onclick="startOrder()">确认并开始点餐</button>
+
+      <!-- 新增问候语放在按钮下方 -->
+      <div id="greeting-message" style="margin-top: 10px; font-size: 16px; color: #e67e22;"></div>
+    </div>
+
+   <!-- 主菜与饮料分栏 -->
+    <div class="menu-container" id="menuContainer" style="display: none;">
+      <div class="menu-box" id="mainDishes">
+        <h3>主菜</h3>
+        <form id="menuForm">
+          <!-- 酸辣土豆丝 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="酸辣土豆丝" data-price="15" data-unit="盘">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>酸辣土豆丝</label>
+            </div>
+            <span class="price">￥15/盘</span>
+          </div>
+
+          <!-- 宫保鸡丁 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="宫保鸡丁" data-price="20" data-unit="盘">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>宫保鸡丁</label>
+            </div>
+            <span class="price">￥20/盘</span>
+          </div>
+
+          <!-- 鱼香肉丝 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="鱼香肉丝" data-price="18" data-unit="盘">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>鱼香肉丝</label>
+            </div>
+            <span class="price">￥18/盘</span>
+          </div>
+
+          <!-- 炒饭 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="炒饭" data-price="5" data-unit="碗">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>炒饭</label>
+            </div>
+            <span class="price">￥5/碗</span>
+          </div>
+
+          <!-- 炒面 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="炒面" data-price="6" data-unit="盘">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>炒面</label>
+            </div>
+            <span class="price">￥6/盘</span>
+          </div>
+
+          <!-- 红烧牛肉面 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="红烧牛肉面" data-price="12" data-unit="碗">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>红烧牛肉面</label>
+            </div>
+            <span class="price">￥12/碗</span>
+          </div>
+
+          <!-- 麻婆豆腐 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="麻婆豆腐" data-price="8" data-unit="盘">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>麻婆豆腐</label>
+            </div>
+            <span class="price">￥8/盘</span>
+          </div>
+        </form>
+      </div>
+
+
+ <!-- 饮料框 -->
+      <div class="menu-box" id="drinks">
+        <h3>饮料</h3>
+        <form id="drinkForm">
+          <!-- 可乐 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="可乐" data-price="5" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>可乐</label>
+            </div>
+            <span class="price">￥5/杯</span>
+          </div>
+
+          <!-- 雪碧 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="雪碧" data-price="5" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>雪碧</label>
+            </div>
+            <span class="price">￥5/杯</span>
+          </div>
+
+          <!-- 绿茶 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="绿茶" data-price="6" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>绿茶</label>
+            </div>
+            <span class="price">￥6/杯</span>
+          </div>
+
+          <!-- 红茶 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="红茶" data-price="6" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>红茶</label>
+            </div>
+            <span class="price">￥6/杯</span>
+          </div>
+
+          <!-- 奶茶 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="奶茶" data-price="7" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>奶茶</label>
+            </div>
+            <span class="price">￥7/杯</span>
+          </div>
+
+          <!-- 咖啡 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="咖啡" data-price="10" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>咖啡</label>
+            </div>
+            <span class="price">￥10/杯</span>
+          </div>
+
+          <!-- 牛奶 -->
+          <div class="menu-item">
+            <div class="menu-left">
+              <select name="牛奶" data-price="4" data-unit="杯">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <label>牛奶</label>
+            </div>
+            <span class="price">￥4/杯</span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+ 
+
+    <!-- 提交按钮组 -->
+    <div class="submit-group" id="submitGroup" style="display: none;">
+      <label for="submitOrderBtn">请您点击</label>
+      <button type="button" id="submitOrderBtn" onclick="submitOrder()">Submit</button>
+      <label for="submitOrderBtn">提交订单</label>
+    </div>
+
+    <!-- 动态插入：订单展示区域 -->
+    <div id="orderDisplayArea"></div>
+  </div>
+
+  <script>
+    function startOrder() {
+      const nameInput = document.getElementById('customerName');
+      const genderSelect = document.getElementById('customerGender');
+      const countInput = document.getElementById('customerCount');
+      const customerName = nameInput.value.trim();
+      const gender = genderSelect.options[genderSelect.selectedIndex].value;
+
+      if (!customerName) {
+        alert("请输入您的名字！");
+        return;
+      }
+
+      // 显示菜单和 Submit 按钮
+      document.getElementById('menuContainer').style.display = 'flex';
+      document.getElementById('submitGroup').style.display = 'flex';
+
+      // 显示问候语
+      const greetingDiv = document.getElementById('greeting-message');
+      greetingDiv.style.display = 'block';
+      greetingDiv.textContent = `您好，${customerName} ${gender}！请选择菜品。`;
+
+      // 禁用输入框防止重复操作
+      nameInput.disabled = true;
+      genderSelect.disabled = true;
+      countInput.disabled = true;
+    }
+
+    function submitOrder() {
+      const selects = document.querySelectorAll('#menuForm select, #drinkForm select');
+      let orderLines = '';
+      let total = 0;
+      let anySelected = false;
+
+      selects.forEach(select => {
+        const quantity = parseInt(select.value);
+        const price = parseInt(select.getAttribute('data-price'));
+        const unit = select.getAttribute('data-unit');
+        const name = select.name;
+
+        if (quantity > 0 && !isNaN(price)) {
+          anySelected = true;
+          const subtotal = price * quantity;
+          orderLines += `<div>${quantity} ${unit}　${name} —— ￥${subtotal}</div>`;
+          total += subtotal;
+        }
+      });
+
+      if (!anySelected) {
+        alert("请至少选择一道菜品并设置数量！");
+        return;
+      }
+
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerGender = document.getElementById('customerGender').options[document.getElementById('customerGender').selectedIndex].value;
+      const customerCount = document.getElementById('customerCount').value;
+
+      // 插入订单内容
+      const orderHTML = `
+        <h4>${customerName} ${customerGender} (${customerCount} 位) 的订单：</h4>
+        ${orderLines}
+        <div id="totalLine">总计：￥${total}</div>
+        <br>
+        <button class="no-print" onclick="window.print()">🖨️ 打印订单</button>
+      `;
+      const orderDisplayArea = document.getElementById('orderDisplayArea');
+      orderDisplayArea.innerHTML = orderHTML;
+      orderDisplayArea.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
