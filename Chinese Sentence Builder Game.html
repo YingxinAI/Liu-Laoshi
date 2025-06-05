@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chinese Sentence Builder Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f7ff;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      margin-top: 20px;
+    }
+
+    #sidebar {
+      width: 250px;
+      text-align: left;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      min-height: 420px;
+      height: fit-content;
+    }
+
+    #game-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: #1976d2;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    #sidebar h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    #sidebar ul {
+      font-size: 12px;
+      padding-left: 16px;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    #name-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-row label {
+      white-space: nowrap;
+      font-size: 11px;
+    }
+
+    .input-row input[type="text"] {
+      font-size: 11px;
+      padding: 3px;
+      flex-grow: 1;
+    }
+
+    #game-board-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 420px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+      gap: 2px;
+      border: 2px solid #333;
+      background-color: #fffde7;
+      padding: 5px;
+      margin: auto;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .player1 {
+      color: red;
+      background-color: #ffe5ec;
+    }
+
+    .player2 {
+      color: blue;
+      background-color: #e0f7ff;
+    }
+
+    input[type="text"] {
+      padding: 4px;
+      font-size: 11px;
+      width: 130px;
+    }
+
+    button {
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-submit {
+      background-color: #2196F3;
+    }
+
+    .btn-undo {
+      background-color: #9c27b0;
+    }
+
+    .btn-reset {
+      background-color: #f44336;
+    }
+
+    .btn-start {
+      background-color: #4CAF50;
+      width: auto;
+      min-width: 100px;
+      font-weight: bold;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #input-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #feedback {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      color: green;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #player-info {
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    #player-info h3 {
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    #player-info p {
+      margin: 2px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Left Panel - Player Info -->
+  <div id="sidebar">
+    <!-- 标题移到这里 -->
+    <div id="game-title">Chinese Sentence Builder Game</div>
+
+    <h3>How to Play</h3>
+    <ul>
+      <li>1. Enter two player names and click "Start Game".</li>
+      <li>2. Each player takes turns entering one Chinese character.</li>
+      <li>3. First move can be placed anywhere on the board.</li>
+      <li>4. Subsequent characters must be adjacent to existing ones.</li>
+      <li>5. Try to build complete sentences like “你好吗” or “我很好”!</li>
+    </ul>
+
+    <h3 id="enter-names-title">Enter Player Names:</h3>
+    <div id="name-fields">
+      <div class="input-row">
+        <label for="player1-name">Player 1:</label>
+        <input type="text" id="player1-name" placeholder="Player 1 Name" oninput="checkStartButton()" />
+      </div>
+
+      <div class="input-row">
+        <label for="player2-name">Player 2:</label>
+        <input type="text" id="player2-name" placeholder="Player 2 Name" oninput="checkStartButton()" />
+      </div>
+
+      <button class="btn-start" id="start-button" onclick="startGame()" disabled>Start Game</button>
+    </div>
+
+    <div id="player-info" class="hidden">
+      <h3>Player Info</h3>
+      <p id="current-player-label">Current Player: -</p>
+      <p id="player1-label">Player 1: -</p>
+      <p id="player2-label">Player 2: -</p>
+    </div>
+  </div>
+
+  <!-- Middle Board Area -->
+  <div id="game-board-container">
+    <div id="game-board"></div>
+
+    <!-- 输入区和按钮排成一行 -->
+    <div id="input-area">
+      <input type="text" id="char-input" placeholder="Enter a Chinese character" maxlength="1"
+             ondblclick="clearInput()" />
+
+      <div class="button-group">
+        <button class="btn-submit" onclick="submitChar()">Submit</button>
+        <button class="btn-undo" onclick="undoLastMove()">Undo</button>
+        <button class="btn-reset" onclick="resetBoard()">Reset Game</button>
+      </div>
+    </div>
+
+    <div id="feedback"></div>
+  </div>
+</div>
+
+<script>
+  let lastChar = '';
+  let currentPlayer = 1;
+  let playerNames = ["Player 1", "Player 2"];
+  let moveHistory = [];
+  let lastValidSentence = null;
+
+  const validSentences = ['你好吗', '我很好', '谢谢你', '我爱你', '今天好', '天气不错'];
+
+  function createBoard() {
+    const gameBoard = document.getElementById('game-board');
+    gameBoard.innerHTML = '';
+    gameBoard.style.backgroundColor = '#fffde7';
+
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.onclick = () => placeChar(cell, i, j);
+        gameBoard.appendChild(cell);
+      }
+    }
+  }
+
+  function startGame() {
+    const player1 = document.getElementById('player1-name').value.trim();
+    const player2 = document.getElementById('player2-name').value.trim();
+
+    if (!player1 || !player2) {
+      alert("Please enter both player names.");
+      return;
+    }
+
+    playerNames[0] = player1;
+    playerNames[1] = player2;
+
+    document.getElementById('enter-names-title').style.display = 'none';
+    document.getElementById('name-fields').style.display = 'none';
+    document.getElementById('player-info').classList.remove('hidden');
+
+    document.getElementById('current-player-label').textContent = `Current Player: ${player1}`;
+    document.getElementById('player1-label').textContent = `Player 1: ${player1}`;
+    document.getElementById('player2-label').textContent = `Player 2: ${player2}`;
+
+    createBoard(); // 创建棋盘
+  }
+
+  function submitChar() {
+    const inputChar = document.getElementById('char-input').value.trim();
+    if (!inputChar || inputChar.length !== 1) {
+      alert("Please enter a single Chinese character.");
+      return;
+    }
+
+    lastChar = inputChar;
+    highlightAvailableCells();
+  }
+
+  function clearInput() {
+    document.getElementById('char-input').value = '';
+    lastChar = '';
+    document.getElementById('feedback').textContent = '';
+    highlightAvailableCells();
+  }
+
+  function highlightAvailableCells() {
+    clearHighlights();
+
+    const cells = document.querySelectorAll('.cell');
+    const allEmpty = Array.from(cells).every(c => c.textContent === '');
+
+    if (allEmpty) {
+      cells.forEach(cell => cell.classList.add('highlight'));
+    } else {
+      cells.forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+
+        if (!cell.textContent && isAdjacentToExisting(row, col)) {
+          cell.classList.add('highlight');
+        }
+      });
+    }
+  }
+
+  function clearHighlights() {
+    document.querySelectorAll('.cell.highlight').forEach(cell => {
+      cell.classList.remove('highlight');
+    });
+  }
+
+  function placeChar(cell, row, col) {
+    if (!lastChar) {
+      alert("Please enter a character first.");
+      return;
+    }
+
+    if (cell.textContent) {
+      alert("This cell is already occupied!");
+      return;
+    }
+
+    const allEmpty = Array.from(document.getElementsByClassName('cell')).every(c => c.textContent === '');
+
+    if (!allEmpty && !isAdjacentToExisting(row, col)) {
+      document.getElementById('feedback').style.color = 'red';
+      document.getElementById('feedback').textContent = "❌ Must be next to an existing tile.";
+      setTimeout(() => document.getElementById('feedback').textContent = '', 2000);
+      return;
+    }
+
+    // 存储历史用于 Undo
+    moveHistory.push({
+      cell,
+      prevText: cell.textContent,
+      prevClass: cell.className,
+      prevBg: cell.style.backgroundColor
+    });
+
+    cell.textContent = lastChar;
+    cell.className = 'cell ' + (currentPlayer === 1 ? 'player1' : 'player2');
+
+    lastChar = '';
+    document.getElementById('char-input').value = '';
+    clearHighlights();
+    switchPlayer();
+
+    checkLocallyForValidSentence(); // 检查是否组成完整句子
+  }
+
+  function isAdjacentToExisting(row, col) {
+    const directions = [-1, 0, 1];
+    const cells = document.querySelectorAll('.cell');
+
+    for (let dx of directions) {
+      for (let dy of directions) {
+        if (dx === 0 && dy === 0) continue;
+        const x = row + dx;
+        const y = col + dy;
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+          const neighbor = cells[x * 10 + y];
+          if (neighbor && neighbor.textContent) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function switchPlayer() {
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+    document.getElementById('current-player-label').textContent = `Current Player: ${playerNames[currentPlayer - 1]}`;
+  }
+
+  function resetBoard() {
+    clearHighlights();
+    document.getElementById('char-input').value = '';
+    lastChar = '';
+    document.getElementById('feedback').textContent = '';
+
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+      cell.textContent = '';
+      cell.className = 'cell';
+    });
+
+    highlightAvailableCells();
+  }
+
+  function undoLastMove() {
+    if (moveHistory.length === 0) {
+      document.getElementById('feedback').textContent = "No moves to undo.";
+      setTimeout(() => document.getElementById('feedback').textContent = "", 2000);
+      return;
+    }
+
+    const lastMove = moveHistory.pop();
+    const { cell, prevText, prevClass, prevBg } = lastMove;
+
+    cell.textContent = prevText;
+    cell.className = prevClass;
+    cell.style.backgroundColor = prevBg;
+
+    document.getElementById('feedback').textContent = "✅ Last move undone.";
+    setTimeout(() => document.getElementById('feedback').textContent = "", 2000);
+
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+    document.getElementById('current-player-label').textContent = `Current Player: ${playerNames[currentPlayer - 1]}`;
+  }
+
+  function checkLocallyForValidSentence() {
+    const cells = document.querySelectorAll('.cell');
+    const sentence = Array.from(cells)
+      .map(c => c.textContent)
+      .join('')
+      .trim()
+      .replace(/\s+/g, '');
+
+    // 查找所有匹配的句子
+    const foundSentences = validSentences.filter(s => sentence.includes(s));
+
+    // 如果找到了新的句子 → 提示
+    const newSentence = foundSentences.find(s => s !== lastValidSentence);
+
+    if (newSentence) {
+      showValidSentenceFeedback(newSentence);
+      lastValidSentence = newSentence;
+    } else {
+      document.getElementById('feedback').textContent = "";
+    }
+  }
+
+  function showValidSentenceFeedback(sentence) {
+    document.getElementById('feedback').style.color = 'green';
+    document.getElementById('feedback').textContent = `🎉 成功组成中文句子：“${sentence}”`;
+    setTimeout(() => document.getElementById('feedback').textContent = "", 3000);
+  }
+
+  function checkStartButton() {
+    const player1 = document.getElementById('player1-name').value.trim();
+    const player2 = document.getElementById('player2-name').value.trim();
+    const startBtn = document.getElementById('start-button');
+
+    if (player1 && player2) {
+      startBtn.disabled = false;
+      startBtn.classList.add('active');
+    } else {
+      startBtn.disabled = true;
+      startBtn.classList.remove('active');
+    }
+  }
+</script>
+
+</body>
+</html>
