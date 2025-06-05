@@ -5,22 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>刘老师的餐馆点餐教学体验馆</title>
   <style>
-    body {
-      font-family: KaiTi, 楷体, serif;
-      background-color: #fff8f0;
-      text-align: center;
-      padding: 20px;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    h1 {
-      color: #d35400;
-    }
-     #welcome-message {
+
+    #welcome-message {
       font-size: 20px;
       color: #c0392b;
       margin-bottom: 30px;
       opacity: 0;
       animation: fadeIn 1s ease-in-out forwards;
     }
+
+    body {
+      font-family: KaiTi, 楷体, serif;
+      background-color: #fff8f0;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #d35400;
+    }
+
     #game-container {
       max-width: 900px;
       margin: auto;
@@ -29,16 +37,19 @@
       padding: 20px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     .input-section,
     .menu-container,
     .submit-group {
       display: block;
       margin-top: 20px;
     }
+
     .menu-container,
     .submit-group {
       display: none;
     }
+
     select,
     input[type="text"],
     input[type="number"] {
@@ -48,12 +59,14 @@
       font-size: 14px;
       margin-right: 10px;
     }
+
     label {
       font-size: 16px;
       display: inline-block;
       margin-bottom: 10px;
       font-family: KaiTi, 楷体, serif;
     }
+
     .menu-box {
       flex: 1;
       background-color: #fff;
@@ -62,18 +75,22 @@
       padding: 15px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
+
     .menu-container {
       display: flex;
       gap: 30px;
       justify-content: space-between;
       margin-top: 20px;
     }
+
     .menu-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 0;
+      border-bottom: 1px dashed #eee;
     }
+
     .menu-left {
       display: flex;
       align-items: center;
@@ -81,11 +98,14 @@
       flex-grow: 1;
       justify-content: flex-start;
     }
+
     .price {
       white-space: nowrap;
       min-width: 70px;
       text-align: right;
+      color: #888;
     }
+
     button[type="button"] {
       background-color: #e67e22;
       color: white;
@@ -95,10 +115,13 @@
       border-radius: 5px;
       cursor: pointer;
       font-family: KaiTi, 楷体, serif;
+      transition: background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #cf711f;
     }
+
     .submit-group {
       display: flex;
       justify-content: center;
@@ -107,13 +130,16 @@
       flex-wrap: wrap;
       margin-top: 20px;
     }
+
     .submit-group label {
       font-size: 16px;
       color: #333;
     }
+
     .menu-box h3 {
       color: #d35400;
     }
+
     #orderDisplayArea {
       text-align: left;
       max-width: 600px;
@@ -125,26 +151,28 @@
       border-radius: 8px;
       display: none;
     }
+
     .order-line {
       font-size: 16px;
       padding: 5px 0;
     }
+
     #totalLine {
       font-weight: bold;
       padding-top: 10px;
       border-top: 1px solid #ccc;
       margin-top: 10px;
     }
+
     #gold {
       font-weight: bold;
     }
   </style>
 </head>
 <body>
-
   <h1>刘老师的餐馆点餐教学体验馆</h1>
 
-   <!-- 始终显示的欢迎信息 -->
+  <!-- 欢迎信息 -->
   <div id="welcome-message">
     <span class="welcome-icon">🍜</span>
     <span class="welcome-text">欢迎光临刘老师的小餐馆！</span>
@@ -152,8 +180,7 @@
   </div>
 
   <div id="game-container">
-
-    <!-- 名字和人数输入区域 -->
+    <!-- 输入区域 -->
     <div class="input-section" id="nameInputSection">
       <select id="customerGender">
         <option value="先生">先生</option>
@@ -165,8 +192,6 @@
       <input type="number" id="customerCount" min="1" max="20" style="display: inline-block; width: 60px;">
       <br><br>
       <button onclick="startOrder()">确认并开始点餐</button>
-
-      <!-- 新增问候语放在按钮下方 -->
       <div id="greeting-message" style="margin-top: 10px; font-size: 16px; color: #e67e22;"></div>
     </div>
 
@@ -409,16 +434,16 @@
       </div>
     </div>
 
- 
 
-    <!-- 提交按钮组 -->
+
+    <!-- 提交按钮 -->
     <div class="submit-group" id="submitGroup" style="display: none;">
       <label for="submitOrderBtn">请您点击</label>
       <button type="button" id="submitOrderBtn" onclick="submitOrder()">Submit</button>
       <label for="submitOrderBtn">提交订单</label>
     </div>
 
-    <!-- 动态插入：订单展示区域 -->
+    <!-- 订单展示区 -->
     <div id="orderDisplayArea"></div>
   </div>
 
@@ -444,7 +469,7 @@
       greetingDiv.style.display = 'block';
       greetingDiv.textContent = `您好，${customerName} ${gender}！请选择菜品。`;
 
-      // 禁用输入框防止重复操作
+      // 禁用输入框
       nameInput.disabled = true;
       genderSelect.disabled = true;
       countInput.disabled = true;
@@ -479,7 +504,6 @@
       const customerGender = document.getElementById('customerGender').options[document.getElementById('customerGender').selectedIndex].value;
       const customerCount = document.getElementById('customerCount').value;
 
-      // 插入订单内容
       const orderHTML = `
         <h4>${customerName} ${customerGender} (${customerCount} 位) 的订单：</h4>
         ${orderLines}
@@ -487,6 +511,7 @@
         <br>
         <button class="no-print" onclick="window.print()">🖨️ 打印订单</button>
       `;
+
       const orderDisplayArea = document.getElementById('orderDisplayArea');
       orderDisplayArea.innerHTML = orderHTML;
       orderDisplayArea.style.display = 'block';
