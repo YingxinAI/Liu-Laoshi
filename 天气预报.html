@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>天气预报 - 北京 & 丹佛</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f2f2f2;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 30px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 30px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .weather-card {
+      background-color: #d0ecff;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      padding: 30px 20px;
+      text-align: center;
+      width: 45%;
+      max-width: 500px;
+      color: black;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .city {
+      font-size: 2em;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .emoji {
+      font-size: 3.5em;
+      margin-bottom: 5px;
+      animation: float 3s infinite ease-in-out;
+      display: inline-block;
+    }
+
+    .emoji.sun {
+      animation: sunRotate 6s linear infinite, float 3s infinite ease-in-out;
+    }
+
+    @keyframes sunRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* 风车图标带动画 */
+    .wind-wheel-icon {
+      font-size: 2.5em;
+      display: inline-block;
+      animation: windRotate 4s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes windRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .info {
+      font-size: 1.3em;
+      color: black;
+      line-height: 1.2;
+      white-space: pre-line;
+      margin-top: 10px;
+    }
+
+    .season-tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 1em;
+      font-weight: bold;
+      color: white;
+    }
+
+    .spring { background-color: #34C759; } /* 春季 🟢 */
+    .summer { background-color: #FF9F0A; } /* 夏季 🟠 */
+    .autumn { background-color: #FFD60A; } /* 秋季 🟡 */
+    .winter { background-color: #50C8FF; } /* 冬季 🔵 */
+
+    .moon {
+      font-size: 2.5em;
+      margin-top: 10px;
+      display: block;
+    }
+
+    .nav-button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+
+    .nav-button:hover {
+      background: #005ECF;
+    }
+
+    h1 {
+      width: 100%;
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .weather-card {
+        width: 90%;
+      }
+      .emoji {
+        font-size: 3em;
+      }
+      .info {
+        font-size: 1.15em;
+      }
+      .moon {
+        font-size: 2.2em;
+      }
+      .wind-wheel-icon {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 第一页：今天天气 -->
+  <div id="todayPage" class="page">
+    <h1>天气预报</h1>
+
+    <!-- 左边：丹佛 -->
+    <div class="weather-card">
+      <div class="city">📍 丹佛</div>
+      <div class="emoji sun">☀️</div>
+      <div class="info" id="denverToday"></div>
+      <div class="moon" id="denverMoonToday">🌕</div>
+    </div>
+
+    <!-- 右边：北京 -->
+    <div class="weather-card">
+      <div class="city">📍 北京</div>
+      <div class="emoji rain">🌧️</div>
+      <div class="info" id="beijingToday"></div>
+      <div class="moon" id="beijingMoonToday">🌕</div>
+    </div>
+
+    <!-- 导航按钮 -->
+    <button class="nav-button" onclick="showTomorrow()">明天天气 ➡️</button>
+  </div>
+
+  <!-- 第二页：明天天气 -->
+  <div id="tomorrowPage" class="page hidden">
+    <h1>明天天气预报</h1>
+
+    <!-- 左边：丹佛 -->
+    <div class="weather-card">
+      <div class="city">📍 丹佛</div>
+      <div class="emoji cloud">🌤️</div>
+      <div class="info" id="denverTomorrow"></div>
+      <div class="moon" id="denverMoonTomorrow">🌕</div>
+    </div>
+
+    <!-- 右边：北京 -->
+    <div class="weather-card">
+      <div class="city">📍 北京</div>
+      <div class="emoji cloud">🌤️</div>
+      <div class="info" id="beijingTomorrow"></div>
+      <div class="moon" id="beijingMoonTomorrow">🌕</div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <button class="nav-button" onclick="showToday()">⬅️ 返回天气预报</button>
+  </div>
+
+  <script>
+    // 获取格式化日期
+    function getFormattedDate(dateObj, isToday = false) {
+      const year = dateObj.getFullYear();
+      const month = dateObj.getMonth() + 1;
+      const date = dateObj.getDate();
+      const daysOfWeek = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+      const day = daysOfWeek[dateObj.getDay()];
+      if (isToday) {
+        return `今天是${month}月${date}日 ${day}`;
+      }
+      return `${year}年${month}月${date}日 ${day}`;
+    }
+
+    // 获取当前时间（带时区偏移）
+    function getFormattedTime(timeZoneOffset) {
+      var now = new Date();
+      var utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+      var localTime = new Date(utcTime + timeZoneOffset * 3600000);
+
+      var hours = ('0' + localTime.getHours()).slice(-2);
+      var minutes = ('0' + localTime.getMinutes()).slice(-2);
+      return `${hours}:${minutes}`;
+    }
+
+    // 根据月份获取季节
+    function getSeason(month) {
+      const seasons = ["冬季", "春季", "春季", "春季", "夏季", "夏季", "夏季", "秋季", "秋季", "秋季", "冬季", "冬季"];
+      return seasons[month];
+    }
+
+    // 获取季节类名
+    function getSeasonClass(month) {
+      const seasonClasses = ["winter", "spring", "spring", "spring", "summer", "summer", "summer", "autumn", "autumn", "autumn", "winter", "winter"];
+      return seasonClasses[month];
+    }
+
+    // 获取季节图标
+    function getSeasonEmoji(season) {
+      switch (season) {
+        case "春季": return "🌸";
+        case "夏季": return "🏖️";
+        case "秋季": return "🍁";
+        case "冬季": return "❄️";
+        default: return "🌿";
+      }
+    }
+
+    // 主要中国传统节日数据（示例）
+    const lunarData = {
+      "2025-01-29": "正月初一 · 春节",
+      "2025-02-12": "元宵节",
+      "2025-04-04": "清明节",
+      "2025-05-31": "端午节",
+      "2025-10-06": "中秋节",
+      "2025-12-14": "腊八节"
+    };
+
+    // 精确农历映射表（部分关键日期）
+    const lunarCalendar = {
+      "2025-05-31": "五月初五",
+      "2025-06-01": "五月 初六",
+      "2025-06-02": "五月 廿五日",
+      "2025-06-03": "五月 廿六日",
+      "2025-06-08": "六月 初一日",
+      "2025-10-06": "九月 初一",
+      "2025-12-14": "冬月 十五日"
+    };
+
+    // 获取农历或节日信息
+    function getLunarAndFestival(date) {
+      const y = date.getFullYear();
+      const m = ('0' + (date.getMonth() + 1)).slice(-2);
+      const d = ('0' + date.getDate()).slice(-2);
+      const key = `${y}-${m}-${d}`;
+
+      if (lunarData[key]) {
+        return { label: "🎉 节日：", value: lunarData[key] };
+      }
+
+      const lunarKey = `${y}-${date.getMonth()+1}-${date.getDate()}`;
+      const lunarStr = lunarCalendar[lunarKey] || `五月 廿五日`;
+      return { label: "📅 农历：", value: `${y}年${lunarStr}` };
+    }
+
+    // 更新今日天气卡片
+    function updateTodayCard(idPrefix, data) {
+      const infoEl = document.getElementById(idPrefix + "Today");
+      const moonEl = document.getElementById(idPrefix + "MoonToday");
+
+      const today = new Date();
+      const todayStr = getFormattedDate(today, true);
+      const timeStr = getFormattedTime(data.timeZoneOffset);
+      const month = today.getMonth(); // 当前月份
+      const season = getSeason(month);
+      const seasonEmoji = getSeasonEmoji(season);
+      const seasonClass = getSeasonClass(month);
+
+      const { label: lunarLabel, value: lunarInfo } = getLunarAndFestival(today);
+
+      infoEl.innerHTML = `
+        📌 公历：${todayStr}<br>
+        ${lunarLabel}${lunarInfo}<br>
+        🕒 时间：${timeStr}<br>
+        ☁️ 天气：${data.todayCondition}<br>
+        🌡️ 气温：${data.todayTemp}<br>
+        <span><span class="wind-wheel-icon">🌀</span> 风力：${data.todayWind}</span><br>
+        <span class="season-tag ${seasonClass}">${seasonEmoji} 季节：${season}</span>
+      `;
+
+      // 设置月相
+      moonEl.innerHTML = getMoonPhase(today);
+    }
+
+    // 更新明日天气卡片
+    function updateTomorrowCard(idPrefix, data) {
+      const infoEl = document.getElementById(idPrefix + "Tomorrow");
+      const moonEl = document.getElementById(idPrefix + "MoonTomorrow");
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getFormattedDate(tomorrow);
+      const timeStr = getFormattedTime(data.timeZoneOffset);
+      const month = tomorrow.getMonth(); // 明天的月份
+      const season = getSeason(month);
+      const seasonEmoji = getSeasonEmoji(season);
+      const seasonClass = getSeasonClass(month);
+
+      const { label: lunarLabel, value: lunarInfo } = getLunarAndFestival(tomorrow);
+
+      infoEl.innerHTML = `
+        📌 公历：${tomorrowStr}<br>
+        ${lunarLabel}${lunarInfo}<br>
+        🕒 时间：${timeStr}<br>
+        ☁️ 天气：${data.tomorrowCondition}<br>
+        🌡️ 气温：${data.tomorrowTemp}<br>
+        <span><span class="wind-wheel-icon">🌀</span> 风力：${data.tomorrowWind}</span><br>
+        <span class="season-tag ${seasonClass}">${seasonEmoji} 季节：${season}</span>
+      `;
+
+      // 设置月相
+      moonEl.innerHTML = getMoonPhase(tomorrow);
+    }
+
+    // 获取月相 🌙
+    function getMoonPhase(date) {
+      const newMoonBase = new Date('2025-05-27'); // 上一次新月时间
+      const lunarMonth = 29.5305882;
+
+      let diffDays = Math.floor((date - newMoonBase) / (1000 * 60 * 60 * 24));
+      let phaseIndex = ((diffDays % lunarMonth + lunarMonth) % lunarMonth) / lunarMonth;
+
+      if (phaseIndex < 0.03 || phaseIndex > 0.97) return "🌑"; // 新月
+      else if (phaseIndex < 0.47) return "🌒"; // 上弦月
+      else if (phaseIndex < 0.53) return "🌕"; // 满月
+      else if (phaseIndex < 0.97) return "🌖"; // 下弦月
+      else return "🌘"; // 残月
+    }
+
+    // 静态天气数据（包含今天、明天）
+    const weatherData = {
+      denver: {
+        todayCondition: "晴朗",
+        tomorrowCondition: "多云",
+        todayTemp: "18°C",
+        tomorrowTemp: "20°C",
+        todayWeatherType: "Clear",
+        tomorrowWeatherType: "Clouds",
+        todayWind: "微风",
+        tomorrowWind: "3级 西北风",
+        timeZoneOffset: -6,
+      },
+      beijing: {
+        todayCondition: "小雨",
+        tomorrowCondition: "晴转多云",
+        todayTemp: "22°C",
+        tomorrowTemp: "24°C",
+        todayWeatherType: "Rain",
+        tomorrowWeatherType: "Clouds",
+        todayWind: "3级 东北风",
+        tomorrowWind: "2级 西南风",
+        timeZoneOffset: +8,
+      }
+    };
+
+    // 页面加载后更新所有天气信息
+    window.onload = function () {
+      updateTodayCard('denver', weatherData.denver);
+      updateTodayCard('beijing', weatherData.beijing);
+      updateTomorrowCard('denver', weatherData.denver);
+      updateTomorrowCard('beijing', weatherData.beijing);
+    };
+
+    // 切换页面
+    function showToday() {
+      document.getElementById('todayPage').classList.remove('hidden');
+      document.getElementById('tomorrowPage').classList.add('hidden');
+    }
+
+    function showTomorrow() {
+      document.getElementById('todayPage').classList.add('hidden');
+      document.getElementById('tomorrowPage').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

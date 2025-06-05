@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>找“我”小游戏</title>
+  <style>
+    body {
+      font-family: KaiTi, SimKai, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+      background-color: #f9f9f9;
+      color: black;
+    }
+
+    h1 {
+      color: #3b82f6;
+      font-size: 24px;
+    }
+
+    #progress {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #3b82f6;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(8, 70px);
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 70px;
+      height: 70px;
+      background-color: #d0e7ff; /* 淡蓝色 */
+      border: none;
+      font-size: 30px;
+      text-align: center;
+      line-height: 70px;
+      cursor: pointer;
+      user-select: none;
+      color: black;
+      position: relative;
+      overflow: hidden;
+      font-family: KaiTi, SimKai, sans-serif;
+    }
+
+    .correct {
+      background-color: #a3e635; /* 绿色 */
+      color: white;
+    }
+
+    .wrong {
+      background-color: #ef4444; /* 红色 */
+      color: white;
+    }
+
+    .bang-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: white;
+      pointer-events: none;
+    }
+
+    #winMessage {
+      font-size: 24px;
+      color: green;
+      font-weight: bold;
+      margin-top: -10px;
+      display: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 找“我”小游戏</h1>
+  <div id="progress">已找到 0 / 10 个“我”</div>
+  <div id="game"></div>
+  <div id="winMessage">你赢了！🎉</div>
+  <button onclick="restartGame()">重新开始</button>
+
+  <script>
+    const rows = 8;
+    const cols = 8;
+    const targetCount = 10;
+
+    let board = [];
+    let foundCount = 0;
+
+    function createBoard() {
+      board = [];
+      foundCount = 0;
+      document.getElementById('winMessage').style.display = 'none';
+      document.getElementById('progress').textContent = `已找到 0 / ${targetCount} 个“我”`;
+
+      const game = document.getElementById('game');
+      game.innerHTML = '';
+
+      // 创建棋盘并填充“找”
+      for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('button');
+          cell.className = 'cell';
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.textContent = "找";
+          cell.onclick = () => handleClick(cell);
+          game.appendChild(cell);
+
+          row.push({ element: cell, isTarget: false, revealed: false });
+        }
+        board.push(row);
+      }
+
+      // 随机设置 10 个“我”
+      let placed = 0;
+      while (placed < targetCount) {
+        const r = Math.floor(Math.random() * rows);
+        const c = Math.floor(Math.random() * cols);
+        if (!board[r][c].isTarget) {
+          board[r][c].isTarget = true;
+          board[r][c].element.textContent = '我';
+          placed++;
+        }
+      }
+    }
+
+    function handleClick(cell) {
+      // 查找数据
+      let data;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (board[r][c].element === cell) {
+            data = board[r][c];
+            break;
+          }
+        }
+      }
+
+      if (!data || data.revealed) return;
+      data.revealed = true;
+
+      if (data.isTarget) {
+        cell.classList.add('correct');
+        cell.textContent = '我';
+        foundCount++;
+        document.getElementById('progress').textContent = `已找到 ${foundCount} / ${targetCount} 个“我”`;
+
+        if (foundCount === targetCount) {
+          document.getElementById('winMessage').style.display = 'block';
+        }
+      } else {
+        cell.classList.add('wrong');
+
+        // 在“找”字上方添加 💥 图标
+        const bang = document.createElement('span');
+        bang.className = 'bang-icon';
+        bang.textContent = '💥';
+        cell.appendChild(bang);
+      }
+    }
+
+    function restartGame() {
+      createBoard();
+    }
+
+    window.onload = createBoard;
+  </script>
+</body>
+</html>
