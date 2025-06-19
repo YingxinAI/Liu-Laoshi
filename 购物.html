@@ -11,21 +11,33 @@
       background: linear-gradient(to right, #ffecd2, #fcb69f);
     }
 
-    h1 {
-      text-align: center;
-      color: white;
-      padding: 20px;
-      font-size: 24px;
-      margin-bottom: 30px;
-      border-radius: 15px;
-      background: linear-gradient(to right, #ff6ec4, #7873f5);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-     .animated-emoji {
-      display: inline-block;
-      animation: float 2s ease-in-out infinite, blink 2s ease-in-out infinite;
-      vertical-align: middle;
-    }
+       h1 {
+    text-align: center;
+    color: white;
+    padding: 20px;
+    font-size: 24px;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    background: linear-gradient(to right, #ff6ec4, #7873f5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .animated-emoji {
+    display: inline-block;
+    animation: float 2s ease-in-out infinite, blink 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 
     .game-container {
       max-width: 900px;
@@ -243,8 +255,9 @@
 
 <div class="game-container">
 
-  <!-- 标题 -->
-   <h1><span class="animated-emoji">🛍</span> 欢迎来到刘老师的空中商城 <span class="animated-emoji">🛍</span></h1>
+  <h1>
+  <span class="animated-emoji">🛍</span> 欢迎来到刘老师的空中商城 <span class="animated-emoji">🛍</span>
+</h1>
 
   <!-- 商品列表 -->
   <div id="products"></div>
