@@ -586,9 +586,9 @@
 
     // 显示送货信息
     document.getElementById("delivery-info").innerHTML = `
-      🧾 姓名：${name}<br><br>
-      🏠 地址：<span>${addressLine1} ${addressLine2}</span><br><br>
-      📨 邮箱：<span>${emailInput}</span><br><br>
+      🧾 姓名：${name}<br>
+      🏠 地址：<span>${addressLine1} ${addressLine2}</span><br>
+      📨 邮箱：<span>${emailInput}</span><br>
       💵 总花费：¥<span>${totalCost.toFixed(2)}</span>
     `;
     document.getElementById("success-message").classList.remove("hidden");
