@@ -21,6 +21,11 @@
       background: linear-gradient(to right, #ff6ec4, #7873f5);
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
+     .animated-emoji {
+      display: inline-block;
+      animation: float 2s ease-in-out infinite, blink 2s ease-in-out infinite;
+      vertical-align: middle;
+    }
 
     .game-container {
       max-width: 900px;
@@ -239,7 +244,7 @@
 <div class="game-container">
 
   <!-- 标题 -->
-   <h1><span class="animated-emoji">🛍</span> 欢迎来到刘老师的空中商城！ <span class="animated-emoji">🛍</span></h1>
+   <h1><span class="animated-emoji">🛍</span> 欢迎来到刘老师的空中商城！<span class="animated-emoji">🛍</span></h1>
 
   <!-- 商品列表 -->
   <div id="products"></div>
