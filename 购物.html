@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>欢迎来到刘老师的空中商城</title>
+  <style>
+    body {
+      font-family: KaiTi, 楷体, SimKai, serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+      margin-bottom: 30px;
+      border-radius: 15px;
+      background: linear-gradient(to right, #ff6ec4, #7873f5);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .game-container {
+      max-width: 900px;
+      margin: auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .product {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 15px 0;
+    }
+
+    .product .info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+    }
+
+    .product span {
+      font-size: 18px;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .product label {
+      font-size: 14px;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .product .quantity {
+      width: 50px;
+      padding: 5px;
+      text-align: center;
+    }
+
+    .product button,
+    .controls button,
+    .payment-section button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: linear-gradient(to right, #2575fc, #6a11cb);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .product button:hover,
+    .controls button:hover,
+    .payment-section button:hover {
+      background-color: #2575fc;
+    }
+
+    .cart {
+      margin-top: 30px;
+      background-color: #e6f7ff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 16px;
+      color: #444;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    .shipping-message {
+      font-size: 16px;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #007acc;
+    }
+
+    .controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .payment-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .payment-section input[type="text"],
+    .payment-section select,
+    .payment-section input[type="email"] {
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .success-message {
+      font-size: 20px;
+      color: green;
+      margin-top: 20px;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    /* 订单详情区域 */
+    .order-details-wrapper {
+      margin-top: 30px;
+      background-color: #e6f7ff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .checkout-button {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .checkout-button button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: linear-gradient(to right, #2575fc, #6a11cb);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .checkout-button button:hover {
+      background-color: #2575fc;
+      color: white;
+    }
+
+    /* 地址输入样式 */
+    .address-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .address-row input,
+    .address-row select {
+      flex: 1;
+      min-width: 120px;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    /* 打印订单样式 */
+    .printable-order {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      line-height: 1.4;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .printable-order, .printable-order * {
+        visibility: visible;
+      }
+      .printable-order {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        font-size: 14px;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-container">
+
+  <!-- 标题 -->
+  <h1><span>🛍</span> 欢迎来到刘老师的空中商城 <span>🛍</span></h1>
+
+  <!-- 商品列表 -->
+  <div id="products"></div>
+
+  <!-- 购物车 -->
+  <div class="cart">
+    <h2>🛒 我的购物车</h2>
+    <div id="cart-list"></div>
+    <div class="total">商品总价: ¥<span id="total-price">0.00</span></div>
+    <div class="total">配送费: ¥<span id="shipping-fee">0.00</span></div>
+    <div class="total">总花费（含运费）: ¥<span id="total-with-shipping">0.00</span></div>
+    <div id="shipping-message" class="shipping-message">满 ¥250.00 的商品即可享受免费配送！</div>
+  </div>
+
+  <!-- 控制按钮 -->
+  <div class="controls">
+    <button onclick="confirmOrder()">🔍 确认订单</button>
+  </div>
+
+  <!-- 订单详情 + 结算按钮 -->
+  <div id="order-details-wrapper" class="order-details-wrapper hidden">
+    <div class="order-details">
+      <h2>📦 订单详情</h2>
+      <div id="order-cart-list" class="order-cart-list"></div>
+      <div class="total">商品总价: ¥<span id="order-total-price">0.00</span></div>
+      <div class="total">配送费: ¥<span id="order-shipping-fee">0.00</span></div>
+      <div class="total">共计: ¥<span id="order-total-cost">0.00</span></div>
+    </div>
+
+    <!-- 新增：结算按钮放在这里 -->
+    <div class="checkout-button" style="margin-top: 20px; text-align: center;">
+      <button class="checkout-button" onclick="showPayment()" id="checkout-button">💳 结算</button>
+    </div>
+  </div>
+
+  <!-- 支付区域 -->
+  <div id="payment-section" class="payment-section hidden">
+    <p>🧾 请输入您的姓名：</p>
+    <input type="text" id="customer-name" placeholder="例如：张三" />
+
+    <p>💳 请输入您的卡号：</p>
+    <input type="text" id="card-number" placeholder="输入卡号：123456789" />
+
+    <p>🏠 请填写完整地址：</p>
+
+    <!-- 第一行：国家、省、市、邮编 -->
+    <div class="address-row">
+      <select id="country">
+        <option value="中国" selected>中国</option>
+        <option value="美国">美国</option>
+        <option value="英国">英国</option>
+        <option value="法国">法国</option>
+        <option value="加拿大">加拿大</option>
+        <option value="日本">日本</option>
+      </select>
+      <input type="text" id="province" placeholder="省/州，如：江苏省" />
+      <input type="text" id="city" placeholder="城市，如：南京市" />
+      <input type="text" id="postal-code" placeholder="邮编，如：200000" />
+    </div>
+
+    <!-- 第二行：街道名、门牌号、单元号 -->
+    <div class="address-row">
+      <input type="text" id="street" placeholder="街道名，如：中山路" />
+      <input type="text" id="house-number" placeholder="门牌号，如：123" onblur="formatHouseNumber(this)" />
+      <input type="text" id="unit-number" placeholder="单元号，如：A栋B座C" onblur="formatUnitNumber(this)" />
+    </div>
+
+    <p>📧 请输入电子邮箱：</p>
+    <input type="email" id="email" placeholder="example@email.com" />
+
+    <!-- 错误提示 -->
+    <div id="error-message" class="error-message hidden"></div>
+
+    <br><br>
+    <button onclick="processPayment()">确认支付</button>
+  </div>
+
+  <!-- 成功提示 -->
+  <div id="success-message" class="success-message hidden">
+    <div id="delivery-info"></div>
+    <div>购物成功！感谢您在刘老师的空中商城购物</div>
+  </div>
+</div>
+
+<!-- 新增：订单小票区域 -->
+<div id="print-area" class="printable-order hidden">
+  <h2 style="text-align:center;">刘老师的空中商城 - 订单小票</h2>
+  <hr>
+  <div style="margin: 5px 0;"><strong>顾客姓名：</strong><span id="print-customer-name"></span></div>
+  <div style="margin: 5px 0;"><strong>送货地址：</strong><span id="print-address-line1"></span></div>
+  <div style="margin: 5px 0;"><span id="print-address-line2"></span></div>
+  <div id="print-cart-list" style="margin: 5px 0;"></div>
+  <div style="margin: 5px 0;"><strong>商品总价:</strong> ¥<span id="print-total-price">0.00</span></div>
+  <div style="margin: 5px 0;"><strong>配送费:</strong> ¥<span id="print-shipping-fee">0.00</span></div>
+  <div style="margin: 5px 0;"><strong>共计:</strong> ¥<span id="print-total-cost">0.00</span></div>
+  <div style="margin: 5px 0;"><strong>邮箱地址:</strong> <span id="print-email"></span></div>
+  <div style="margin: 5px 0;"><strong>结账时间:</strong> <span id="print-time">--</span></div>
+  <hr>
+  <div style="text-align:center; font-weight:bold;">感谢光临刘老师的空中商城！</div>
+  <br>
+  <!-- 唯一的打印按钮 -->
+  <button class="print-button" onclick="window.print()" style="display: block; margin: auto; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">
+    🖨️ 打印订单
+  </button>
+</div>
+
+<script>
+  let cart = [];
+  let totalPrice = 0;
+
+  // 商品数据
+  const productsData = [
+    { name: "裙子", price: 80.00, unit: "件" },
+    { name: "衣服", price: 60.00, unit: "件" },
+    { name: "衬衣", price: 55.00, unit: "件" },
+    { name: "裤子", price: 70.00, unit: "条" },
+    { name: "鞋子", price: 99.99, unit: "双" },
+    { name: "足球", price: 59.90, unit: "个" },
+    { name: "书包", price: 129.00, unit: "个" },
+    { name: "学习用品-笔记本", price: 15.50, unit: "本" },
+    { name: "学习用品-铅笔盒", price: 20.00, unit: "个" }
+  ];
+
+  const productsContainer = document.getElementById("products");
+
+  // 动态生成商品项
+  productsData.forEach(product => {
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <div class="info">
+        <span>${product.name} - ¥${product.price.toFixed(2)}/${product.unit}</span>
+        <div class="input-group">
+          <label>请输入数量：</label>
+          <input type="number" class="quantity" value="0" min="0">
+        </div>
+      </div>
+      <button onclick="addToCart('${product.name}', ${product.price}, '${product.unit}')">加入购物车</button>
+    `;
+    productsContainer.appendChild(div);
+  });
+
+  function addToCart(productName, price, unit) {
+    const quantityInput = event.target.previousElementSibling.querySelector('.quantity');
+    const quantity = parseInt(quantityInput.value);
+
+    if (isNaN(quantity) || quantity < 0) {
+      alert("请输入有效的数量（不能为负数）！");
+      return;
+    }
+
+    // 清除同类商品
+    cart = cart.filter(item => item.name !== productName);
+
+    // 添加新数量的商品
+    for (let i = 0; i < quantity; i++) {
+      cart.push({ name: productName, price: price });
+    }
+
+    calculateTotalPrice();
+    updateCartDisplay();
+    updateShippingMessage();
+    updateTotalWithShipping();
+  }
+
+  function calculateTotalPrice() {
+    totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  }
+
+  function updateCartDisplay() {
+    const cartList = document.getElementById("cart-list");
+    cartList.innerHTML = "";
+
+    const groupedItems = {};
+    cart.forEach(item => {
+      if (!groupedItems[item.name]) {
+        groupedItems[item.name] = { ...item, count: 1 };
+      } else {
+        groupedItems[item.name].count++;
+      }
+    });
+
+    Object.values(groupedItems).forEach(item => {
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.textContent = `${item.name} x${item.count} - ¥${item.price.toFixed(2)} x${item.count} = ¥${(item.price * item.count).toFixed(2)}`;
+      cartList.appendChild(div);
+    });
+
+    document.getElementById("total-price").textContent = totalPrice.toFixed(2);
+    updateShippingMessage();
+    updateTotalWithShipping();
+  }
+
+  function updateShippingMessage() {
+    const shippingDiv = document.getElementById("shipping-message");
+    const threshold = 250;
+
+    if (totalPrice === 0) {
+      shippingDiv.style.color = "#007acc";
+      shippingDiv.textContent = `满 ¥${threshold.toFixed(2)} 的商品即可享受免费配送！`;
+    } else if (totalPrice >= threshold) {
+      shippingDiv.style.color = "green";
+      shippingDiv.textContent = "🎉 恭喜您，订单满250元，可享受免费配送！";
+    } else {
+      const remaining = (threshold - totalPrice).toFixed(2);
+      shippingDiv.style.color = "#007acc";
+      shippingDiv.textContent = `再买 ¥${remaining} 的商品即可享受免费配送！`;
+    }
+  }
+
+  function updateTotalWithShipping() {
+    const shippingFee = totalPrice >= 250 ? 0 : 25;
+    const totalCost = totalPrice + shippingFee;
+
+    document.getElementById("shipping-fee").textContent = shippingFee.toFixed(2);
+    document.getElementById("total-with-shipping").textContent = totalCost.toFixed(2);
+
+    document.getElementById("order-total-price").textContent = totalPrice.toFixed(2);
+    document.getElementById("order-shipping-fee").textContent = shippingFee.toFixed(2);
+    document.getElementById("order-total-cost").textContent = totalCost.toFixed(2);
+  }
+
+  function confirmOrder() {
+    if (cart.length === 0) {
+      alert("您的购物车为空，请先选择商品！");
+      return;
+    }
+
+    const orderCartList = document.getElementById("order-cart-list");
+
+    if (orderCartList.innerHTML.trim() === "") {
+      orderCartList.innerHTML = "";
+      const groupedItems = {};
+      cart.forEach(item => {
+        if (!groupedItems[item.name]) {
+          groupedItems[item.name] = { ...item, count: 1 };
+        } else {
+          groupedItems[item.name].count++;
+        }
+      });
+
+      Object.values(groupedItems).forEach(item => {
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        div.textContent = `${item.name} x${item.count} - ¥${item.price.toFixed(2)} x${item.count} = ¥${(item.price * item.count).toFixed(2)}`;
+        orderCartList.appendChild(div);
+      });
+    }
+
+    updateTotalWithShipping();
+
+    // 显示订单详情 + 下方“结算”按钮
+    document.getElementById("order-details-wrapper").classList.remove("hidden");
+  }
+
+  function showPayment() {
+    if (cart.length === 0) {
+      alert("您的购物车为空，请先选择商品！");
+      return;
+    }
+
+    document.getElementById("payment-section").classList.remove("hidden");
+  }
+
+  function formatHouseNumber(input) {
+    let value = input.value.trim();
+    if (value && !value.endsWith('号')) {
+      input.value = value.replace(/\D/g, '') + '号';
+    }
+  }
+
+  function formatUnitNumber(input) {
+    let value = input.value.trim();
+    if (value && !value.endsWith('室')) {
+      input.value = value.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '') + '室';
+    }
+  }
+
+  function processPayment() {
+    const cardInput = document.getElementById("card-number").value.trim();
+    const country = document.getElementById("country").value.trim();
+    const province = document.getElementById("province").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const postalCode = document.getElementById("postal-code").value.trim();
+    const street = document.getElementById("street").value.trim();
+    const houseNumber = document.getElementById("house-number").value.trim();
+    const unitNumber = document.getElementById("unit-number").value.trim();
+    const emailInput = document.getElementById("email").value.trim();
+    const errorMessage = document.getElementById("error-message");
+
+    let hasError = false;
+    let errorText = "";
+
+    if (cardInput !== "123456789") {
+      hasError = true;
+      errorText += "❌ 卡号错误，请重新输入正确的卡号<br>";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailInput || !emailRegex.test(emailInput)) {
+      hasError = true;
+      errorText += "❌ 邮箱格式不正确，请重新输入<br>";
+    }
+
+    if (!province || !city || !street || !houseNumber || !postalCode) {
+      hasError = true;
+      errorText += "❌ 地址信息未完整填写，请检查省、市、街道、门牌号、邮编是否都填了<br>";
+    }
+
+    if (hasError) {
+      errorMessage.innerHTML = errorText;
+      errorMessage.classList.remove("hidden");
+      return;
+    } else {
+      errorMessage.classList.add("hidden");
+    }
+
+    const name = document.getElementById("customer-name").value.trim();
+    const shippingFee = totalPrice >= 250 ? 0 : 25;
+    const totalCost = totalPrice + shippingFee;
+
+    // 构建地址
+    const addressLine1 = `${country} ${province} ${city} 邮政编码：${postalCode}`;
+    const addressLine2 = `${street} ${houseNumber} ${unitNumber}`;
+
+    // 显示送货信息
+    document.getElementById("delivery-info").innerHTML = `
+      🧾 姓名：${name}<br><br>
+      🏠 地址：<span>${addressLine1} ${addressLine2}</span><br><br>
+      📨 邮箱：<span>${emailInput}</span><br><br>
+      💵 总花费：¥<span>${totalCost.toFixed(2)}</span>
+    `;
+    document.getElementById("success-message").classList.remove("hidden");
+
+    // 更新打印区内容
+    const time = new Date().toLocaleString();
+    const printArea = document.getElementById("print-area");
+
+    printArea.classList.remove("hidden");
+
+    document.getElementById("print-customer-name").textContent = name;
+    document.getElementById("print-address-line1").textContent = addressLine1;
+    document.getElementById("print-address-line2").textContent = addressLine2;
+    document.getElementById("print-total-price").textContent = totalPrice.toFixed(2);
+    document.getElementById("print-shipping-fee").textContent = shippingFee.toFixed(2);
+    document.getElementById("print-total-cost").textContent = totalCost.toFixed(2);
+    document.getElementById("print-email").textContent = emailInput;
+    document.getElementById("print-time").textContent = time;
+
+    const printCartList = document.getElementById("print-cart-list");
+    printCartList.innerHTML = ""; // 清空之前的内容
+
+    const groupedItems = {};
+    cart.forEach(item => {
+      if (!groupedItems[item.name]) {
+        groupedItems[item.name] = { ...item, count: 1 };
+      } else {
+        groupedItems[item.name].count++;
+      }
+    });
+
+    Object.values(groupedItems).forEach(item => {
+      const p = document.createElement("div");
+      p.textContent = `${item.name} x${item.count} - ¥${item.price.toFixed(2)} x${item.count} = ¥${(item.price * item.count).toFixed(2)}`;
+      printCartList.appendChild(p);
+    });
+
+    // 清空购物车和输入框
+    cart = [];
+    totalPrice = 0;
+    updateCartDisplay();
+    resetInputs();
+    clearPaymentFields();
+  }
+
+  function resetInputs() {
+    const quantities = document.querySelectorAll(".quantity");
+    quantities.forEach(input => input.value = "0");
+  }
+
+  function clearPaymentFields() {
+    document.getElementById("card-number").value = "";
+    document.getElementById("province").value = "";
+    document.getElementById("city").value = "";
+    document.getElementById("street").value = "";
+    document.getElementById("house-number").value = "";
+    document.getElementById("unit-number").value = "";
+    document.getElementById("postal-code").value = "";
+    document.getElementById("email").value = "";
+  }
+</script>
+</body>
+</html>
