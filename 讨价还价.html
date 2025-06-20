@@ -15,13 +15,51 @@
       flex-wrap: wrap;
     }
 
-    .header {
+    .header-container {
       width: 100%;
       text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .main-title {
       font-size: 28px;
       color: #d32f2f;
-      margin-bottom: 20px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .emoji-swing {
+      display: inline-block;
+      animation: swing 2s ease-in-out infinite;
+      margin-right: 6px;
+      margin-left: 6px;
+    }
+
+    @keyframes swing {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(15deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .emoji-breathe {
+      display: inline-block;
+      animation: breathe 2s infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.6; }
+    }
+
+    .chat-date {
+      font-size: 14px;
+      color: #757575;
+      margin-top: 4px;
+      display: block;
     }
 
     .product-container {
@@ -104,6 +142,7 @@
       background-color: #43a047;
     }
 
+    /* 动态按钮样式 */
     #startBtn, #printBtn {
       display: block;
       margin: 30px auto;
@@ -116,6 +155,23 @@
       border: none;
       border-radius: 30px;
       cursor: pointer;
+      animation: gradientBG 10s ease infinite, pulseScale 2s ease-in-out infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulseScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* 新增：按钮中🤔表情也摇摆 */
+    #startBtn .emoji-swing {
+      animation: swing 2s ease-in-out infinite;
     }
 
     #printBtn {
@@ -126,24 +182,38 @@
 </head>
 <body>
 
-<h1 id="pageTitle">👋 欢迎同刘老师的聊天机器人讨价还价 🤑 - </h1>
+<!-- 页面标题 -->
+<div class="header-container">
+  <h1 class="main-title">
+    <span class="emoji-swing">👋</span>
+    <span style="margin: 0 6px;">欢迎同刘老师的聊天机器人讨价还价</span>
+    <span class="emoji-breathe">🤑</span>
+  </h1>
+  <span id="chatDate" class="chat-date"></span>
+</div>
+
 <script>
   const now = new Date();
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  document.getElementById('pageTitle').textContent += ' ' + dateStr;
+  document.getElementById('chatDate').textContent = '📅 当前对话日期：' + dateStr;
 </script>
 
+<!-- 衣服图片区域 -->
 <div class="product-container">
   <img src="https://marinaracewear.com/storage/media/attributes/9/0/8/6/5/90865/conversions/1-category.jpg" 
        alt="一件衣服">
 </div>
 
+<!-- 聊天窗口 -->
 <div class="chat-container">
   <div id="chat"></div>
-  <button id="startBtn" onclick="startChat()">有问题🤔问我</button>
+  <button id="startBtn" onclick="startChat()">
+    <span class="emoji-swing">🤔</span>
+    有问题我问
+  </button>
   <div id="inputArea" style="display:none;">
     <input type="text" id="userInputField" placeholder="输入你的中文..."
-           onkeydown="if(event.key === 'Enter') sendMessage()">
+           onkeydown="if(event.key === 'Enter') sendMessage()" />
     <button onclick="sendMessage()">发送</button>
   </div>
   <button id="printBtn" onclick="printChat()" style="display:none;">📄 打印聊天记录</button>
@@ -158,7 +228,7 @@
 
   let step = 0;
   let customerName = '';
-  let strategy = null;
+  let userPrice = null;
 
   function appendMessage(text, className) {
     const div = document.createElement('div');
@@ -168,14 +238,8 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
-  function startChat() {
-    startBtn.style.display = 'none';
-    inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是刘老师的小助手，请问您叫什么名字？", 'bot');
-  }
-
   function extractName(input) {
-    const prefixes = ['你好我叫', '我是', '我的名字是', '名字是', '我叫'];
+    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length).trim();
@@ -187,22 +251,23 @@
     return nameMatch ? nameMatch[0] : input.trim();
   }
 
-  const priceSuggestions = [
-    "🤖：你觉得多少钱呢？",
-    "🤖：你可以给多少钱～",
-    "🤖：你想出多少？😊",
-    "🤖：你说个价吧，我们可以商量。",
-    "🤖：你希望多少钱这件衣服？"
-  ];
-
-  function getRandomSuggestion() {
-    const index = Math.floor(Math.random() * priceSuggestions.length);
-    return priceSuggestions[index];
+  function isEndStatement(text) {
+    const endings = ["再见", "谢谢", "成交", "拜拜"];
+    return endings.some(end => text.includes(end));
   }
 
-  function isEndStatement(text) {
-    const endings = ["再见", "谢谢", "成交", "走", "拜拜" "再见", "可以"];
-    return endings.some(end => text.includes(end));
+  function isPrice(text) {
+    return /^\d+$/.test(text.replace(/[^\d]/g, ''));
+  }
+
+  function getPrice(text) {
+    return parseInt(text.replace(/[^\d]/g, ''), 10);
+  }
+
+  function startChat() {
+    startBtn.style.display = 'none';
+    inputArea.style.display = 'flex';
+    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
   }
 
   function sendMessage() {
@@ -212,76 +277,96 @@
     // 添加顾客消息
     appendMessage("🧑：" + userText, 'user');
 
-    // 如果用户说再见、谢谢、成交等，则直接结束并打印
+    // 自动结束语句判断
     if (isEndStatement(userText)) {
-      appendMessage(`🤖：欢迎下次再来！`, 'bot');
+      appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
       showPrintButton();
       userInput.value = '';
       return;
     }
 
-    // 对话流程控制
+    // 开始对话流程
     if (step === 0) {
       customerName = extractName(userText);
-      appendMessage(`🤖：你好${customerName}！叫什么名字？`, 'bot');
+      appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
       step++;
     } else if (step === 1) {
-      if (userText.includes("问题") || userText.includes("帮助")) {
-        appendMessage("🤖：您可以问我衣服、多少钱，我可以帮助你～", 'bot');
-      } else if (userText.includes("多少钱") || userText.includes("多少")) {
-        appendMessage("🤖：这件衣服500块。", 'bot');
+      if (userText.includes("多少钱") || userText.includes("多少")) {
+        appendMessage("🤖：这件衣服500块钱", 'bot');
         step++;
       } else {
-        appendMessage("🤖：您可以问这件衣服多少钱哦～", 'bot');
+        appendMessage("🤖：您可以问我价格、讲价或优惠哦～", 'bot');
       }
     } else if (step === 2) {
       if (userText.includes("贵") || userText.includes("便宜")) {
-        strategy = Math.random() < 0.5 ? 1 : 2;
-        if (strategy === 1) {
-          appendMessage("🤖：可以，便宜点，400块怎么样？", 'bot');
-        } else {
-          appendMessage("🤖：可以，你说多少钱？", 'bot');
-        }
+        appendMessage("🤖：可以，450块，怎么样？", 'bot');
         step++;
       } else {
         appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
       }
     } else if (step === 3) {
-      if (strategy === 1 && userText.includes("400") && userText.includes("贵")) {
-        appendMessage("🤖：400还太贵，你说多少钱？", 'bot');
-        strategy = 3;
+      if (userText.includes("450") && userText.includes("贵")) {
+        appendMessage("🤖：450还太贵，你说多少钱？", 'bot');
         step++;
-      } else if (/^\d+$/.test(userText)) {
-        const price = parseInt(userText);
-        if (price >= 400) {
-          appendMessage("🤖：谢谢！", 'bot');
-        } else if (price >= 200) {
-          appendMessage("🤖：可以！", 'bot');
-          appendMessage("🤖：欢迎下次再来！", 'bot');
+      } else if (isPrice(userText)) {
+        userPrice = getPrice(userText);
+        if (userPrice > 200 && userPrice < 450) {
+          appendMessage(`🤖：我可以卖给你${userPrice}块`, 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
-        } else {
-          appendMessage("🤖：那我200块，可以吗？", 'bot');
-          strategy = 4;
+        } else if (userPrice <= 200) {
+          appendMessage(`🤖：${userPrice} 不可以，太便宜了。我可以给你300块，怎么样？`, 'bot');
+          step++;
+        } else if (userPrice >= 450) {
+          appendMessage("🤖：谢谢惠顾！", 'bot');
           step++;
         }
       } else {
-        appendMessage(getRandomSuggestion(), 'bot');
+        appendMessage("🤖：你觉得多少钱合适呢？", 'bot');
       }
     } else if (step === 4) {
+      if (userText.includes("300") && userText.includes("贵")) {
+        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        step++;
+      } else if (userText.includes("不要") || userText.includes("走了")) {
+        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        step++;
+      } else if (isPrice(userText)) {
+        userPrice = getPrice(userText);
+        if (userPrice >= 200) {
+          appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          showPrintButton();
+          step++;
+        } else {
+          appendMessage("🤖：我只能接受200块，好吗？", 'bot');
+        }
+      } else {
+        appendMessage("🤖：你说个价吧，我们可以商量 😊", 'bot');
+      }
+    } else if (step === 5) {
       if (userText.includes("好") || userText.includes("可以")) {
         appendMessage("🤖：好的，成交！", 'bot');
-        appendMessage("🤖：欢迎下次再来！", 'bot');
+        appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
         showPrintButton();
         step++;
+      } else if (isPrice(userText)) {
+        userPrice = getPrice(userText);
+        if (userPrice >= 200) {
+          appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          showPrintButton();
+          step++;
+        } else {
+          appendMessage("🤖：我只能接受200块，好吗？", 'bot');
+        }
       } else {
-        appendMessage("🤖：好吧！", 'bot');
-        appendMessage("🤖：欢迎下次再来！", 'bot');
-        showPrintButton();
-        step++;
+        appendMessage("🤖：那就按200块来吧，可以吗？", 'bot');
       }
-    } else if (step >= 5) {
-      appendMessage("🤖：还有什么我可以帮您的吗？", 'bot');
+    } else {
+      appendMessage("🤖：感谢光临，我们下次见！", 'bot');
+      showPrintButton();
     }
 
     userInput.value = '';
@@ -293,14 +378,16 @@
 
   function printChat() {
     const chatContent = chat.innerText;
-    const title = document.getElementById('pageTitle').innerText;
+    const title = document.querySelector('.main-title').innerText;
+    const date = document.getElementById('chatDate').innerText;
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <html>
-        <head><title>${customerName || '顾客'} 的聊天记录</title></head>
+        <head><title>聊天记录</title></head>
         <body>
           <h2>${title}</h2>
+          <p>${date}</p>
           <pre>${chatContent}</pre>
         </body>
       </html>
