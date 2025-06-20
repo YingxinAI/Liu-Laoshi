@@ -22,6 +22,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
     }
 
     .product-container img {
@@ -92,6 +93,38 @@
     button:hover {
       background-color: #43a047;
     }
+
+    /* 动态按钮样式 */
+    #startBtn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 24px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #ff7043, #ef5350, #ec407a, #ab47bc);
+      background-size: 400% 400%;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      animation: gradientBG 10s ease infinite, pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    #startBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 100, 100, 0.6);
+    }
   </style>
 </head>
 <body>
@@ -103,17 +136,22 @@
 
 <div class="chat-container">
   <div id="chat"></div>
-  <div id="inputArea">
-    <input type="text" id="userInput" placeholder="输入你的中文..." onkeydown="if(event.key === 'Enter') sendMessage()">
+  <button id="startBtn" onclick="startChat()">有问题问我</button>
+  <div id="inputArea" style="display:none;">
+    <input type="text" id="userInputField" placeholder="输入你的中文..." onkeydown="if(event.key === 'Enter') sendMessage()">
     <button onclick="sendMessage()">发送</button>
   </div>
 </div>
 
 <script>
   const chat = document.getElementById('chat');
+  const startBtn = document.getElementById('startBtn');
+  const inputArea = document.getElementById('inputArea');
+  const userInput = document.getElementById('userInputField');
+
   let step = 0;
   let customerName = '';
-  let strategy = null; // 记录当前使用哪种策略（1 或 2）
+  let strategy = null;
   let userPrice = null;
 
   function appendMessage(text, className) {
@@ -124,9 +162,11 @@
     chat.scrollTop = chat.scrollHeight;
   }
 
-  window.onload = () => {
-    appendMessage("🤖：您好！请问您叫什么名字？", 'bot');
-  };
+  function startChat() {
+    startBtn.style.display = 'none';
+    inputArea.style.display = 'flex';
+    appendMessage("🤖：您好！我是店员小李，有什么问题可以问我哦～", 'bot');
+  }
 
   function extractName(input) {
     const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
@@ -154,8 +194,7 @@
   }
 
   function sendMessage() {
-    const input = document.getElementById('userInput');
-    const userText = input.value.trim();
+    const userText = userInput.value.trim();
     if (userText === '') return;
 
     appendMessage("你：" + userText, 'user');
@@ -236,7 +275,6 @@
           strategy = 4;
         }
         step++;
-
       } else if (strategy === 4) {
         if (userText.includes("好") || userText.includes("可以")) {
           appendMessage("🤖：好的，成交！", 'bot');
@@ -244,7 +282,6 @@
           appendMessage("🤖：那就按你的价格来吧！", 'bot');
         }
         step++;
-
       } else {
         appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
       }
@@ -253,7 +290,7 @@
       appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
     }
 
-    input.value = '';
+    userInput.value = '';
   }
 </script>
 
