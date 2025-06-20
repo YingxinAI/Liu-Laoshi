@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>中文砍价机器人 😊</title>
+  <title>中文讨价还价机器人 😊</title>
   <style>
     body {
       font-family: "Microsoft YaHei", sans-serif;
@@ -136,7 +136,7 @@
 
 <div class="chat-container">
   <div id="chat"></div>
-  <button id="startBtn" onclick="startChat()">有问题问我</button>
+  <button id="startBtn" onclick="startChat()">有问题，请问我 🤖</button>
   <div id="inputArea" style="display:none;">
     <input type="text" id="userInputField" placeholder="输入你的中文..." onkeydown="if(event.key === 'Enter') sendMessage()">
     <button onclick="sendMessage()">发送</button>
@@ -165,7 +165,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是店员小李，有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我叫友朋，请问您叫什么名字", 'bot');
   }
 
   function extractName(input) {
@@ -181,11 +181,10 @@
   }
 
   const priceSuggestions = [
-    "🤖：你觉得多少钱合适呢？",
-    "🤖：你可以给我一个价格哦～",
-    "🤖：你想出多少？我可以考虑一下 😊",
-    "🤖：你说个价吧，我们可以商量。",
-    "🤖：你希望多少钱买这件衣服？"
+    "🤖：你说多少钱？😊",
+    "🤖：你想多少钱",😊
+    "🤖：多少钱 你买？ 😊",
+  
   ];
 
   function getRandomSuggestion() {
@@ -201,12 +200,12 @@
 
     if (step === 0) {
       customerName = extractName(userText);
-      appendMessage(`🤖：${customerName}您好！有什么我可以帮您的吗？`, 'bot');
+      appendMessage(`🤖：${customerName}您好！我可以帮您吗？`, 'bot');
       step++;
 
     } else if (step === 1) {
       if (userText.includes("问题") || userText.includes("帮助")) {
-        appendMessage("🤖：您可以问我价格、讲价，或者看看有没有优惠哦～", 'bot');
+        appendMessage("🤖：您可以问多少钱、, 'bot');
       } else if (userText.includes("多少钱") || userText.includes("多少")) {
         appendMessage("🤖：这件衣服500块。", 'bot');
         step++;
@@ -236,13 +235,13 @@
         } else if (/^\d+$/.test(userText)) {
           userPrice = parseInt(userText);
           if (userPrice >= 400) {
-            appendMessage("🤖：谢谢惠顾！", 'bot');
+            appendMessage("🤖：谢谢您！", 'bot');
             step++;
           } else if (userPrice >= 200) {
-            appendMessage("🤖：可以！成交！", 'bot');
+            appendMessage("🤖：可以！给你", 'bot');
             step++;
           } else {
-            appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+            appendMessage("🤖：那200块，可以吗？", 'bot');
             strategy = 4;
             step++;
           }
@@ -253,10 +252,10 @@
         if (/^\d+$/.test(userText)) {
           userPrice = parseInt(userText);
           if (userPrice >= 200) {
-            appendMessage("🤖：可以！成交！", 'bot');
+            appendMessage("🤖：可以！谢谢！", 'bot');
             step++;
           } else {
-            appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+            appendMessage("🤖：那我200块，可以吗？", 'bot');
             strategy = 4;
             step++;
           }
@@ -269,25 +268,25 @@
       if (strategy === 3 && /^\d+$/.test(userText)) {
         userPrice = parseInt(userText);
         if (userPrice >= 200) {
-          appendMessage("🤖：可以！成交！", 'bot');
+          appendMessage("🤖：可以！谢谢！", 'bot');
         } else {
-          appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+          appendMessage("🤖：那我200块，可以吗？", 'bot');
           strategy = 4;
         }
         step++;
       } else if (strategy === 4) {
         if (userText.includes("好") || userText.includes("可以")) {
-          appendMessage("🤖：好的，成交！", 'bot');
+          appendMessage("🤖：好的，谢谢！", 'bot');
         } else {
           appendMessage("🤖：那就按你的价格来吧！", 'bot');
         }
         step++;
       } else {
-        appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
+        appendMessage("🤖：谢谢，欢迎再来！", 'bot');
       }
 
     } else {
-      appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
+      appendMessage("🤖：谢谢，欢迎再来！", 'bot');
     }
 
     userInput.value = '';
