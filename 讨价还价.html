@@ -209,11 +209,11 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我是刘老师的助手，请问你叫什么名字？", 'bot');
   }
 
   function extractName(input) {
-    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '你好，我是'， '你好，我叫'，];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length);
