@@ -1,5 +1,319 @@
 <!DOCTYPE html>
+<html lang="zh-CN"><!DOCTYPE html>
 <html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>刘老师的砍价机器人</title>
+  <style>
+    body {
+      font-family: "KaiTi", "Microsoft YaHei", sans-serif;
+      background-color: #e3f2fd;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .header {
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      color: #d32f2f;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .product-container {
+      flex: 1;
+      min-width: 250px;
+      max-width: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .product-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-container {
+      flex: 2;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat {
+      flex: 1;
+      border: 1px solid #dce1e6;
+      padding: 15px;
+      overflow-y: auto;
+      background-color: #ffffff;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .message {
+      margin: 6px 0;
+      font-size: 16px;
+    }
+
+    .user {
+      color: #0056d2;
+      text-align: right;
+    }
+
+    .bot {
+      color: #2e7d32;
+      text-align: left;
+    }
+
+    #inputArea {
+      display: flex;
+      margin-top: 15px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: "KaiTi", "Microsoft YaHei", sans-serif;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 16px;
+      font-family: "KaiTi", "Microsoft YaHei", sans-serif;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    #startBtn, #printBtn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 24px;
+      font-size: 18px;
+      font-weight: bold;
+      font-family: "KaiTi", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(45deg, #ff7043, #ef5350, #ec407a, #ab47bc);
+      background-size: 400% 400%;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      animation: gradientBG 10s ease infinite, pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    #startBtn:hover,
+    #printBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 100, 100, 0.6);
+    }
+
+    #printBtn {
+      margin-top: 15px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1 class="header">欢迎同刘老师的聊天机器人讨价还价</h1>
+
+<div class="product-container">
+  <img src="https://marinaracewear.com/storage/media/attributes/9/0/8/6/5/90865/conversions/1-category.jpg" 
+       alt="一件衣服">
+</div>
+
+<div class="chat-container">
+  <div id="chat"></div>
+
+  <button id="startBtn" onclick="startChat()">有问题问我</button>
+
+  <div id="inputArea" style="display:none;">
+    <input type="text" id="userInputField" placeholder="输入你的中文..."
+           onkeydown="if(event.key === 'Enter') sendMessage()">
+    <button onclick="sendMessage()">发送</button>
+  </div>
+
+  <button id="printBtn" onclick="printChat()">📄 打印聊天记录</button>
+</div>
+
+<script>
+  const chat = document.getElementById('chat');
+  const startBtn = document.getElementById('startBtn');
+  const inputArea = document.getElementById('inputArea');
+  const userInput = document.getElementById('userInputField');
+  const printBtn = document.getElementById('printBtn');
+
+  let step = 0;
+  let customerName = '';
+  let strategy = null;
+  let userPrice = null;
+
+  function appendMessage(text, className) {
+    const div = document.createElement('div');
+    div.className = 'message ' + className;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function startChat() {
+    startBtn.style.display = 'none';
+    inputArea.style.display = 'flex';
+    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
+  }
+
+  function extractName(input) {
+    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    for (let prefix of prefixes) {
+      if (input.startsWith(prefix)) {
+        input = input.slice(prefix.length);
+        break;
+      }
+    }
+    const nameMatch = input.match(/^[\u4e00-\u9fa5]{2,4}/);
+    return nameMatch ? nameMatch[0] : input.trim();
+  }
+
+  const priceSuggestions = [
+    "🤖：你觉得多少钱合适呢？",
+    "🤖：你可以给我一个价格哦～",
+    "🤖：你想出多少？我可以考虑一下 😊",
+    "🤖：你说个价吧，我们可以商量。",
+    "🤖：你希望多少钱买这件衣服？"
+  ];
+
+  function getRandomSuggestion() {
+    const index = Math.floor(Math.random() * priceSuggestions.length);
+    return priceSuggestions[index];
+  }
+
+  function sendMessage() {
+    const userText = userInput.value.trim();
+    if (userText === '') return;
+
+    appendMessage("你：" + userText, 'user');
+
+    if (step === 0) {
+      customerName = extractName(userText);
+      appendMessage(`🤖：${customerName}您好！有什么我可以帮您的吗？`, 'bot');
+      step++;
+    } else if (step === 1) {
+      if (userText.includes("问题") || userText.includes("帮助")) {
+        appendMessage("🤖：您可以问我价格、讲价，或者看看有没有优惠哦～", 'bot');
+      } else if (userText.includes("多少钱") || userText.includes("多少")) {
+        appendMessage("🤖：这件衣服500块。", 'bot');
+        step++;
+      } else {
+        appendMessage("🤖：您可以问这件衣服多少钱哦～", 'bot');
+      }
+
+    } else if (step === 2) {
+      if (userText.includes("贵") || userText.includes("便宜")) {
+        strategy = Math.random() < 0.5 ? 1 : 2;
+        if (strategy === 1) {
+          appendMessage("🤖：可以，便宜点，400块怎么样？", 'bot');
+        } else {
+          appendMessage("🤖：可以，你说多少钱？", 'bot');
+        }
+        step++;
+      } else {
+        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
+      }
+
+    } else if (step === 3) {
+      if (strategy === 1 && userText.includes("400") && userText.includes("贵")) {
+        appendMessage("🤖：400还太贵，你说多少钱？", 'bot');
+        strategy = 3;
+        step++;
+      } else if (/^\d+$/.test(userText)) {
+        userPrice = parseInt(userText);
+        if (userPrice >= 400) {
+          appendMessage("🤖：谢谢惠顾！", 'bot');
+          showPrintButton();
+        } else if (userPrice >= 200) {
+          appendMessage("🤖：可以！成交！", 'bot');
+          showPrintButton();
+        } else {
+          appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+          strategy = 4;
+          step++;
+        }
+      } else {
+        appendMessage(getRandomSuggestion(), 'bot');
+      }
+
+    } else if (step === 4) {
+      if (userText.includes("好") || userText.includes("可以")) {
+        appendMessage("🤖：好的，成交！", 'bot');
+        showPrintButton();
+      } else {
+        appendMessage("🤖：那就按你的价格来吧！", 'bot');
+        showPrintButton();
+      }
+      step++;
+    } else {
+      appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
+      showPrintButton();
+    }
+
+    userInput.value = '';
+  }
+
+  function showPrintButton() {
+    printBtn.style.display = 'block';
+  }
+
+  function printChat() {
+    const chatContent = chat.innerText;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head><title>聊天记录</title></head>
+        <body>
+          <h2>刘老师的砍价机器人 - 聊天记录</h2>
+          <pre>${chatContent}</pre>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  }
+</script>
+
+</body>
+</html>
 <head>
   <meta charset="UTF-8" />
   <title>刘老师的砍价机器人</title>
