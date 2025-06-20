@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: "Microsoft YaHei", sans-serif;
-      background-color: #e3f2fd; /* 柔和的浅蓝色背景 */
+      background-color: #e3f2fd;
       margin: 0;
       padding: 20px;
       display: flex;
@@ -113,6 +113,8 @@
   const chat = document.getElementById('chat');
   let step = 0;
   let customerName = '';
+  let strategy = null; // 记录当前使用哪种策略（1 或 2）
+  let userPrice = null;
 
   function appendMessage(text, className) {
     const div = document.createElement('div');
@@ -126,7 +128,6 @@
     appendMessage("🤖：您好！请问您叫什么名字？", 'bot');
   };
 
-  // 提取用户名字的函数
   function extractName(input) {
     const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
     for (let prefix of prefixes) {
@@ -139,7 +140,6 @@
     return nameMatch ? nameMatch[0] : input.trim();
   }
 
-  // 随机提示语库
   const priceSuggestions = [
     "🤖：你觉得多少钱合适呢？",
     "🤖：你可以给我一个价格哦～",
@@ -176,35 +176,77 @@
       }
 
     } else if (step === 2) {
-      if (userText.includes("贵")) {
-        appendMessage("🤖：可以便宜点。", 'bot');
-        step++;
-      } else if (userText.includes("便宜")) {
-        appendMessage("🤖：可以，400怎么样？", 'bot');
+      if (userText.includes("贵") || userText.includes("便宜")) {
+        strategy = Math.random() < 0.5 ? 1 : 2;
+        if (strategy === 1) {
+          appendMessage("🤖：可以，便宜点，400块怎么样？", 'bot');
+        } else {
+          appendMessage("🤖：可以，你说多少钱？", 'bot');
+        }
         step++;
       } else {
         appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
       }
 
     } else if (step === 3) {
-      if (userText.includes("便宜") || userText.includes("贵")) {
-        appendMessage("🤖：可以，400怎么样？", 'bot');
-        step++;
-      } else if (userText.includes("100") && userText.includes("行吗")) {
-        appendMessage("🤖：100 不行，150吧？", 'bot');
-        step++;
-      } else {
-        appendMessage(getRandomSuggestion(), 'bot');
+      if (strategy === 1) {
+        if (userText.includes("400") && userText.includes("贵")) {
+          appendMessage("🤖：400还太贵，你说多少钱？", 'bot');
+          strategy = 3;
+          step++;
+        } else if (/^\d+$/.test(userText)) {
+          userPrice = parseInt(userText);
+          if (userPrice >= 400) {
+            appendMessage("🤖：谢谢惠顾！", 'bot');
+            step++;
+          } else if (userPrice >= 200) {
+            appendMessage("🤖：可以！成交！", 'bot');
+            step++;
+          } else {
+            appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+            strategy = 4;
+            step++;
+          }
+        } else {
+          appendMessage(getRandomSuggestion(), 'bot');
+        }
+      } else if (strategy === 2) {
+        if (/^\d+$/.test(userText)) {
+          userPrice = parseInt(userText);
+          if (userPrice >= 200) {
+            appendMessage("🤖：可以！成交！", 'bot');
+            step++;
+          } else {
+            appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+            strategy = 4;
+            step++;
+          }
+        } else {
+          appendMessage("🤖：请直接告诉我你的价格哦～", 'bot');
+        }
       }
 
     } else if (step === 4) {
-      if (userText.includes("100")) {
-        appendMessage("🤖：好吧，卖给你了！", 'bot');
+      if (strategy === 3 && /^\d+$/.test(userText)) {
+        userPrice = parseInt(userText);
+        if (userPrice >= 200) {
+          appendMessage("🤖：可以！成交！", 'bot');
+        } else {
+          appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+          strategy = 4;
+        }
         step++;
-      } else if (userText.includes("不要了") || userText.includes("走")) {
-        appendMessage("🤖：你说个价嘛，我们可以商量～", 'bot');
+
+      } else if (strategy === 4) {
+        if (userText.includes("好") || userText.includes("可以")) {
+          appendMessage("🤖：好的，成交！", 'bot');
+        } else {
+          appendMessage("🤖：那就按你的价格来吧！", 'bot');
+        }
+        step++;
+
       } else {
-        appendMessage("🤖：你说多少我都考虑一下 😊", 'bot');
+        appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
       }
 
     } else {
