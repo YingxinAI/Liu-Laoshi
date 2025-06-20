@@ -213,7 +213,7 @@
   }
 
   function extractName(input) {
-    const prefixes = ['你好，我叫', '我是', '我的名字是', '名字是', '我叫'];
+    const prefixes = ['你好我叫', '我是', '我的名字是', '名字是', '我叫'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length);
