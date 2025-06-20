@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>刘老师的砍价机器人</title>
+  <title>刘老师的讨价还价机器人</title>
   <style>
     body {
       font-family: "KaiTi", "Microsoft YaHei", sans-serif;
@@ -153,7 +153,7 @@
 <body>
 
 <!-- 动态标题 -->
-<h1 class="header" id="pageTitle">👋 欢迎同刘老师的聊天机器人讨价还价 - </h1>
+<h1 class="header" id="pageTitle">👋 欢迎同刘老师的聊天机器人讨价还价 🤑 - </h1>
 
 <script>
   // 自动添加当前日期
@@ -173,7 +173,7 @@
   <div id="chat"></div>
 
   <!-- 开始按钮 -->
-  <button id="startBtn" onclick="startChat()">有问题问我</button>
+  <button id="startBtn" onclick="startChat()">有问题🤔请问我</button>
 
   <!-- 输入框（默认隐藏） -->
   <div id="inputArea" style="display:none;">
@@ -209,11 +209,11 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我是刘老师的助手，请问您叫什么名字？", 'bot');
   }
 
   function extractName(input) {
-    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    const prefixes = ['你好，我叫', '我是', '我的名字是', '名字是', '我叫'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length);
@@ -268,7 +268,7 @@
         }
         step++;
       } else {
-        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
+        appendMessage("🤖：你想买吗？你想是多少钱？", 'bot');
       }
     } else if (step === 3) {
       if (strategy === 1 && userText.includes("400") && userText.includes("贵")) {
@@ -278,11 +278,11 @@
       } else if (/^\d+$/.test(userText)) {
         userPrice = parseInt(userText);
         if (userPrice >= 400) {
-          appendMessage("🤖：谢谢惠顾！", 'bot');
+          appendMessage("🤖：谢谢！", 'bot');
         } else if (userPrice >= 200) {
-          appendMessage("🤖：可以！成交！", 'bot');
+          appendMessage("🤖：可以！", 'bot');
         } else {
-          appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
+          appendMessage("🤖：那我200块，可以吗？", 'bot');
           strategy = 4;
           step++;
         }
@@ -292,14 +292,14 @@
       }
     } else if (step === 4) {
       if (userText.includes("好") || userText.includes("可以")) {
-        appendMessage("🤖：好的，成交！", 'bot');
+        appendMessage("🤖：好的，可以！", 'bot');
       } else {
-        appendMessage("🤖：那就按你的价格来吧！", 'bot');
+        appendMessage("🤖：那可以吧！", 'bot');
       }
       showPrintButtonIfEnd(userText);
       step++;
     } else {
-      appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
+      appendMessage("🤖：谢谢，欢迎再来！", 'bot');
       showPrintButtonIfEnd(userText);
     }
 
@@ -311,6 +311,7 @@
       text.includes("再见") ||
       text.includes("谢谢") ||
       text.includes("成交") ||
+      text.includes("可以") ||
       text.includes("走") ||
       text.includes("拜拜")
     ) {
