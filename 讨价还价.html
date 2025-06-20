@@ -5,71 +5,152 @@
   <title>中文砍价机器人 😊</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
+      font-family: "Microsoft YaHei", sans-serif;
+      background-color: #e3f2fd; /* 柔和的浅蓝色背景 */
+      margin: 0;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-    #chat {
-      border: 1px solid #ccc;
-      padding: 10px;
-      height: 300px;
-      overflow-y: auto;
-      background-color: white;
-      margin-bottom: 10px;
+
+    .product-container {
+      flex: 1;
+      min-width: 250px;
+      max-width: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .user, .bot {
-      margin: 5px 0;
-    }
-    .user {
-      color: blue;
-      text-align: right;
-    }
-    .bot {
-      color: green;
-    }
-    input[type="text"] {
-      width: 80%;
-      padding: 5px;
-    }
-    button {
-      padding: 5px 10px;
-    }
-    img.product-image {
-      display: block;
-      margin: 0 auto 20px auto;
+
+    .product-container img {
       max-width: 100%;
       height: auto;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-container {
+      flex: 2;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat {
+      flex: 1;
+      border: 1px solid #dce1e6;
+      padding: 15px;
+      overflow-y: auto;
+      background-color: #ffffff;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .message {
+      margin: 6px 0;
+      font-size: 16px;
+    }
+
+    .user {
+      color: #0056d2;
+      text-align: right;
+    }
+
+    .bot {
+      color: #2e7d32;
+      text-align: left;
+    }
+
+    #inputArea {
+      display: flex;
+      margin-top: 15px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background-color: #43a047;
     }
   </style>
 </head>
 <body>
 
-<h2 style="text-align:center;">中文砍价机器人 😊</h2>
+<div class="product-container">
+  <img src="https://marinaracewear.com/storage/media/attributes/9/0/8/6/5/90865/conversions/1-category.jpg" 
+       alt="一件衣服">
+</div>
 
-<!-- 商品图片 -->
-<img src="https://marinaracewear.com/storage/media/attributes/9/0/8/6/5/90865/conversions/1-category.jpg" 
-     alt="一件衣服"
-     class="product-image">
-
-<div id="chat"></div>
-
-<input type="text" id="userInput" placeholder="输入你的中文..." />
-<button onclick="sendMessage()">发送</button>
+<div class="chat-container">
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="输入你的中文..." onkeydown="if(event.key === 'Enter') sendMessage()">
+    <button onclick="sendMessage()">发送</button>
+  </div>
+</div>
 
 <script>
   const chat = document.getElementById('chat');
-  let step = 0; // 当前对话步骤
+  let step = 0;
+  let customerName = '';
 
   function appendMessage(text, className) {
     const div = document.createElement('div');
-    div.className = className;
+    div.className = 'message ' + className;
     div.textContent = text;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+  }
+
+  window.onload = () => {
+    appendMessage("🤖：您好！请问您叫什么名字？", 'bot');
+  };
+
+  // 提取用户名字的函数
+  function extractName(input) {
+    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    for (let prefix of prefixes) {
+      if (input.startsWith(prefix)) {
+        input = input.slice(prefix.length);
+        break;
+      }
+    }
+    const nameMatch = input.match(/^[\u4e00-\u9fa5]{2,4}/);
+    return nameMatch ? nameMatch[0] : input.trim();
+  }
+
+  // 随机提示语库
+  const priceSuggestions = [
+    "🤖：你觉得多少钱合适呢？",
+    "🤖：你可以给我一个价格哦～",
+    "🤖：你想出多少？我可以考虑一下 😊",
+    "🤖：你说个价吧，我们可以商量。",
+    "🤖：你希望多少钱买这件衣服？"
+  ];
+
+  function getRandomSuggestion() {
+    const index = Math.floor(Math.random() * priceSuggestions.length);
+    return priceSuggestions[index];
   }
 
   function sendMessage() {
@@ -79,55 +160,55 @@
 
     appendMessage("你：" + userText, 'user');
 
-    switch (step) {
-      case 0:
-        if (userText.includes("多少钱") || userText.includes("多少")) {
-          appendMessage("🤖：500块。", 'bot');
-          step++;
-        } else {
-          appendMessage("🤖：你可以问我“这个多少钱？”哦～", 'bot');
-        }
-        break;
+    if (step === 0) {
+      customerName = extractName(userText);
+      appendMessage(`🤖：${customerName}您好！有什么我可以帮您的吗？`, 'bot');
+      step++;
 
-      case 1:
-        if (userText.includes("贵") || userText.includes("便宜")) {
-          appendMessage("🤖：可以，400怎么样？", 'bot');
-          step++;
-        } else {
-          appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
-        }
-        break;
+    } else if (step === 1) {
+      if (userText.includes("问题") || userText.includes("帮助")) {
+        appendMessage("🤖：您可以问我价格、讲价，或者看看有没有优惠哦～", 'bot');
+      } else if (userText.includes("多少钱") || userText.includes("多少")) {
+        appendMessage("🤖：这件衣服500块。", 'bot');
+        step++;
+      } else {
+        appendMessage("🤖：您可以问这件衣服多少钱哦～", 'bot');
+      }
 
-      case 2:
-        if (userText.includes("100") && userText.includes("行吗")) {
-          appendMessage("🤖：100 不行，150吧？", 'bot');
-          step++;
-        } else {
-          appendMessage("🤖：那你觉得多少钱合适？", 'bot');
-        }
-        break;
+    } else if (step === 2) {
+      if (userText.includes("贵")) {
+        appendMessage("🤖：可以便宜点。", 'bot');
+        step++;
+      } else if (userText.includes("便宜")) {
+        appendMessage("🤖：可以，400怎么样？", 'bot');
+        step++;
+      } else {
+        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
+      }
 
-      case 3:
-        if (userText.includes("不要了") || userText.includes("我走了")) {
-          appendMessage("🤖：你说多少钱？再商量一下嘛～", 'bot');
-          step++;
-        } else {
-          appendMessage("🤖：你要不买啦？再想想咯～", 'bot');
-        }
-        break;
+    } else if (step === 3) {
+      if (userText.includes("便宜") || userText.includes("贵")) {
+        appendMessage("🤖：可以，400怎么样？", 'bot');
+        step++;
+      } else if (userText.includes("100") && userText.includes("行吗")) {
+        appendMessage("🤖：100 不行，150吧？", 'bot');
+        step++;
+      } else {
+        appendMessage(getRandomSuggestion(), 'bot');
+      }
 
-      case 4:
-        if (userText.includes("100")) {
-          appendMessage("🤖：好吧，卖给你了！", 'bot');
-          step++;
-        } else {
-          appendMessage("🤖：你刚刚不是说100吗？", 'bot');
-        }
-        break;
+    } else if (step === 4) {
+      if (userText.includes("100")) {
+        appendMessage("🤖：好吧，卖给你了！", 'bot');
+        step++;
+      } else if (userText.includes("不要了") || userText.includes("走")) {
+        appendMessage("🤖：你说个价嘛，我们可以商量～", 'bot');
+      } else {
+        appendMessage("🤖：你说多少我都考虑一下 😊", 'bot');
+      }
 
-      default:
-        appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
-        break;
+    } else {
+      appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
     }
 
     input.value = '';
