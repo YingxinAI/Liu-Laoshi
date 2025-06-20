@@ -209,11 +209,11 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是刘老师的助手，请问你叫什么名字？", 'bot');
+    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
   }
 
   function extractName(input) {
-    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '你好，我是'， '你好，我叫'，];
+    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length);
@@ -225,11 +225,11 @@
   }
 
   const priceSuggestions = [
-    "🤖：你觉得多少钱合适呢？",
-    "🤖：你可以给我一个价格哦～",
-    "🤖：你想出多少？我可以考虑一下 😊",
-    "🤖：你说个价吧，我们可以商量。",
-    "🤖：你希望多少钱买这件衣服？"
+    "你觉得多少钱合适呢？",
+    "你可以给我一个价格哦～",
+    "你想出多少？我可以考虑一下 😊",
+    "你说个价吧，我们可以商量。",
+    "你希望多少钱买这件衣服？"
   ];
 
   function getRandomSuggestion() {
@@ -245,6 +245,7 @@
     appendMessage("🧑：" + userText, 'user');
 
     if (step === 0) {
+      // 提取名字并打招呼
       customerName = extractName(userText);
       appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
       step++;
