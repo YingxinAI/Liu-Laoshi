@@ -205,7 +205,6 @@
     const div = document.createElement('div');
     const time = getCurrentTime();
 
-    // 添加顾客 emoji 👨‍💼 或机器人 🤖
     if (className === 'user') {
       div.textContent = `🧑 ${time}: ${text}`;
     } else if (className === 'bot') {
@@ -259,9 +258,16 @@
     appendUserMessage(`🧑 ${time}: ${userText}`);
 
     if (step === 0) {
-      customerName = extractName(userText);
-      appendBotMessage(`🤖 ${time}: ${customerName}您好！有什么我可以帮您的吗？`);
-      step++;
+      // 判断是否为“你好，我叫XXX”
+      if (/^(你好|您好|hi|hello|哈喽)/i.test(userText)) {
+        customerName = extractName(userText);
+        appendBotMessage(`🤖 ${time}: 你好${customerName}！`);
+        step++;
+      } else {
+        customerName = extractName(userText);
+        appendBotMessage(`🤖 ${time}: 你好${customerName}！有什么我可以帮您的吗？`);
+        step++;
+      }
     } else if (step === 1) {
       if (userText.includes("问题") || userText.includes("帮助")) {
         appendBotMessage(`🤖 ${time}: 您可以问我价格、讲价，或者看看有没有优惠哦～`);
