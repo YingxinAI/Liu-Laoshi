@@ -153,7 +153,14 @@
 <body>
 
 <!-- 动态标题 -->
-<h1 class="header">👋 欢迎同刘老师的聊天机器人讨价还价</h1>
+<h1 class="header" id="pageTitle">👋 欢迎同刘老师的聊天机器人讨价还价 - </h1>
+
+<script>
+  // 自动添加当前日期
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  document.getElementById('pageTitle').textContent += ' ' + dateStr;
+</script>
 
 <!-- 衣服图片区域 -->
 <div class="product-container">
@@ -176,7 +183,7 @@
   </div>
 
   <!-- 打印按钮（默认隐藏） -->
-  <button id="printBtn" onclick="printChat()">📄 打印聊天记录</button>
+  <button id="printBtn" onclick="printChat()" style="display:none;">📄 打印聊天记录</button>
 </div>
 
 <script>
@@ -191,29 +198,10 @@
   let strategy = null;
   let userPrice = null;
 
-  function getCurrentTime() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `[${year}-${month}-${day} ${hours}:${minutes}]`;
-  }
-
   function appendMessage(text, className) {
     const div = document.createElement('div');
-    const time = getCurrentTime();
-
-    if (className === 'user') {
-      div.textContent = `🧑 ${time}: ${text}`;
-    } else if (className === 'bot') {
-      div.textContent = `🤖 ${time}: ${text}`;
-    } else {
-      div.textContent = `${time}: ${text}`;
-    }
-
     div.className = 'message ' + className;
+    div.textContent = text;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
   }
@@ -221,7 +209,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
   }
 
   function extractName(input) {
@@ -237,11 +225,11 @@
   }
 
   const priceSuggestions = [
-    "你觉得多少钱合适呢？",
-    "你可以给我一个价格哦～",
-    "你想出多少？我可以考虑一下 😊",
-    "你说个价吧，我们可以商量。",
-    "你希望多少钱买这件衣服？"
+    "🤖：你觉得多少钱合适呢？",
+    "🤖：你可以给我一个价格哦～",
+    "🤖：你想出多少？我可以考虑一下 😊",
+    "🤖：你说个价吧，我们可以商量。",
+    "🤖：你希望多少钱买这件衣服？"
   ];
 
   function getRandomSuggestion() {
@@ -253,92 +241,68 @@
     const userText = userInput.value.trim();
     if (userText === '') return;
 
-    // 添加带时间的顾客消息
-    const time = getCurrentTime();
-    appendUserMessage(`🧑 ${time}: ${userText}`);
+    // 添加顾客消息
+    appendMessage("🧑：" + userText, 'user');
 
     if (step === 0) {
-      // 判断是否为“你好，我叫XXX”
-      if (/^(你好|您好|hi|hello|哈喽)/i.test(userText)) {
-        customerName = extractName(userText);
-        appendBotMessage(`🤖 ${time}: 你好${customerName}！`);
-        step++;
-      } else {
-        customerName = extractName(userText);
-        appendBotMessage(`🤖 ${time}: 你好${customerName}！有什么我可以帮您的吗？`);
-        step++;
-      }
+      customerName = extractName(userText);
+      appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
+      step++;
     } else if (step === 1) {
       if (userText.includes("问题") || userText.includes("帮助")) {
-        appendBotMessage(`🤖 ${time}: 您可以问我价格、讲价，或者看看有没有优惠哦～`);
+        appendMessage("🤖：您可以问我价格、讲价，或者看看有没有优惠哦～", 'bot');
       } else if (userText.includes("多少钱") || userText.includes("多少")) {
-        appendBotMessage(`🤖 ${time}: 这件衣服500块。`);
+        appendMessage("🤖：这件衣服500块。", 'bot');
         step++;
       } else {
-        appendBotMessage(`🤖 ${time}: 您可以问这件衣服多少钱哦～`);
+        appendMessage("🤖：您可以问这件衣服多少钱哦～", 'bot');
       }
     } else if (step === 2) {
       if (userText.includes("贵") || userText.includes("便宜")) {
         strategy = Math.random() < 0.5 ? 1 : 2;
         if (strategy === 1) {
-          appendBotMessage(`🤖 ${time}: 可以，便宜点，400块怎么样？`);
+          appendMessage("🤖：可以，便宜点，400块怎么样？", 'bot');
         } else {
-          appendBotMessage(`🤖 ${time}: 可以，你说多少钱？`);
+          appendMessage("🤖：可以，你说多少钱？", 'bot');
         }
         step++;
       } else {
-        appendBotMessage(`🤖 ${time}: 你想买吗？可以试试砍价哦～`);
+        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
       }
     } else if (step === 3) {
       if (strategy === 1 && userText.includes("400") && userText.includes("贵")) {
-        appendBotMessage(`🤖 ${time}: 400还太贵，你说多少钱？`);
+        appendMessage("🤖：400还太贵，你说多少钱？", 'bot');
         strategy = 3;
         step++;
       } else if (/^\d+$/.test(userText)) {
         userPrice = parseInt(userText);
         if (userPrice >= 400) {
-          appendBotMessage(`🤖 ${time}: 谢谢惠顾！`);
+          appendMessage("🤖：谢谢惠顾！", 'bot');
         } else if (userPrice >= 200) {
-          appendBotMessage(`🤖 ${time}: 可以！成交！`);
+          appendMessage("🤖：可以！成交！", 'bot');
         } else {
-          appendBotMessage(`🤖 ${time}: 那我最低卖200块，可以吗？`);
+          appendMessage("🤖：那我最低卖200块，可以吗？", 'bot');
           strategy = 4;
           step++;
         }
         showPrintButtonIfEnd(userText);
       } else {
-        appendBotMessage(`🤖 ${time}: ` + getRandomSuggestion());
+        appendMessage(getRandomSuggestion(), 'bot');
       }
     } else if (step === 4) {
       if (userText.includes("好") || userText.includes("可以")) {
-        appendBotMessage(`🤖 ${time}: 好的，成交！`);
+        appendMessage("🤖：好的，成交！", 'bot');
       } else {
-        appendBotMessage(`🤖 ${time}: 那就按你的价格来吧！`);
+        appendMessage("🤖：那就按你的价格来吧！", 'bot');
       }
       showPrintButtonIfEnd(userText);
       step++;
     } else {
-      appendBotMessage(`🤖 ${time}: 谢谢惠顾，欢迎再来！`);
+      appendMessage("🤖：谢谢惠顾，欢迎再来！", 'bot');
       showPrintButtonIfEnd(userText);
     }
 
     userInput.value = '';
-  }
-
-  function appendUserMessage(message) {
-    const div = document.createElement('div');
-    div.className = 'message user';
-    div.textContent = message;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function appendBotMessage(message) {
-    const div = document.createElement('div');
-    div.className = 'message bot';
-    div.textContent = message;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
   }
 
   function showPrintButtonIfEnd(text) {
@@ -354,19 +318,15 @@
   }
 
   function printChat() {
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日`;
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
     const chatContent = chat.innerText;
+    const title = document.getElementById('pageTitle').innerText;
+
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <html>
-        <head><title>${customerName} 的聊天记录</title></head>
+        <head><title>聊天记录</title></head>
         <body>
-          <h2>${customerName} 的聊天记录</h2>
-          <p>日期：${dateStr}</p>
-          <p>时间：${timeStr}</p>
+          <h2>${title}</h2>
           <pre>${chatContent}</pre>
         </body>
       </html>
