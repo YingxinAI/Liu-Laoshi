@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>欢迎来到刘老师的空中模拟商城</title>
+  <title>欢迎来到刘老师的空中商城</title>
   <style>
     body {
       font-family: KaiTi, 楷体, SimKai, serif;
@@ -295,7 +295,7 @@
     </div>
   </div>
 
-<!-- 支付区域 -->
+  <!-- 支付区域 -->
   <div id="payment-section" class="payment-section hidden">
     <p>🧾 请输入您的姓名：</p>
     <input type="text" id="customer-name" placeholder="例如：张三" />
@@ -304,7 +304,6 @@
     <input type="text" id="card-number" placeholder="输入卡号：123456789" />
 
     <p>🏠 请填写完整地址：</p>
-
 
     <!-- 第一行：国家、省、市、邮编 -->
     <div class="address-row">
@@ -324,11 +323,11 @@
     <!-- 第二行：街道名、门牌号、单元号 -->
     <div class="address-row">
       <input type="text" id="street" placeholder="街道名，如：中山路" />
-      <input type="text" id="house-number" placeholder="门牌号，如：7803" onblur="formatHouseNumber(this)" />
-      <input type="text" id="unit-number" placeholder="单元号，如：302" onblur="formatUnitNumber(this)" />
+      <input type="text" id="house-number" placeholder="门牌号，如：123" onblur="formatHouseNumber(this)" />
+      <input type="text" id="unit-number" placeholder="单元号，如：A栋B座C" onblur="formatUnitNumber(this)" />
     </div>
 
-   <p> 📧 请输入电子邮箱：</p>
+    <p>📧 请输入电子邮箱：</p>
     <input type="email" id="email" placeholder="example@email.com" />
 
     <!-- 错误提示 -->
@@ -359,10 +358,9 @@
   <div style="margin: 5px 0;"><strong>邮箱地址:</strong> <span id="print-email"></span></div>
   <div style="margin: 5px 0;"><strong>结账时间:</strong> <span id="print-time">--</span></div>
   <hr>
-  
-  <span class="animated-emoji"> <div style="text-align:center; font-weight:bold;">  🤗 感谢光临刘老师的空中模拟商城！</div></span> 
+  <div style="text-align:center; font-weight:bold;"> 🤗感谢光临刘老师的空中商城！</div>
 <!DOCTYPE html>
-  
+   <span class="animated-emoji">🛍🤗</span> 感谢光临刘老师的空中商城！ <span class="animated-emoji">🛍</span>
   <br>
   <!-- 唯一的打印按钮 -->
   <button class="print-button" onclick="window.print()" style="display: block; margin: auto; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">
