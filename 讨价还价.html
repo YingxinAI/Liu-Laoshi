@@ -247,7 +247,7 @@
     if (step === 0) {
       // 提取名字并打招呼
       customerName = extractName(userText);
-      appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
+      appendMessage(`🤖：你好${customerName}！你有什么问题？`, 'bot');
       step++;
     } else if (step === 1) {
       if (userText.includes("问题") || userText.includes("帮助")) {
@@ -311,6 +311,7 @@
       text.includes("再见") ||
       text.includes("谢谢") ||
       text.includes("成交") ||
+       text.includes("欢迎再来") ||
       text.includes("可以") ||
       text.includes("走") ||
       text.includes("拜拜")
