@@ -59,6 +59,7 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
+      background-color: #FBE4D7; /* 和衣服图片背景一致 */
     }
 
     .product-container img {
@@ -169,7 +170,7 @@
 <div class="header-container">
   <h1 class="main-title">
     <span class="emoji-swing">👋</span>
-    你好！让我们一起跟刘老师的AI聊天机器人🤖讨价还价吧！🤑
+    欢迎同刘老师的聊天机器人讨价还价 🤑
   </h1>
   <span id="chatDate" class="chat-date"></span>
 </div>
@@ -177,7 +178,7 @@
 <script>
   const now = new Date();
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  document.getElementById('chatDate').textContent = '📅今天是：' + dateStr;
+  document.getElementById('chatDate').textContent = '📅 当前对话日期：' + dateStr;
 </script>
 
 <!-- 衣服图片区域 -->
@@ -233,7 +234,7 @@
   }
 
   function isEndStatement(text) {
-    const endings = ["再见", "谢谢", "可以","成交", "拜拜"];
+    const endings = ["再见", "谢谢", "成交", "拜拜"];
     return endings.some(end => text.includes(end));
   }
 
@@ -248,7 +249,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是AI机器人小助手，请问，你叫什么名字？～", 'bot');
+    appendMessage("🤖：您好！我是机器人AI小助手，请问你叫什么名字？有什么问题可以问我哦～", 'bot');
   }
 
   function sendMessage() {
@@ -260,7 +261,7 @@
 
     // 自动结束语句判断
     if (isEndStatement(userText)) {
-      appendMessage("🤖：欢迎下次再来！", 'bot');
+      appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
       showPrintButton();
       userInput.value = '';
       return;
@@ -269,21 +270,21 @@
     // 开始对话流程
     if (step === 0) {
       customerName = extractName(userText);
-      appendMessage(`🤖：你好${customerName}！你有什么问题？我可以帮你。`, 'bot');
+      appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
       step++;
     } else if (step === 1) {
       if (userText.includes("多少钱") || userText.includes("多少")) {
         appendMessage("🤖：这件衣服500块钱", 'bot');
         step++;
       } else {
-        appendMessage("🤖：您可以 讨价还价哦～", 'bot');
+        appendMessage("🤖：您可以问我价格、讲价或优惠哦～", 'bot');
       }
     } else if (step === 2) {
       if (userText.includes("贵") || userText.includes("便宜")) {
         appendMessage("🤖：可以，450块，怎么样？", 'bot');
         step++;
       } else {
-        appendMessage("🤖：你想买吗？可以讨价还价哦～", 'bot');
+        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
       }
     } else if (step === 3) {
       if (userText.includes("450") && userText.includes("贵")) {
@@ -297,54 +298,54 @@
           step++;
         } else if (userPrice > 200 && userPrice < 450) {
           appendMessage(`🤖：我可以卖给你${userPrice}块`, 'bot');
-          appendMessage("🤖：欢迎下次再来！", 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else if (userPrice >= 450) {
-          appendMessage("🤖：谢谢惠顾！", 'bot');
+          appendMessage("🤖：谢谢光临！", 'bot');
           step++;
         }
       } else {
-        appendMessage("🤖：你说多少钱？😊", 'bot');
+        appendMessage("🤖：你说个价吧，我们可以商量 😊", 'bot');
       }
     } else if (step === 4) {
       if (userText.includes("300") && userText.includes("贵")) {
-        appendMessage("🤖：200块，好吗？", 'bot');
+        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
         step++;
       } else if (userText.includes("不要") || userText.includes("走")) {
-        appendMessage("🤖：200块，好吗？", 'bot');
+        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
         step++;
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
         if (userPrice >= 200) {
           appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
-          appendMessage("🤖：欢迎下次再来！", 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else {
-          appendMessage("🤖：200块，好吗？", 'bot');
+          appendMessage("🤖：我只能接受200块，好吗？", 'bot');
         }
       } else {
-        appendMessage("🤖：200块，可以吗？", 'bot');
+        appendMessage("🤖：你说个价吧，我们可以商量 😊", 'bot');
       }
     } else if (step === 5) {
       if (userText.includes("好") || userText.includes("可以")) {
         appendMessage("🤖：好的，成交！", 'bot');
-        appendMessage("🤖：欢迎下次再来！", 'bot');
+        appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
         showPrintButton();
         step++;
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
         if (userPrice >= 200) {
           appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
-          appendMessage("🤖：欢迎下次再来！", 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else {
-          appendMessage("🤖：200块，好吗？", 'bot');
+          appendMessage("🤖：那就200块吧，可以吗？", 'bot');
         }
       } else {
-        appendMessage("🤖：200块吧，", 'bot');
+        appendMessage("🤖：那就按200块来吧，可以吗？", 'bot');
       }
     } else {
       appendMessage("🤖：感谢光临，我们下次见！", 'bot');
