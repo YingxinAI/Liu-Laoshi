@@ -195,7 +195,7 @@
 <script>
   const now = new Date();
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  document.getElementById('chatDate').textContent = '📅 当前对话日期：' + dateStr;
+  document.getElementById('chatDate').textContent = '📅 今天是：' + dateStr;
 </script>
 
 <!-- 衣服图片区域 -->
@@ -239,7 +239,7 @@
   }
 
   function extractName(input) {
-    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    const prefixes = ['我叫', '你好', '我是', '我的名字是', '名字是', '叫我'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length).trim();
