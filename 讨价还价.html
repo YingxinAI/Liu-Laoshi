@@ -298,7 +298,7 @@
           step++;
         } else if (userPrice > 200 && userPrice < 450) {
           appendMessage(`🤖：我可以卖给你${userPrice}块`, 'bot');
-          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          appendMessage("🤖：欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else if (userPrice >= 450) {
@@ -319,7 +319,7 @@
         userPrice = getPrice(userText);
         if (userPrice >= 200) {
           appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
-          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          appendMessage("🤖：欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else {
@@ -331,14 +331,14 @@
     } else if (step === 5) {
       if (userText.includes("好") || userText.includes("可以")) {
         appendMessage("🤖：好的，成交！", 'bot');
-        appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+        appendMessage("🤖：欢迎下次再来！", 'bot');
         showPrintButton();
         step++;
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
         if (userPrice >= 200) {
           appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
-          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          appendMessage("🤖：欢迎下次再来！", 'bot');
           showPrintButton();
           step++;
         } else {
