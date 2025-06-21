@@ -209,7 +209,7 @@
   <div id="chat"></div>
   <button id="startBtn" onclick="startChat()">
     <span class="emoji-swing">🤔</span>
-    有问题我问
+    有问题问我
   </button>
   <div id="inputArea" style="display:none;">
     <input type="text" id="userInputField" placeholder="输入你的中文..."
@@ -267,7 +267,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是聊天机器人，你叫什么名字？你可以问我问题哦～", 'bot');
+    appendMessage("🤖：您好！我是聊天机器人，你叫什么名字？我可以帮你您", 'bot');
   }
 
   function sendMessage() {
