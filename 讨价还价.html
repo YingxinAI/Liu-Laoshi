@@ -259,7 +259,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是刘老师的助手，有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我是AI助手，你叫什么名字？～", 'bot');
   }
 
   function sendMessage() {
@@ -280,21 +280,21 @@
     // 开始对话流程
     if (step === 0) {
       customerName = extractName(userText);
-      appendMessage(`🤖：你好${customerName}！有什么问题可以问吗？`, 'bot');
+      appendMessage(`🤖：你好${customerName}！有什么问题吗？`, 'bot');
       step++;
     } else if (step === 1) {
       if (userText.includes("多少钱") || userText.includes("多少")) {
         appendMessage("🤖：这件衣服500块钱", 'bot');
         step++;
       } else {
-        appendMessage("🤖：您可以问我价格、讲价或优惠哦～", 'bot');
+        appendMessage("🤖：你可以讨价还价哦～", 'bot');
       }
     } else if (step === 2) {
       if (userText.includes("贵") || userText.includes("便宜")) {
         appendMessage("🤖：可以，450块，怎么样？", 'bot');
         step++;
       } else {
-        appendMessage("🤖：你想买吗？可以试试砍价哦～", 'bot');
+        appendMessage("🤖：你想买吗？可以讨价还价哦～", 'bot');
       }
     } else if (step === 3) {
       if (userText.includes("450") && userText.includes("贵")) {
@@ -308,21 +308,21 @@
           showPrintButton();
           step++;
         } else if (userPrice <= 200) {
-          appendMessage(`🤖：${userPrice} 不可以，太便宜了。我可以给你300块，怎么样？`, 'bot');
+          appendMessage(`🤖：${userPrice} 不可以，太便宜了。300块，怎么样？`, 'bot');
           step++;
         } else if (userPrice >= 450) {
           appendMessage("🤖：谢谢惠顾！", 'bot');
           step++;
         }
       } else {
-        appendMessage("🤖：你觉得多少钱合适呢？", 'bot');
+        appendMessage("🤖：你说多少钱？", 'bot');
       }
     } else if (step === 4) {
       if (userText.includes("300") && userText.includes("贵")) {
-        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        appendMessage("🤖：200块，好吗？", 'bot');
         step++;
       } else if (userText.includes("不要") || userText.includes("走")) {
-        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        appendMessage("🤖：200块，好吗？", 'bot');
         step++;
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
@@ -332,10 +332,10 @@
           showPrintButton();
           step++;
         } else {
-          appendMessage("🤖：我只能接受200块，好吗？", 'bot');
+          appendMessage("🤖：200块，好吗？", 'bot');
         }
       } else {
-        appendMessage("🤖：你说个价吧，我们可以商量 😊", 'bot');
+        appendMessage("🤖：你说多少钱？，我们可以讨价还价 😊", 'bot');
       }
     } else if (step === 5) {
       if (userText.includes("好") || userText.includes("可以")) {
@@ -351,13 +351,13 @@
           showPrintButton();
           step++;
         } else {
-          appendMessage("🤖：我只能接受200块，好吗？", 'bot');
+          appendMessage("🤖：200块，好吗？", 'bot');
         }
       } else {
-        appendMessage("🤖：那就按200块来吧，可以吗？", 'bot');
+        appendMessage("🤖：200块，可以吗？", 'bot');
       }
     } else {
-      appendMessage("🤖：感谢光临，我们下次见！", 'bot');
+      appendMessage("🤖：谢谢！，下次再见！", 'bot');
       showPrintButton();
     }
 
