@@ -10,8 +10,9 @@
       margin: 0;
       padding: 20px;
       display: flex;
-      flex-wrap: wrap; /* 支持响应式换行 */
-      gap: 20px;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
     }
 
     .header-container {
@@ -37,9 +38,7 @@
 
     @keyframes swing {
       0% { transform: rotate(0deg); }
-      25% { transform: rotate(15deg); }
-      50% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
+      50% { transform: rotate(15deg); }
       100% { transform: rotate(0deg); }
     }
 
@@ -50,24 +49,23 @@
       display: block;
     }
 
-    /* 固定衣服展示区域尺寸 */
     .product-container {
-      width: 300px;           /* 固定宽度 */
-      height: 400px;          /* 固定高度 */
+      width: 300px;
+      height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      background-color: #fff;
+      background-color: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      flex-shrink: 0;         /* 禁止压缩 */
-      overflow: hidden;
+      flex-shrink: 0;
     }
 
     .product-container img {
       max-width: 90%;
-      height: auto;
+      max-height: 80%;
+      object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
@@ -75,7 +73,7 @@
     .chat-container {
       flex: 1;
       min-width: 300px;
-      max-width: 600px;
+      max-width: 500px;
       display: flex;
       flex-direction: column;
     }
@@ -225,7 +223,7 @@
   }
 
   function extractName(input) {
-    const prefixes = ['我叫', '我是', '我的名字是', '名字是', '叫我'];
+    const prefixes = ['我叫', '我是', '你好','我的名字是', '名字是', '叫我'];
     for (let prefix of prefixes) {
       if (input.startsWith(prefix)) {
         input = input.slice(prefix.length).trim();
@@ -253,7 +251,7 @@
   function startChat() {
     startBtn.style.display = 'none';
     inputArea.style.display = 'flex';
-    appendMessage("🤖：您好！我是AI机器人小助手，请问你叫什么名字？有什么问题可以问我哦～", 'bot');
+    appendMessage("🤖：您好！我是AI机器人小助手，请问你叫什么名字？有问题可以问我哦～", 'bot');
   }
 
   function sendMessage() {
@@ -281,7 +279,7 @@
         appendMessage("🤖：这件衣服500块钱", 'bot');
         step++;
       } else {
-        appendMessage("🤖：您可以问我价格、讲价或优惠哦～", 'bot');
+        appendMessage("🤖：您可以问我多少钱、可以讨价还价哦～", 'bot');
       }
     } else if (step === 2) {
       if (userText.includes("贵") || userText.includes("便宜")) {
@@ -297,27 +295,49 @@
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
 
-        if (userPrice <= 200) {
-          appendMessage(`🤖：${userPrice} 不可以，太便宜了。我可以给你300块，怎么样？`, 'bot');
-          step++;
-        } else if (userPrice > 200 && userPrice < 450) {
+        if (userPrice > 200 && userPrice < 450) {
           appendMessage(`🤖：我可以卖给你${userPrice}块`, 'bot');
           appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
           showPrintButton();
+          step++;
+        } else if (userPrice <= 200) {
+          appendMessage(`🤖：${userPrice} 不可以，太便宜了。我可以给你300块，怎么样？`, 'bot');
           step++;
         } else if (userPrice >= 450) {
           appendMessage("🤖：谢谢光临！", 'bot');
           step++;
         }
       } else {
-        appendMessage("🤖：你说个价吧，我们可以商量 😊", 'bot');
+        appendMessage("🤖：你觉得多少钱合适呢？", 'bot');
       }
     } else if (step === 4) {
       if (userText.includes("300") && userText.includes("贵")) {
-        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        appendMessage("🤖：那我最低200块，好吗？", 'bot');
         step++;
       } else if (userText.includes("不要") || userText.includes("走")) {
-        appendMessage("🤖：那我最低卖200块，好吗？", 'bot');
+        appendMessage("🤖：那我最低200块，好吗？", 'bot');
+        step++;
+      } else if (isPrice(userText)) {
+        userPrice = getPrice(userText);
+        if (userPrice >= 200) {
+          appendMessage(`🤖：好的，${userPrice}块成交！`, 'bot');
+          appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
+          showPrintButton();
+          step++;
+        } else {
+          appendMessage("🤖：那就200块来吧，可以吗？", 'bot');
+        }
+      } else {
+        appendMessage("🤖：你说多少钱吧，我们可以商量 😊", 'bot');
+      }
+    } else if (step === 5) {
+      if (userText.includes("好") || userText.includes("可以")) {
+        appendMessage("🤖：好的，成交！", 'bot');
+        appendMessage("🤖：欢迎下次再来！", 'bot');
+        showPrintButton();
+        step++;
+      } else if (userText.includes("不") || userText.includes("不可以")) {
+        appendMessage("🤖：那我最低200块，好吗？", 'bot');
         step++;
       } else if (isPrice(userText)) {
         userPrice = getPrice(userText);
@@ -332,7 +352,7 @@
       } else {
         appendMessage("🤖：你说多少钱，我们可以讨价还价 😊", 'bot');
       }
-    } else if (step === 5) {
+    } else if (step === 6) {
       if (userText.includes("好") || userText.includes("可以")) {
         appendMessage("🤖：好的，成交！", 'bot');
         appendMessage("🤖：不客气，欢迎下次再来！", 'bot');
