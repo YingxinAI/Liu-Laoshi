@@ -273,7 +273,7 @@
     // 开始对话流程
     if (step === 0) {
       customerName = extractName(userText);
-      appendMessage(`🤖：你好${customerName}！你有什么问题？`, 'bot');
+      appendMessage(`🤖：你好${customerName}！请问，你有什么问题？`, 'bot');
       step++;
     } else if (step === 1) {
       if (userText.includes("多少钱") || userText.includes("多少")) {
