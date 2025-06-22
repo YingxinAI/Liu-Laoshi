@@ -283,20 +283,46 @@
     };
 
     // 获取农历或节日信息
-    function getLunarAndFestival(date) {
+    function getLunarOrFestival(date) {
       const y = date.getFullYear();
       const m = ('0' + (date.getMonth() + 1)).slice(-2);
       const d = ('0' + date.getDate()).slice(-2);
       const key = `${y}-${m}-${d}`;
 
       if (lunarData[key]) {
-        return { label: "🎉 节日：", value: lunarData[key] };
+        return { label: "🎉 节日：", value: lunarData[key], greeting: "粽叶飘香，端午安康" };
       }
 
-      const lunarKey = `${y}-${date.getMonth()+1}-${date.getDate()}`;
-      const lunarStr = lunarCalendar[lunarKey] || `五月 廿五日`;
-      return { label: "📅 农历：", value: `${y}年${lunarStr}` };
+      const diffDays = Math.floor((date - newMoonBase) / (1000 * 60 * 60 * 24));
+      const lunarMonthLength = 29.5305882;
+      const lunarDay = ((diffDays % lunarMonthLength) + lunarMonthLength) % lunarMonthLength;
+
+      let lunarMonthIndex = Math.floor(diffDays / lunarMonthLength) % 12;
+      if (lunarMonthIndex < 0) lunarMonthIndex += 12;
+
+      let lunarDayStr = "";
+      const lunarDayInt = Math.round(lunarDay);
+      if (lunarDayInt === 0 || lunarDayInt >= 29) {
+        lunarDayStr = "初一";
+        lunarMonthIndex++;
+      } else if (lunarDayInt < 10) {
+        lunarDayStr = `初${lunarDayInt}`;
+      } else if (lunarDayInt < 20) {
+        lunarDayStr = `十${lunarDayInt % 10 === 0 ? "" : lunarDayInt % 10}`;
+      } else if (lunarDayInt < 30) {
+        lunarDayStr = `廿${lunarDayInt % 10 === 0 ? "" : lunarDayInt % 10}`;
+      } else {
+        lunarDayStr = "三十";
+      }
+const lunarMonthName = chineseMonths[lunarMonthIndex] || "五月";
+
+      return {
+        label: "📅 农历：",
+        value: `${y}年${lunarMonthName}${lunarDayStr}`,
+        greeting: "仲夏时节，宜避暑养心"
+      };
     }
+
 
     // 更新今日天气卡片
     function updateTodayCard(idPrefix, data) {
