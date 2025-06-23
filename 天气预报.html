@@ -9,30 +9,43 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: "KaiTi", "SimKai", "楷体", serif; /* 全局使用楷体 */
     }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f2f2f2;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: start;
       flex-direction: column;
       padding: 30px;
+      color: black;
     }
+
     .page {
       width: 100%;
       max-width: 1000px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 30px;
-      margin-bottom: 40px;
+      margin: 0 auto;
+      display: none;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
     }
-    .hidden {
-      display: none !important;
+
+    .page.active {
+      display: flex;
     }
+
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      margin-top: 20px;
+    }
+
     .weather-card {
       background-color: #d0ecff;
       border-radius: 15px;
@@ -45,40 +58,45 @@
       overflow: hidden;
       transition: transform 0.3s ease;
     }
+
     .city {
       font-size: 2em;
       margin-bottom: 8px;
       font-weight: bold;
     }
+
     .emoji {
       font-size: 3.5em;
       margin-bottom: 5px;
       animation: float 3s infinite ease-in-out;
       display: inline-block;
     }
+
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
       100% { transform: translateY(0px); }
     }
-    /* 风车动画 */
+
     .wind-wheel-icon {
       font-size: 2.5em;
       display: inline-block;
       animation: windRotate 4s linear infinite;
       vertical-align: middle;
     }
+
     @keyframes windRotate {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
     .info {
       font-size: 1.3em;
-      color: black;
       line-height: 1.2;
       white-space: pre-line;
       margin-top: 10px;
     }
+
     .season-tag {
       display: inline-block;
       margin-top: 10px;
@@ -88,15 +106,23 @@
       font-weight: bold;
       color: white;
     }
+
     .summer { background-color: #FF9F0A; } /* 夏季 🟠 */
     .spring { background-color: #34C759; } /* 春季 🟢 */
     .autumn { background-color: #FFD60A; } /* 秋季 🟡 */
     .winter { background-color: #50C8FF; } /* 冬季 🔵 */
-    .moon {
-      font-size: 2.5em;
+
+    .moon-phase-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
       margin-top: 10px;
-      display: block;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: black;
     }
+
     .nav-button {
       padding: 15px 30px;
       font-size: 1.2em;
@@ -106,18 +132,22 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      margin: 10px;
+      margin: 20px auto;
+      display: block;
       transition: background 0.3s;
     }
+
     .nav-button:hover {
       background: #005ECF;
     }
+
     h1 {
       width: 100%;
       text-align: center;
       font-size: 1.8em;
       margin-bottom: 20px;
     }
+
     @media (max-width: 768px) {
       .weather-card {
         width: 90%;
@@ -128,8 +158,8 @@
       .info {
         font-size: 1.15em;
       }
-      .moon {
-        font-size: 2.2em;
+      .moon-phase-container {
+        font-size: 1em;
       }
       .wind-wheel-icon {
         font-size: 2em;
@@ -139,47 +169,59 @@
 </head>
 <body>
 
-  <!-- 第一页：今天天气 -->
-  <div id="todayPage" class="page">
-    <h1>天气预报</h1>
-    <!-- 左边：丹佛 -->
-    <div class="weather-card">
-      <div class="city">📍 丹佛</div>
-      <div class="emoji sun">☀️</div>
-      <div class="info" id="denverToday"></div>
-      <div class="moon" id="denverMoonToday">🌕</div>
+  <!-- 第一页：今天 -->
+  <section id="todayPage" class="page active">
+    <h1>天气预报 - 今天</h1>
+
+    <div class="card-container">
+
+      <!-- 左边：丹佛 -->
+      <div class="weather-card">
+        <div class="city">📍 丹佛</div>
+        <div class="emoji sun">☀️</div>
+        <div class="info" id="denverToday"></div>
+        <div class="moon-phase-container" id="denverMoonToday">🌕 满月</div>
+      </div>
+
+      <!-- 右边：北京 -->
+      <div class="weather-card">
+        <div class="city">📍 北京</div>
+        <div class="emoji rain">🌧️</div>
+        <div class="info" id="beijingToday"></div>
+        <div class="moon-phase-container" id="beijingMoonToday">🌕 满月</div>
+      </div>
+
     </div>
-    <!-- 右边：北京 -->
-    <div class="weather-card">
-      <div class="city">📍 北京</div>
-      <div class="emoji rain">🌧️</div>
-      <div class="info" id="beijingToday"></div>
-      <div class="moon" id="beijingMoonToday">🌕</div>
-    </div>
+
     <!-- 导航按钮 -->
     <button class="nav-button" onclick="showTomorrow()">明天天气 ➡️</button>
-  </div>
+  </section>
 
-  <!-- 第二页：明天天气 -->
-  <div id="tomorrowPage" class="page hidden">
-    <h1>明天天气预报</h1>
-    <!-- 左边：丹佛 -->
-    <div class="weather-card">
-      <div class="city">📍 丹佛</div>
-      <div class="emoji cloud">🌤️</div>
-      <div class="info" id="denverTomorrow"></div>
-      <div class="moon" id="denverMoonTomorrow">🌖</div>
-    </div>
-    <!-- 右边：北京 -->
+  <!-- 第二页：明天 -->
+  <section id="tomorrowPage" class="page hidden">
+    <h1>天气预报 - 明天</h1>
+
+    <div class="card-container">
+
+      <!-- 左边：丹佛 -->
+      <div class="weather-card">
+        <div class="city">📍 丹佛</div>
+        <div class="emoji cloud">🌤️</div>
+        <div class="info" id="denverTomorrow"></div>
+        <div class="moon-phase-container" id="denverMoonTomorrow">🌖 下弦月</div>
+      </div>
+
+     <!-- 右边：北京 -->
     <div class="weather-card">
       <div class="city">📍 北京</div>
       <div class="emoji cloud">🌤️</div>
       <div class="info" id="beijingTomorrow"></div>
       <div class="moon" id="beijingMoonTomorrow">🌕</div>
     </div>
+
     <!-- 返回按钮 -->
     <button class="nav-button" onclick="showToday()">⬅️ 返回天气预报</button>
-  </div>
+  </section>
 
   <script>
     // 获取格式化日期
@@ -196,10 +238,11 @@
     }
 
     // 获取本地时间（带时区偏移）
-    function getFormattedTime(timeZoneOffset) {
+    function getLocalTime(timeZoneOffset) {
       var now = new Date();
       var utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
       var localTime = new Date(utcTime + timeZoneOffset * 3600000);
+
       var hours = ('0' + localTime.getHours()).slice(-2);
       var minutes = ('0' + localTime.getMinutes()).slice(-2);
       return `${hours}:${minutes}`;
@@ -257,82 +300,122 @@
       const key = `${y}-${m}-${d}`;
 
       if (lunarData[key]) {
-        return { label: "🎉 节日：", value: lunarData[key] };
+        return { label: "🎉 节日：", value: lunarData[key], greeting: "粽叶飘香，端午安康" };
       }
 
       const lunarKey = `${y}-${date.getMonth()+1}-${date.getDate()}`;
-      const lunarStr = lunarCalendar[lunarKey] || "五月 廿五日";
-      return { label: "📅 农历：", value: `${y}年${lunarStr}` };
+      const lunarStr = lunarCalendar[lunarKey] || calculateDynamicLunar(date);
+      return { label: "📅 农历：", value: `${y}年${lunarStr}`, greeting: "" };
     }
 
-    // 获取月相图标
-    function getMoonPhase(date) {
+    // 动态计算农历（模拟）
+    function calculateDynamicLunar(date) {
+      const base = new Date('2025-05-27');
+      const diffDays = Math.floor((date - base) / (1000 * 60 * 60 * 24));
+      const chineseMonths = [
+        "正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
+        "九月", "十月", "冬月", "腊月"
+      ];
+      const monthIndex = Math.floor(diffDays / 30) % 12;
+      const lunarMonthName = chineseMonths[monthIndex];
+
+      const lunarDay = ((diffDays % 29.5305882) + 29.5305882) % 29.5305882;
+
+      if (lunarDay <= 10) {
+        return `${lunarMonthName} 初${Math.round(lunarDay)}`;
+      } else if (lunarDay <= 20) {
+        return `${lunarMonthName} 十${Math.round(lunarDay) % 10 === 0 ? "" : Math.round(lunarDay) % 10}`;
+      } else if (lunarDay <= 30) {
+        return `${lunarMonthName} 廿${Math.round(lunarDay) % 10 === 0 ? "" : Math.round(lunarDay) % 10}`;
+      } else {
+        return `${chineseMonths[(monthIndex + 1) % 12]} 初一`;
+      }
+    }
+
+    // 获取月相图标 + 名称
+    function getMoonPhaseWithLabel(date) {
       const newMoonBase = new Date('2025-05-27'); // 上一次新月时间
       const lunarMonth = 29.5305882;
 
       let diffDays = Math.floor((date - newMoonBase) / (1000 * 60 * 60 * 24));
       let phaseIndex = ((diffDays % lunarMonth + lunarMonth) % lunarMonth) / lunarMonth;
 
-      if (phaseIndex < 0.03 || phaseIndex > 0.97) return "🌑"; // 新月
-      else if (phaseIndex < 0.25) return "🌒"; // 峨眉月
-      else if (phaseIndex < 0.47) return "🌓"; // 上弦月
-      else if (phaseIndex < 0.53) return "🌕"; // 满月
-      else if (phaseIndex < 0.75) return "🌖"; // 下弦月
-      else if (phaseIndex < 0.97) return "🌘"; // 残月
-      else return "🌗"; // 残月
+      if (phaseIndex < 0.03 || phaseIndex > 0.97) return { icon: "🌑", name: "新月" };
+      else if (phaseIndex < 0.25) return { icon: "🌒", name: "峨眉月" };
+      else if (phaseIndex < 0.47) return { icon: "🌓", name: "上弦月" };
+      else if (phaseIndex < 0.53) return { icon: "🌕", name: "满月" };
+      else if (phaseIndex < 0.75) return { icon: "🌖", name: "下弦月" };
+      else if (phaseIndex < 0.97) return { icon: "🌘", name: "残月" };
+      else return { icon: "🌗", name: "残月" };
     }
 
-    // 更新今日卡片
+    // 更新今日卡片（带时区）
     function updateTodayCard(idPrefix, data) {
       const infoEl = document.getElementById(idPrefix + "Today");
-      const moonEl = document.getElementById(idPrefix + "MoonToday");
+      const moonContainer = document.getElementById(idPrefix + "MoonToday");
 
       const today = new Date();
       const todayStr = getFormattedDate(today, true);
-      const timeStr = getFormattedTime(data.timeZoneOffset);
+      const timeStr = getLocalTime(data.timeZoneOffset);
       const month = today.getMonth(); // 当前月份
       const season = getSeason(month);
       const emoji = getSeasonEmoji(season);
       const seasonClass = getSeasonClass(month);
-      const { label: lunarLabel, value: lunarInfo } = getLunarAndFestival(today);
+      const { label: lunarLabel, value: lunarInfo, greeting } = getLunarAndFestival(today);
+      const moon = getMoonPhaseWithLabel(today);
+
+      let extraGreeting = "";
+      if (greeting && lunarLabel === "🎉 节日：") {
+        extraGreeting = `<br><span style="color:#e67e22; font-size:1.2em; font-weight:bold;">${greeting}</span>`;
+      }
 
       infoEl.innerHTML = `
         📌 公历：${todayStr}<br/>
         ${lunarLabel}${lunarInfo}<br/>
+        ${extraGreeting}
         🕒 时间：${timeStr}<br/>
         ☁️ 天气：${data.todayCondition}<br/>
         🌡️ 气温：${data.todayTemp}<br/>
         <span><span class="wind-wheel-icon">🌀</span> 风力：${data.todayWind}</span><br/>
         <span class="season-tag ${seasonClass}">${emoji} 季节：${season}</span>
       `;
-      moonEl.textContent = getMoonPhase(today);
+
+      moonContainer.innerHTML = `${moon.icon} ${moon.name}`;
     }
 
-    // 更新明日卡片
+    // 更新明日卡片（带时区）
     function updateTomorrowCard(idPrefix, data) {
       const infoEl = document.getElementById(idPrefix + "Tomorrow");
-      const moonEl = document.getElementById(idPrefix + "MoonTomorrow");
+      const moonContainer = document.getElementById(idPrefix + "MoonTomorrow");
 
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = getFormattedDate(tomorrow);
-      const timeStr = getFormattedTime(data.timeZoneOffset);
+      const timeStr = getLocalTime(data.timeZoneOffset);
       const month = tomorrow.getMonth(); // 明天的月份
       const season = getSeason(month);
       const emoji = getSeasonEmoji(season);
       const seasonClass = getSeasonClass(month);
-      const { label: lunarLabel, value: lunarInfo } = getLunarAndFestival(tomorrow);
+      const { label: lunarLabel, value: lunarInfo, greeting } = getLunarAndFestival(tomorrow);
+      const moon = getMoonPhaseWithLabel(tomorrow);
+
+      let extraGreeting = "";
+      if (greeting && lunarLabel === "🎉 节日：") {
+        extraGreeting = `<br><span style="color:#e67e22; font-size:1.2em; font-weight:bold;">${greeting}</span>`;
+      }
 
       infoEl.innerHTML = `
         📌 公历：${tomorrowStr}<br/>
         ${lunarLabel}${lunarInfo}<br/>
+        ${extraGreeting}
         🕒 时间：${timeStr}<br/>
         ☁️ 天气：${data.tomorrowCondition}<br/>
         🌡️ 水平：${data.tomorrowTemp}<br/>
         <span><span class="wind-wheel-icon">🌀</span> 风力：${data.tomorrowWind}</span><br/>
         <span class="season-tag ${seasonClass}">${emoji} 季节：${season}</span>
       `;
-      moonEl.textContent = getMoonPhase(tomorrow);
+
+      moonContainer.innerHTML = `${moon.icon} ${moon.name}`;
     }
 
     // 静态天气数据（包含今天、明天）
@@ -357,6 +440,29 @@
       }
     };
 
+    // 页面切换函数
+    function showToday() {
+      // 清除所有页面的 active 类
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+      // 设置今天页面为 active，隐藏明天页面
+      document.getElementById('todayPage').classList.add('active');
+      document.getElementById('todayPage').classList.remove('hidden');
+
+      document.getElementById('tomorrowPage').classList.add('hidden');
+    }
+
+    function showTomorrow() {
+      // 清除所有页面的 active 类
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+      // 设置明天页面为 active，隐藏今天页面
+      document.getElementById('tomorrowPage').classList.add('active');
+      document.getElementById('tomorrowPage').classList.remove('hidden');
+
+      document.getElementById('todayPage').classList.add('hidden');
+    }
+
     // 页面加载后更新时间和月相
     window.onload = function () {
       updateTodayCard('denver', weatherData.denver);
@@ -364,17 +470,6 @@
       updateTomorrowCard('denver', weatherData.denver);
       updateTomorrowCard('beijing', weatherData.beijing);
     };
-
-    // 页面切换函数
-    function showToday() {
-      document.getElementById('todayPage').classList.remove('hidden');
-      document.getElementById('tomorrowPage').classList.add('hidden');
-    }
-
-    function showTomorrow() {
-      document.getElementById('todayPage').classList.add('hidden');
-      document.getElementById('tomorrowPage').classList.remove('hidden');
-    }
   </script>
 </body>
 </html>
