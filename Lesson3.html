@@ -1803,7 +1803,7 @@
                     structure: "Noun/Pronoun + 和 (hé) + Noun/Pronoun",
                     examples: [
                         "我 <span class='subject'>和</span> <span class='object'>我的同学</span> 是中国人。 (Wǒ hé wǒ de tóngxué shì Zhōngguó rén. - My classmate and I are Chinese.)",
-                        "他们是李文中 <span class='subject'>和</span> <span class='object'>吴小美</span>。 (Tāmen shì Lǐ Wénzhōng hé Uú Xiǎoměi. - They are Wenzhong Li and Xiaomei Wu.)"
+                        "他们是李文中 <span class='subject'>和</span> <span class='object'>吴小美</span>。 (Tāmen shì Lǐ Wénzhōng hé Uú Xiǎoměi. - They are Wenzhong Li and Xiaomei Wu.))"
                     ]
                 }
             ],
@@ -4003,7 +4003,7 @@
                     if (!currentTurnDiv) return;
 
                     const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    const listeningStatus = listeningStatus; // Use the already defined listeningStatus, or query again
+                    const listeningStatus = startVoiceInputButton.querySelector('.listening-status'); // Corrected: re-query listeningStatus if needed
                     if (listeningStatus) listeningStatus.textContent = ''; // Clear status
                     startVoiceInputButton.classList.remove('listening'); // Remove listening class
                     // Button re-enabled in checkVoiceAnswer or onerror
