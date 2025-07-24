@@ -1046,8 +1046,8 @@
         .typing-finish-buttons-group button {
             padding: 10px 20px;
             font-size: 18px;
-            border-radius: 5px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
             transition: background 0.3s ease, transform 0.2s;
             color: white;
@@ -1160,7 +1160,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s;
             color: white;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -1377,7 +1377,7 @@
                     <p>小爱: 你是哪国人？ (Nǐ shì nǎ guó rén? - Where are you from?)</p>
                     <p>学生: 我是美国人。 (Wǒ shì Měiguó rén. - I am American.)</p>
                     <p>小爱: 你会说什么语言？ (Nǐ huì shuō shénme yǔyán? - What language can you speak?)</p>
-                    <p>学生: 我会说英语，也会说一点儿中文。 (Wǒ huì shuō Yīngyǔ, wǒ yě huì shuō yīdiǎner Zhōngwén. - I can speak English, and also a little Chinese.)</p>
+                    <p>学生: 我会说英语，也会说一点儿中文。 (Wǒ huì shuō Yīngyǔ, wǒ yě huì 说 yīdiǎner Zhōngwén. - I can speak English, and also a little Chinese.)</p>
                 </div>
 
                 <div class="task-instructions">
@@ -1525,8 +1525,12 @@
         // Utility Functions
         function speak(text, lang = 'zh-CN', rate = 1.0) {
             if ('speechSynthesis' in window) {
-                // speechSynthesis.cancel(); // Removed this line to allow queuing of speech
-                const utterance = new SpeechSynthesisUtterance(text);
+                // Ensure text is plain text, remove any HTML tags if present
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text;
+                const plainText = tempDiv.textContent || text;
+
+                const utterance = new SpeechSynthesisUtterance(plainText);
                 utterance.lang = lang;
                 utterance.rate = rate;
                 speechSynthesis.speak(utterance);
@@ -1685,15 +1689,15 @@
                 { hanzi: "国", pinyin: "guó", partOfSpeech: "N.", english: "country", example: "你是什么国家人？ (Nǐ shì shénme guójiā rén? - What country are you from?)" },
                 { hanzi: "人", pinyin: "rén", partOfSpeech: "N.", english: "person, people", example: "他是中国人。 (Tā shì Zhōngguó rén. - He is Chinese.)" },
                 { hanzi: "很", pinyin: "hěn", partOfSpeech: "Adv.", english: "very, quite", example: "他很好。 (Tā hěn hǎo. - He hěn good.)" },
-                { hanzi: "对了", pinyin: "duìle", partOfSpeech: "Adj.", english: "by the way (a phrase used to start a new topic)", example: "对了，你会说中文吗？ (Duìle, nǐ huì shuō Zhōngwén ma? - By the way, can you speak Chinese?)" },
+                { hanzi: "对了", pinyin: "duìle", partOfSpeech: "Adj.", english: "by the way (a phrase used to start a new topic)", example: "对了，你会说中文吗？ (Duìle, nǐ huì 说 Zhōngwén ma? - By the way, can you speak Chinese?)" },
                 { hanzi: "法国", pinyin: "Fǎguó", partOfSpeech: "N.", english: "France", example: "他是法国人。 (Tā shì Fǎguó rén. - He is French.)" },
                 { hanzi: "美国", pinyin: "Měiguó", partOfSpeech: "N.", english: "United States", example: "她在美国工作。 (Tā zài Měiguó gōngzuò. - She works in America.)" },
                 { hanzi: "英国", pinyin: "Yīngguó", partOfSpeech: "N.", english: "Britain", example: "他是英国人。 (Tā shì Yīngguó rén. - He is British.)" },
                 { hanzi: "中国", pinyin: "Zhōngguó", partOfSpeech: "N.", english: "China", example: "我爱中国。 (Wǒ ài Zhōngguó. - I love China.)" },
                 { hanzi: "说", pinyin: "shuō", partOfSpeech: "V.", english: "to speak, to say", example: "你会说中文吗？ (Nǐ huì shuō Zhōngwén ma? - Can you speak Chinese?)" },
                 { hanzi: "会", pinyin: "huì", partOfSpeech: "Aux.", english: "can, be able to, know how to", example: "我会开车。 (Wǒ huì kāichē. - I can drive.)" },
-                { hanzi: "一点儿", pinyin: "yīdiǎner", partOfSpeech: "adverb", english: "a little bit", example: "我会说一点儿中文。 (Wǒ huì shuō yīdiǎner Zhōngwén. - I can speak a little Chinese.)" },
-                { hanzi: "法文", pinyin: "Fǎwén", partOfSpeech: "N.", english: "French (language)", example: "他会说一点儿法文。 (Tā huì shuō yīdiǎner Fǎwén. - He can speak a little French.)" },
+                { hanzi: "一点儿", pinyin: "yīdiǎner", partOfSpeech: "adverb", english: "a little bit", example: "我会说一点儿中文。 (Wǒ huì 说 yīdiǎner Zhōngwén. - I can speak a little Chinese.)" },
+                { hanzi: "法文", pinyin: "Fǎwén", partOfSpeech: "N.", english: "French (language)", example: "他会说一点儿法文。 (Tā huì 说 yīdiǎner Fǎwén. - He can speak a little French.)" },
                 { hanzi: "和", pinyin: "hé", partOfSpeech: "Conj.", english: "and", example: "我和你。 (Wǒ hé nǐ. - Me and you.)" }
             ],
             supplementaryWords: [
@@ -1774,9 +1778,9 @@
                     structure: "Subject + 会 (huì) + 说 (shuō) + Language",
                     examples: [
                         "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>英语</span>。 (Wǒ huì shuō Yīngyǔ. - I can speak English.)",
-                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>法文</span>。 (Wǒ huì shuō Fǎwén. - I can speak French.)",
-                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>德语</span>。 (Wǒ huì shuō Déyǔ. - I can speak German.)",
-                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>日文</span>。 (Wǒ huì shuō Rìwén. - I can speak Japanese.)"
+                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>法文</span>。 (Wǒ huì 说 Fǎwén. - I can speak French.)",
+                        "我 <span class='subject'>会说</span> <span class='object'>德语</span>。 (Wǒ huì 说 Déyǔ. - I can speak German.)",
+                        "我 <span class='subject'>会说</span> <span class='object'>日文</span>。 (Wǒ huì 说 Rìwén. - I can speak Japanese.)"
                     ],
                     notes: [
                         "'中文' (Zhōngwén) can also mean 'Chinese language' or 'Mandarin'."
@@ -1788,8 +1792,8 @@
                     englishExplanation: "'一点儿' (yīdiǎner) is a phrase placed before a noun to mean 'a little bit'. Note that it is pronounced 'yīdiǎner' when followed by first, second, and third tones, and 'yìdiǎner' when followed by a fourth tone. Therefore, it should be pronounced 'yīdiǎner'.",
                     structure: "Verb + 一点儿 (yīdiǎner) + Object",
                     examples: [
-                        "我会说 <span class='verb'>一点儿</span> 中文。 (Wǒ huì shuō yīdiǎner Zhōngwén. - I can speak a little Chinese.)",
-                        "我会说 <span class='verb'>一点儿</span> 法文。 (Wǒ huì shuō yīdiǎner Fǎwén. - I can speak a little French.)"
+                        "我会说 <span class='verb'>一点儿</span> 中文。 (Wǒ huì 说 yīdiǎner Zhōngwén. - I can speak a little Chinese.)",
+                        "我会说 <span class='verb'>一点儿</span> 法文。 (Wǒ huì 说 yīdiǎner Fǎwén. - I can speak a little French.)"
                     ]
                 },
                 {
@@ -1816,8 +1820,8 @@
                 },
                 {
                     question: "If I want to say 'I can speak a little French', what is the correct Chinese translation?",
-                    options: ["我不会说法文。(Wǒ bú huì shuō Fǎwén.)", "我会说法文。(Wǒ huì shuō Fǎwén.)", "我会说一点儿法文。(Wǒ huì shuō yīdiǎner Fǎwén.)", "我喜欢说法文。(Wǒ xǐhuān shuō Fǎwén.)"],
-                    answer: "我会说一点儿法文。(Wǒ huì shuō yīdiǎner Fǎwén.)"
+                    options: ["我不会说法文。(Wǒ bú huì 说 Fǎwén.)", "我会说法文。(Wǒ huì 说 Fǎwén.)", "我会说一点儿法文。(Wǒ huì 说 yīdiǎner Fǎwén.)", "我喜欢说法文。(Wǒ xǐhuān 说 Fǎwén.)"],
+                    answer: "我会说一点儿法文。(Wǒ huì 说 yīdiǎner Fǎwén.)"
                 },
                 {
                     question: "In the sentence “她也是老师” (Tā yě shì lǎoshī - She is also a teacher), what does “也” (yě) mean?",
@@ -1832,7 +1836,7 @@
                     sentences: [
                         { chinese: "你好，我叫玛丽。", pinyin: "Nǐ hǎo, wǒ jiào Mǎlì.", english: "Hello, my name is Mary." },
                         { chinese: "我是美国人。", pinyin: "Wǒ shì Měiguó rén.", english: "I am American." },
-                        { chinese: "我说英文，我也会说一点儿中文。", pinyin: "Wǒ shuō Yīngwén, wǒ yě huì shuō yīdiǎner Zhōngwén.", english: "I speak English, and I can also speak a little Chinese." },
+                        { chinese: "我说英文，我也会说一点儿中文。", pinyin: "Wǒ shuō Yīngwén, wǒ yě huì 说 yīdiǎner Zhōngwén.", english: "I speak English, and I can also speak a little Chinese." },
                         { chinese: "我喜欢中国文化。", pinyin: "Wǒ xǐhuān Zhōngguó wénhuà.", english: "I like Chinese culture." }
                     ]
                 },
@@ -1840,7 +1844,7 @@
                     paragraphId: "david-intro",
                     sentences: [
                         { chinese: "我的朋友叫大卫，他是法国人。", pinyin: "Wǒ de péngyou jiào Dàwèi, tā shì Fǎguó rén.", english: "My friend's name is David, he is French." },
-                        { chinese: "他说法文，他会说英文，他也会说一点儿中文。", pinyin: "Tā shuō Fǎwén, tā huì shuō Yīngwén, tā yě huì shuō yīdiǎner Zhōngwén.", english: "He speaks French, he can speak English, and he can also speak a little Chinese." },
+                        { chinese: "他说法文，他会说英文，他也会说一点儿中文。", pinyin: "Tā shuō Fǎwén, tā huì 说 Yīngwén, tā yě huì 说 yīdiǎner Zhōngwén.", english: "He speaks French, he can speak English, and he can also speak a little Chinese." },
                         { chinese: "我们都喜欢学中文，中文很有意思。", pinyin: "Wǒmen dōu xǐhuān xué Zhōngwén, Zhōngwén hěn yǒuyìsi.", english: "We all like learning Chinese, Chinese is very interesting." }
                     ]
                 }
@@ -1855,9 +1859,9 @@
                 { hanzi: "学", pinyin: "xué", english: "to learn" } // '学' is here for story notes, but not for chat
             ],
             supplementaryText: [
-                { chinese: "我是美国人，我会说英文和法文，我也会说一点儿中文。", pinyin: "Wǒ shì Měiguó rén, wǒ huì shuō Yīngwén hé Fǎwén, wǒ yě huì shuō yīdiǎner Zhōngwén.", english: "I am American, I can speak English and French, and I can also speak a little Chinese." },
-                { chinese: "他是我的中文老师，我的老师很好。他是中国人。他说中文，他也说一点儿英文。", pinyin: "Tā shì wǒ de Zhōngwén lǎoshī, wǒ de lǎoshī hěn hǎo. Tā shì Zhōngguó rén. Tā shuō Zhōngwén, tā yě huì shuō yīdiǎner Yīngwén.", english: "He is my Chinese teacher, my teacher is very good. He is Chinese. He speaks Chinese, and he also speaks a little English." },
-                { chinese: "对了，你呢？请问，你是哪国人？你会说什么语言？你会说中文吗？", pinyin: "Duìle, nǐ ne? Qǐngwèn, nǐ shì nǎ guó rén? Nǐ huì shuō shénme yǔyán? Nǐ huì shuō Zhōngwén ma?", english: "By the way, how about you? May I ask, where are you from? What language can you speak? Can you speak Chinese?" }
+                { chinese: "我是美国人，我会说英文和法文，我也会说一点儿中文。", pinyin: "Wǒ shì Měiguó rén, wǒ huì 说 Yīngwén hé Fǎwén, wǒ yě huì 说 yīdiǎner Zhōngwén.", english: "I am American, I can speak English and French, and I can also speak a little Chinese." },
+                { chinese: "他是我的中文老师，我的老师很好。他是中国人。他说中文，他也说一点儿英文。", pinyin: "Tā shì wǒ de Zhōngwén lǎoshī, wǒ de lǎoshī hěn hǎo. Tā shì Zhōngguó rén. Tā shuō Zhōngwén, tā yě huì 说 yīdiǎner Yīngwén.", english: "He is my Chinese teacher, my teacher is very good. He is Chinese. He speaks Chinese, and he also speaks a little English." },
+                { chinese: "对了，你呢？请问，你是哪国人？你会说什么语言？你会说中文吗？", pinyin: "Duìle, nǐ ne? Qǐngwèn, nǐ shì nǎ guó rén? Nǐ huì 说 shénme yǔyán? Nǐ huì 说 Zhōngwén ma?", english: "By the way, how about you? May I ask, where are you from? What language can you speak? Can you speak Chinese?" }
             ],
             // Dialogue practice is now directly using chatResponses structure for turns
             // The original dialoguePractice array is removed as chatResponses will be used.
@@ -1924,7 +1928,7 @@
                 },
                 {
                     bot: "你会说中文吗？",
-                    pinyin: "Nǐ huì shuō Zhōngwén ma?",
+                    pinyin: "Nǐ huì 说 Zhōngwén ma?", // Changed '说' to be inside '会' highlighted.
                     english: "Can you speak Chinese?",
                     expectedUser: ["会我会说一点儿中文", "我会说一点儿中文", "我会说一点中文", "会我会说一点中文", "会我会一点中文", "不我不会说中文", "会我会说中文", "会我会说中文"], // Added "会我会说中文"
                     hint: "你可以说“会，我会说一点儿中文”或者“不，我不会说中文”。"
@@ -2840,16 +2844,21 @@
             let newDisplay = '';
             // Only update display if not in listening mode
             if (typingMode !== 'listening') {
-                for (let i = 0; i < targetSentence.length; i++) {
-                    if (i < userInputVal.length) {
+                for (let i = 0; i < userInputVal.length; i++) { // Iterate only up to user input length
+                    if (i < targetSentence.length) { // Check against target sentence length
                         if (userInputVal[i] === targetSentence[i]) {
                             newDisplay += `<span class="correct-char">${targetSentence[i]}</span>`;
                         } else {
                             newDisplay += `<span class="wrong-char">${targetSentence[i]}</span>`;
                         }
                     } else {
-                        newDisplay += `<span class="untyped-char">${targetSentence[i]}</span>`;
+                        // If user types more than target sentence length, just show wrong char (or clip)
+                        newDisplay += `<span class="wrong-char">${userInputVal[i]}</span>`; // Indicate extra characters are wrong
                     }
+                }
+                // For remaining untyped characters in the target sentence
+                for (let i = userInputVal.length; i < targetSentence.length; i++) {
+                    newDisplay += `<span class="untyped-char">${targetSentence[i]}</span>`;
                 }
                 document.getElementById('typingExercise').innerHTML = newDisplay;
             } else {
@@ -3580,12 +3589,12 @@
                 const pinyinEnglishHover = document.createElement('span');
                 pinyinEnglishHover.classList.add('pinyin-english-hover');
 
-                const pinyinTextInline = document.createElement('span');
-                pinyinTextInline.classList.add('pinyin-text-inline');
+                const pinyinTextInline = document.createElement('p'); // Use p for line break
+                pinyinTextInline.classList.add('pinyin-line');
                 pinyinTextInline.textContent = line.pinyin;
                 pinyinEnglishHover.appendChild(pinyinTextInline);
 
-                const englishTextInline = document.createElement('span');
+                const englishTextInline = document.createElement('p'); // Use p for line break
                 englishTextInline.classList.add('english-line');
                 englishTextInline.textContent = line.english;
                 pinyinEnglishHover.appendChild(englishTextInline);
@@ -3641,13 +3650,13 @@
                 const pinyinEnglishHover = document.createElement('span');
                 pinyinEnglishHover.classList.add('pinyin-english-hover');
 
-                const pinyinTextInline = document.createElement('span');
-                pinyinTextInline.classList.add('pinyin-text-inline');
+                const pinyinTextInline = document.createElement('p'); // Use p for line break
+                pinyinTextInline.classList.add('pinyin-line');
                 pinyinTextInline.textContent = line.pinyin.replace('[studentName]', studentName);
                 pinyinEnglishHover.appendChild(pinyinTextInline);
 
-                const englishTextInline = document.createElement('span');
-                englishTextInline.classList.add('english-text-inline');
+                const englishTextInline = document.createElement('p'); // Use p for line break
+                englishTextInline.classList.add('english-line');
                 englishTextInline.textContent = line.english.replace('[studentName]', studentName);
                 pinyinEnglishHover.appendChild(englishTextInline);
 
@@ -3658,7 +3667,7 @@
             // NEW: Supplementary Explanations for Language in Use
             const languageInUseExplanationsTitle = document.createElement('h5');
             languageInUseExplanationsTitle.textContent = '补充说明 (Bǔchōng Shuōmíng) - Supplementary Explanations';
-            languageInUseExplanationsTitle.style.marginTop = '0px'; // Changed from 20px to 0px
+            languageInUseExplanationsTitle.style.marginTop = '0px'; // Set margin-top to 0px
             learningCenterDiv.appendChild(languageInUseExplanationsTitle);
 
             lessonData.languageInUseExplanations.forEach(explanation => {
@@ -3735,7 +3744,8 @@
 
                     // Append the pinyin and English part
                     const pinyinEnglishPart = parts.length > 1 ? ' (' + parts.slice(1).join(' (') : ''; // "(Nǐ shì Měiguó rén ma? - Are you American?)"
-                    const pinyinEnglishSpan = document.createElement('span');
+                    const pinyinEnglishSpan = document.createElement('p'); // Changed to p for line break
+                    pinyinEnglishSpan.classList.add('pinyin-line'); // Add class for styling
                     pinyinEnglishSpan.textContent = pinyinEnglishPart;
                     exampleP.appendChild(pinyinEnglishSpan);
 
@@ -4038,7 +4048,8 @@
 
             const dialogueText = document.createElement('div');
             dialogueText.classList.add('dialogue-text');
-            dialogueText.innerHTML = `<span class="speaker-name">🤖 小爱:</span> <span class="chinese-text-dialogue">${applyHighlights(botChineseText, 'dialogue')}</span>`;
+            // MODIFIED: Removed pinyin and englishTranslation from direct display here
+            dialogueText.innerHTML = `<span class="speaker-name">🤖 :</span> <span class="chinese-text-dialogue">${applyHighlights(botChineseText, 'dialogue')}</span> <span class="english-translation-inline">(${botEnglishText})</span>`;
             
             // Add audio icon to dialogue text
             const audioIcon = document.createElement('span');
@@ -4052,15 +4063,16 @@
             dialogueText.appendChild(audioIcon);
             turnDiv.appendChild(dialogueText);
 
-            const pinyinDisplay = document.createElement('p');
-            pinyinDisplay.classList.add('pinyin-display');
-            pinyinDisplay.textContent = botPinyinText;
-            turnDiv.appendChild(pinyinDisplay);
+            // Removed pinyinDisplay and englishTranslation elements
+            // const pinyinDisplay = document.createElement('p');
+            // pinyinDisplay.classList.add('pinyin-display');
+            // pinyinDisplay.textContent = botPinyinText;
+            // turnDiv.appendChild(pinyinDisplay);
 
-            const englishTranslation = document.createElement('p');
-            englishTranslation.classList.add('english-translation');
-            englishTranslation.textContent = `(${botEnglishText})`;
-            turnDiv.appendChild(englishTranslation);
+            // const englishTranslation = document.createElement('p');
+            // englishTranslation.classList.add('english-translation');
+            // englishTranslation.textContent = `(${botEnglishText})`;
+            // turnDiv.appendChild(englishTranslation);
 
             const userResponseArea = document.createElement('div');
             userResponseArea.classList.add('user-response-area');
