@@ -169,7 +169,7 @@
         }
 
         /* Specific override for learningCenter and readingStoryScreen to align content to start */
-        #learningCenter, #readingStoryScreen, #dialoguePracticeScreen { /* Removed #chatArea from here */
+        #learningCenter, #readingStoryScreen { /* Removed #chatArea from here, #dialoguePracticeScreen modified below */
             align-items: flex-start; /* Align content to top-left */
             justify-content: flex-start; /* Align content to top-left */
             padding-top: 20px; /* Ensure consistent padding from top */
@@ -947,7 +947,7 @@
         .current-exercise-container {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center content horizontally */
+            align-items: center; /* Center horizontally */
             justify-content: center; /* Center content vertically within its space */
             /* MODIFIED: Set flex-grow and flex-shrink to 0 to maintain its size */
             flex-grow: 0; 
@@ -1197,6 +1197,26 @@
         }
 
         /* NEW: Dialogue Practice Specific Styles for Voice Input */
+        /* Container for the entire dialogue practice screen content */
+        #dialoguePracticeScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding-top: 20px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        #dialoguePracticeArea {
+            flex: 1; /* Allow dialogue area to grow */
+            overflow-y: auto; /* Enable scrolling for dialogue turns */
+            width: 100%;
+            padding-right: 10px; /* Add some padding for scrollbar */
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
         .dialogue-practice-turn {
             background: linear-gradient(to right, rgba(240, 255, 255, 0.7), rgba(240, 255, 255, 0));
             padding: 15px;
@@ -1226,25 +1246,37 @@
             margin-right: 8px;
             font-size: 0.9em; /* Slightly smaller than main text */
         }
-        .dialogue-practice-turn .pinyin-display,
-        .dialogue-practice-turn .english-translation {
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 10px;
+        /* NEW: Style for the user's recognized response within the turn */
+        .dialogue-practice-turn .user-dialogue-attempt { /* Changed from user-recognized-response */
+            font-size: 1.2em; /* Same as recognized-text-display */
+            color: #1a73e8; /* Blue for user's recognized text */
+            font-weight: bold;
+            margin-left: 25px; /* Indent user's response */
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-left: 3px solid #64B5F6; /* Lighter blue bar */
+            background-color: #f0f8ff; /* Light blue background */
+            border-radius: 0 5px 5px 0;
+            width: calc(100% - 25px); /* Adjust width for indent */
+            box-sizing: border-box;
+            word-wrap: break-word; /* Ensure text wraps */
         }
-        .dialogue-practice-turn .english-translation {
-            font-style: italic;
-            color: #777;
-        }
-
-        .dialogue-practice-turn .user-response-area {
+        /* NEW: Style for the current active input area within the turn */
+        .dialogue-practice-turn .current-input-area {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
             margin-top: 10px;
             gap: 10px;
+            background-color: #e0f7fa; /* Light blue background for the input panel */
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            min-height: 100px; /* Ensure enough space for voice input */
+            justify-content: center;
         }
+
 
         .dialogue-practice-turn .recognized-text-display {
             font-size: 1.2em;
@@ -1257,7 +1289,20 @@
             padding: 8px;
             border-radius: 5px;
             background-color: #f0f8ff; /* Light blue background */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* Allow it to grow to fill space */
         }
+        /* Make recognized-text-display expand more */
+        .dialogue-practice-turn .recognized-text-display.expanded {
+            min-height: 80px; /* Increased min-height for more space */
+            align-items: flex-start; /* Align text to top-left when expanded */
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
 
         .dialogue-practice-turn .start-voice-input-btn {
             padding: 12px 25px;
@@ -1327,16 +1372,21 @@
             text-align: center;
         }
 
-        .dialogue-practice-buttons {
+        /* Removed dialogue-practice-buttons inside turns, now a global group */
+        .dialogue-global-buttons { /* NEW global button group for dialogue practice */
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 15px; /* Adjust gap */
+            margin-top: auto; /* Push to bottom */
+            padding-top: 15px;
+            border-top: 1px solid #eee;
             width: 100%;
             flex-wrap: wrap;
+            box-sizing: border-box;
+            background-color: #f9f9f9; /* Light background for the button area */
         }
 
-        .dialogue-practice-buttons button {
+        .dialogue-global-buttons button {
             padding: 10px 20px;
             font-size: 18px;
             border: none;
@@ -1347,12 +1397,15 @@
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .dialogue-practice-buttons .show-answer-btn { background: linear-gradient(45deg, #FFC107, #FFD54F); color: #333; }
-        .dialogue-practice-buttons .show-answer-btn:hover { background: linear-gradient(45deg, #FFA000, #FFC107); transform: translateY(-2px); }
-        .dialogue-practice-buttons .next-dialogue-btn { background: linear-gradient(45deg, #4CAF50, #8BC34A); }
-        .dialogue-practice-buttons .next-dialogue-btn:hover { background: linear-gradient(45deg, #43A047, #7CB342); transform: translateY(-2px); }
-        .dialogue-practice-buttons .restart-dialogue-btn { background: linear-gradient(45deg, #9E9E9E, #BDBDBD); }
-        .dialogue-practice-buttons .restart-dialogue-btn:hover { background: linear-gradient(45deg, #757575, #9E9E9E); transform: translateY(-2px); }
+        /* Specific colors for global dialogue buttons */
+        #showDialogueAnswerButton { background: linear-gradient(45deg, #FFC107, #FFD54F); color: #333; }
+        #showDialogueAnswerButton:hover { background: linear-gradient(45deg, #FFA000, #FFC107); transform: translateY(-2px); }
+        #nextDialogueButton { background: linear-gradient(45deg, #4CAF50, #8BC34A); }
+        #nextDialogueButton:hover { background: linear-gradient(45deg, #43A047, #7CB342); transform: translateY(-2px); }
+        #restartDialogueButton { background: linear-gradient(45deg, #9E9E9E, #BDBDBD); }
+        #restartDialogueButton:hover { background: linear-gradient(45deg, #757575, #9E9E9E); transform: translateY(-2px); }
+        #printDialogueButton { /* Keep existing print style */ }
+        #backToHomeFromDialogue { /* Keep existing back to home style */ }
 
     </style>
 </head>
@@ -1377,7 +1430,7 @@
                     <p>小爱: 你是哪国人？ (Nǐ shì nǎ guó rén? - Where are you from?)</p>
                     <p>学生: 我是美国人。 (Wǒ shì Měiguó rén. - I am American.)</p>
                     <p>小爱: 你会说什么语言？ (Nǐ huì shuō shénme yǔyán? - What language can you speak?)</p>
-                    <p>学生: 我会说英语，也会说一点儿中文。 (Wǒ huì shuō Yīngyǔ, wǒ yě huì 说 yīdiǎner Zhōngwén. - I can speak English, and also a little Chinese.)</p>
+                    <p>学生: 我会说英语，也会说一点儿中文。 (Wǒ huì 说 Yīngyǔ, wǒ yě huì 说 yīdiǎner Zhōngwén. - I can speak English, and also a little Chinese.)</p>
                 </div>
 
                 <div class="task-instructions">
@@ -1508,9 +1561,13 @@
                 <div id="dialoguePracticeArea" style="width: 100%;">
                     <!-- Dialogue practice turns will be dynamically inserted here -->
                 </div>
-                <div class="typing-finish-buttons-group">
+                <!-- Global button group for dialogue practice -->
+                <div class="dialogue-global-buttons">
+                    <button id="showDialogueAnswerButton" class="show-answer-btn" style="display: none;">显示答案</button>
+                    <button id="nextDialogueButton" class="next-dialogue-btn" style="display: none;">下一句</button>
+                    <button id="restartDialogueButton" class="restart-dialogue-btn" style="display: none;">重新开始</button>
                     <button id="printDialogueButton" class="print-dialogue-btn" style="display: none;">打印对话练习</button>
-                    <button id="backToHomeFromDialogue" class="back-home-btn">返回主页</button> <!-- NEW BUTTON -->
+                    <button id="backToHomeFromDialogue" class="back-home-btn">返回主页</button>
                 </div>
             </div>
         </div>
@@ -1607,7 +1664,18 @@
 
             // --- Manage elements specific to Dialogue Practice Screen ---
             const isDialoguePracticeScreen = (screenId === 'dialoguePracticeScreen');
-            document.getElementById('printDialogueButton').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none';
+            // Manage visibility of the global dialogue buttons
+            const globalDialogueButtons = document.querySelector('.dialogue-global-buttons');
+            if (globalDialogueButtons) {
+                globalDialogueButtons.style.display = isDialoguePracticeScreen ? 'flex' : 'none';
+                // Initially hide "显示答案" and "下一句" when starting a new dialogue practice, they will be controlled by JS
+                document.getElementById('showDialogueAnswerButton').style.display = 'none';
+                document.getElementById('nextDialogueButton').style.display = 'none';
+                document.getElementById('restartDialogueButton').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none'; // Always show restart if on screen
+                document.getElementById('printDialogueButton').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none';
+                document.getElementById('backToHomeFromDialogue').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none';
+            }
+
 
             // Log heights for debugging
             const rightPanel = document.querySelector('.right-panel');
@@ -1694,7 +1762,7 @@
                 { hanzi: "美国", pinyin: "Měiguó", partOfSpeech: "N.", english: "United States", example: "她在美国工作。 (Tā zài Měiguó gōngzuò. - She works in America.)" },
                 { hanzi: "英国", pinyin: "Yīngguó", partOfSpeech: "N.", english: "Britain", example: "他是英国人。 (Tā shì Yīngguó rén. - He is British.)" },
                 { hanzi: "中国", pinyin: "Zhōngguó", partOfSpeech: "N.", english: "China", example: "我爱中国。 (Wǒ ài Zhōngguó. - I love China.)" },
-                { hanzi: "说", pinyin: "shuō", partOfSpeech: "V.", english: "to speak, to say", example: "你会说中文吗？ (Nǐ huì shuō Zhōngwén ma? - Can you speak Chinese?)" },
+                { hanzi: "说", pinyin: "shuō", partOfSpeech: "V.", english: "to speak, to say", example: "你会说中文吗？ (Nǐ huì 说 Zhōngwén ma? - Can you speak Chinese?)" },
                 { hanzi: "会", pinyin: "huì", partOfSpeech: "Aux.", english: "can, be able to, know how to", example: "我会开车。 (Wǒ huì kāichē. - I can drive.)" },
                 { hanzi: "一点儿", pinyin: "yīdiǎner", partOfSpeech: "adverb", english: "a little bit", example: "我会说一点儿中文。 (Wǒ huì 说 yīdiǎner Zhōngwén. - I can speak a little Chinese.)" },
                 { hanzi: "法文", pinyin: "Fǎwén", partOfSpeech: "N.", english: "French (language)", example: "他会说一点儿法文。 (Tā huì 说 yīdiǎner Fǎwén. - He can speak a little French.)" },
@@ -1716,8 +1784,8 @@
             sentencePatterns: [
                 { chinese: "A: 你是哪国人？", pinyin: "Nǐ shì nǎ guó rén?", english: "Where are you from?" },
                 { chinese: "B: 我是<span class='highlight-country-char'>法</span>国人。", pinyin: "Wǒ shì Fǎguó rén.", english: "I am French." },
-                { chinese: "A: 你<span class='highlight-verb'>会说</span>中文吗？", pinyin: "Nǐ huì shuō Zhōngwén ma?", english: "Can you speak Chinese?" },
-                { chinese: "B: <span class='highlight-verb'>会</span>，我<span class='highlight-verb'>会说</span>中文。", pinyin: "Huì, wǒ huì shuō Zhōngwén.", english: "Yes, I can speak Chinese." }
+                { chinese: "A: 你<span class='highlight-verb'>会说</span>中文吗？", pinyin: "Nǐ huì 说 Zhōngwén ma?", english: "Can you speak Chinese?" },
+                { chinese: "B: <span class='highlight-verb'>会</span>，我<span class='highlight-verb'>会说</span>中文。", pinyin: "Huì, wǒ huì 说 Zhōngwén.", english: "Yes, I can speak Chinese." }
             ],
             languageInUse: [
                 { speaker: "李文中", chinese: "小美，你好吗？", pinyin: "Xiǎoměi, nǐ hǎo ma?", english: "Xiaomei, how are you?" },
@@ -1725,9 +1793,9 @@
                 { speaker: "李文中", chinese: "我是法国人。你呢？你是美国人吗？", pinyin: "Wǒ shì Fǎguó rén. Nǐ ne? Nǐ shì Měiguó rén ma?", english: "I'm French. How about you? Are you American?" },
                 { speaker: "吴小美", chinese: "不，我不是美国人，我是英国人。", pinyin: "Bú, wǒ bú shì Měiguó rén, wǒ shì Yīngguó rén.", english: "No, I'm not American, I'm British." },
                 { speaker: "李文中", chinese: "老师呢？", pinyin: "Lǎoshī ne?", english: "How about the teacher?" },
-                { speaker: "吴小美", chinese: "他是中国人。他说中文。", pinyin: "Tā shì Zhōngguó rén. Tā shuō Zhōngwén.", english: "He is Chinese. He speaks Chinese." },
-                { speaker: "李文中", chinese: "你会说什么语言？", pinyin: "Nǐ huì shuō shénme yǔyán?", english: "Can you speak Chinese?" },
-                { speaker: "吴小美", chinese: "我会说一点儿中文，我也会说法文和英文。", pinyin: "Wǒ huì shuō yīdiǎner Zhōngwén, wǒ yě huì shuō Fǎwén hé Yīngwén.", english: "I can speak a little Chinese, and I can also speak French and English." }
+                { speaker: "吴小美", chinese: "他是中国人。他说中文。", pinyin: "Tā shì Zhōngguó rén. Tā 说 Zhōngwén.", english: "He is Chinese. He speaks Chinese." },
+                { speaker: "李文中", chinese: "你会说什么语言？", pinyin: "Nǐ huì 说 shénme yǔyán?", english: "Can you speak Chinese?" },
+                { speaker: "吴小美", chinese: "我会说一点儿中文，我也会说法文和英文。", pinyin: "Wǒ huì 说 yīdiǎner Zhōngwén, wǒ yě huì 说 Fǎwén hé Yīngwén.", english: "I can speak a little Chinese, and I can also speak French and English." }
             ],
             // NEW: Added supplementary explanations for Language in Use section
             languageInUseExplanations: [
@@ -1774,10 +1842,10 @@
                 {
                     title: "III. 说 and 语言",
                     explanation: "汉字“说”表示“说”。“我会说中文”表示“我能说中文”。在台湾中文中，有时用“讲”代替“说”。在大多数情况下，语言的词是通过在国家名称后加上“文”或“语”来形成的（不带“国”）。",
-                    englishExplanation: "The character '说' (shuō) means 'to speak'. '我会说中文' (Wǒ huì shuō Zhōngwén) means 'I can speak Chinese'. In Taiwanese Mandarin, '讲' (jiǎng) is sometimes used interchangeably with '说'. In most cases, words for languages are formed by adding '文' (wén) or '语' (yǔ) after the country name (without '国').",
+                    englishExplanation: "The character '说' (shuō) means 'to speak'. '我会说中文' (Wǒ huì 说 Zhōngwén) means 'I can speak Chinese'. In Taiwanese Mandarin, '讲' (jiǎng) is sometimes used interchangeably with '说'. In most cases, words for languages are formed by adding '文' (wén) or '语' (yǔ) after the country name (without '国').",
                     structure: "Subject + 会 (huì) + 说 (shuō) + Language",
                     examples: [
-                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>英语</span>。 (Wǒ huì shuō Yīngyǔ. - I can speak English.)",
+                        "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>英语</span>。 (Wǒ huì 说 Yīngyǔ. - I can speak English.)",
                         "我 <span class='subject'>会</span> <span class='verb'>说</span> <span class='object'>法文</span>。 (Wǒ huì 说 Fǎwén. - I can speak French.)",
                         "我 <span class='subject'>会说</span> <span class='object'>德语</span>。 (Wǒ huì 说 Déyǔ. - I can speak German.)",
                         "我 <span class='subject'>会说</span> <span class='object'>日文</span>。 (Wǒ huì 说 Rìwén. - I can speak Japanese.)"
@@ -1836,7 +1904,7 @@
                     sentences: [
                         { chinese: "你好，我叫玛丽。", pinyin: "Nǐ hǎo, wǒ jiào Mǎlì.", english: "Hello, my name is Mary." },
                         { chinese: "我是美国人。", pinyin: "Wǒ shì Měiguó rén.", english: "I am American." },
-                        { chinese: "我说英文，我也会说一点儿中文。", pinyin: "Wǒ shuō Yīngwén, wǒ yě huì 说 yīdiǎner Zhōngwén.", english: "I speak English, and I can also speak a little Chinese." },
+                        { chinese: "我说英文，我也会说一点儿中文。", pinyin: "Wǒ 说 Yīngwén, wǒ yě huì 说 yīdiǎner Zhōngwén.", english: "I speak English, and I can also speak a little Chinese." },
                         { chinese: "我喜欢中国文化。", pinyin: "Wǒ xǐhuān Zhōngguó wénhuà.", english: "I like Chinese culture." }
                     ]
                 },
@@ -1844,7 +1912,7 @@
                     paragraphId: "david-intro",
                     sentences: [
                         { chinese: "我的朋友叫大卫，他是法国人。", pinyin: "Wǒ de péngyou jiào Dàwèi, tā shì Fǎguó rén.", english: "My friend's name is David, he is French." },
-                        { chinese: "他说法文，他会说英文，他也会说一点儿中文。", pinyin: "Tā shuō Fǎwén, tā huì 说 Yīngwén, tā yě huì 说 yīdiǎner Zhōngwén.", english: "He speaks French, he can speak English, and he can also speak a little Chinese." },
+                        { chinese: "他说法文，他会说英文，他也会说一点儿中文。", pinyin: "Tā 说 Fǎwén, tā huì 说 Yīngwén, tā yě huì 说 yīdiǎner Zhōngwén.", english: "He speaks French, he can speak English, and he can also speak a little Chinese." },
                         { chinese: "我们都喜欢学中文，中文很有意思。", pinyin: "Wǒmen dōu xǐhuān xué Zhōngwén, Zhōngwén hěn yǒuyìsi.", english: "We all like learning Chinese, Chinese is very interesting." }
                     ]
                 }
@@ -1860,7 +1928,7 @@
             ],
             supplementaryText: [
                 { chinese: "我是美国人，我会说英文和法文，我也会说一点儿中文。", pinyin: "Wǒ shì Měiguó rén, wǒ huì 说 Yīngwén hé Fǎwén, wǒ yě huì 说 yīdiǎner Zhōngwén.", english: "I am American, I can speak English and French, and I can also speak a little Chinese." },
-                { chinese: "他是我的中文老师，我的老师很好。他是中国人。他说中文，他也说一点儿英文。", pinyin: "Tā shì wǒ de Zhōngwén lǎoshī, wǒ de lǎoshī hěn hǎo. Tā shì Zhōngguó rén. Tā shuō Zhōngwén, tā yě huì 说 yīdiǎner Yīngwén.", english: "He is my Chinese teacher, my teacher is very good. He is Chinese. He speaks Chinese, and he also speaks a little English." },
+                { chinese: "他是我的中文老师，我的老师很好。他是中国人。他说中文，他也说一点儿英文。", pinyin: "Tā shì wǒ de Zhōngwén lǎoshī, wǒ de lǎoshī hěn hǎo. Tā shì Zhōngguó rén. Tā 说 Zhōngwén, tā yě huì 说 yīdiǎner Yīngwén.", english: "He is my Chinese teacher, my teacher is very good. He is Chinese. He speaks Chinese, and he also speaks a little English." },
                 { chinese: "对了，你呢？请问，你是哪国人？你会说什么语言？你会说中文吗？", pinyin: "Duìle, nǐ ne? Qǐngwèn, nǐ shì nǎ guó rén? Nǐ huì 说 shénme yǔyán? Nǐ huì 说 Zhōngwén ma?", english: "By the way, how about you? May I ask, where are you from? What language can you speak? Can you speak Chinese?" }
             ],
             // Dialogue practice is now directly using chatResponses structure for turns
@@ -1916,7 +1984,7 @@
                 },
                 {
                     bot: "你说英文吗？",
-                    pinyin: "Nǐ shuō Yīngwén ma?",
+                    pinyin: "Nǐ 说 Yīngwén ma?",
                     english: "Do you speak English?",
                     expectedUser: [
                         "说我说英文", "说我说英语", "会我说英文", "会我说英语",
@@ -2126,6 +2194,10 @@
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
             const printDialogueButton = document.getElementById('printDialogueButton');
             const backToHomeFromDialogue = document.getElementById('backToHomeFromDialogue'); // New back button
+            // Global Dialogue Control Buttons
+            const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
+            const nextDialogueButton = document.getElementById('nextDialogueButton');
+            const restartDialogueButton = document.getElementById('restartDialogueButton');
 
 
             // Event Listeners
@@ -2275,6 +2347,12 @@
             // backToHomeFromReading listener is now attached in loadReadingStory
             // Moved backToHomeFromLearning listener inside loadLearningCenter
             backToHomeFromDialogue.addEventListener('click', () => {
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel(); // Stop any ongoing speech
+                }
+                if (speechRecognition) {
+                    speechRecognition.stop(); // Stop ongoing recognition
+                }
                 showScreen('homeScreen');
                 updateStats();
             });
@@ -2355,6 +2433,16 @@
                 updateStats();
             });
 
+            // Dialogue Practice Global Buttons
+            showDialogueAnswerButton.addEventListener('click', () => {
+                // Find the current active turn div (last child of dialoguePracticeArea)
+                const currentTurnDiv = dialoguePracticeArea.lastElementChild;
+                if (currentTurnDiv && currentDialogueTurnIndex < lessonData.chatResponses.length) {
+                    showDialogueAnswer(currentTurnDiv, lessonData.chatResponses[currentDialogueTurnIndex], lessonData.chatResponses[currentDialogueTurnIndex].bot);
+                }
+            });
+            nextDialogueButton.addEventListener('click', nextDialogueTurn);
+            restartDialogueButton.addEventListener('click', startDialoguePractice); // Reuses the start function to reset
 
             // Reading Story Event Listeners (Removed from here, now dynamic in loadReadingStory)
             // listenStoryButton.addEventListener('click', playFullStory);
@@ -3006,7 +3094,7 @@
 
                     const audioIcon = document.createElement('span');
                     audioIcon.classList.add('audio-icon');
-                    audioIcon.innerHTML = '🔊';
+                    audioIcon.innerHTML = '�';
                     audioIcon.onclick = (event) => {
                         event.stopPropagation(); // Prevent the paragraph click event
                         speak(sentenceObj.chinese); // Speak original text
@@ -3918,6 +4006,13 @@
          * Starts a new dialogue practice session.
          */
         function startDialoguePractice() {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel(); // Cancel any ongoing speech when starting a new lesson intro
+            }
+            if (speechRecognition) {
+                speechRecognition.stop(); // Stop ongoing recognition if any
+            }
+
             document.getElementById('dialoguePracticeArea').innerHTML = '';
             currentDialogueTurnIndex = 0;
             dialoguePracticeHistory = [];
@@ -3930,6 +4025,9 @@
                     globalTemporaryHint.classList.remove('show');
                 }, 5000);
                 // Disable dialogue practice or provide alternative input
+                document.getElementById('showDialogueAnswerButton').style.display = 'none';
+                document.getElementById('nextDialogueButton').style.display = 'none';
+                document.getElementById('restartDialogueButton').style.display = 'none';
                 return;
             }
 
@@ -3944,10 +4042,14 @@
                 speechRecognition.onstart = () => {
                     const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
                     if (currentTurnDiv) {
+                        const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
+                        recognizedTextDisplay.textContent = '正在聆听...';
+                        recognizedTextDisplay.classList.add('expanded'); // Expand while listening
                         const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                        const listeningStatus = startVoiceInputButton.querySelector('.listening-status');
-                        listeningStatus.textContent = '正在聆听...';
-                        startVoiceInputButton.classList.add('listening'); // Add listening class for visual feedback
+                        if (startVoiceInputButton) {
+                            startVoiceInputButton.classList.add('listening'); // Add listening class for visual feedback
+                            startVoiceInputButton.disabled = true; // Disable during listening
+                        }
                     }
                 };
 
@@ -3958,6 +4060,14 @@
                     const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
                     const transcript = event.results[0][0].transcript;
                     recognizedTextDisplay.textContent = transcript;
+                    recognizedTextDisplay.classList.remove('expanded'); // Shrink after result
+
+                    // Re-enable mic button here if not automatically advancing
+                    const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
+                    if (startVoiceInputButton) {
+                        startVoiceInputButton.classList.remove('listening');
+                        startVoiceInputButton.disabled = false; // Re-enable for retry
+                    }
                     
                     checkVoiceAnswer(transcript, currentDialogueTurnIndex, currentTurnDiv);
                 };
@@ -3966,11 +4076,15 @@
                     const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
                     if (!currentTurnDiv) return;
 
+                    const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
+                    recognizedTextDisplay.textContent = '语音识别失败，请重试。';
+                    recognizedTextDisplay.classList.remove('expanded'); // Shrink on error
+
                     const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    const listeningStatus = startVoiceInputButton.querySelector('.listening-status');
-                    listeningStatus.textContent = ''; // Clear status
-                    startVoiceInputButton.classList.remove('listening'); // Remove listening class
-                    startVoiceInputButton.disabled = false; // Re-enable button
+                    if (startVoiceInputButton) {
+                        startVoiceInputButton.classList.remove('listening'); // Remove listening class
+                        startVoiceInputButton.disabled = false; // Re-enable button
+                    }
 
                     let errorMessage = '语音识别错误。请重试。';
                     if (event.error === 'not-allowed') {
@@ -4003,10 +4117,11 @@
                     if (!currentTurnDiv) return;
 
                     const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    const listeningStatus = startVoiceInputButton.querySelector('.listening-status'); // Corrected: re-query listeningStatus if needed
-                    if (listeningStatus) listeningStatus.textContent = ''; // Clear status
-                    startVoiceInputButton.classList.remove('listening'); // Remove listening class
-                    // Button re-enabled in checkVoiceAnswer or onerror
+                    if (startVoiceInputButton) { // Check if element exists before modifying
+                        startVoiceInputButton.classList.remove('listening');
+                        // Button re-enabled in checkVoiceAnswer or onerror
+                        // If it's still disabled, it means the answer was correct, so it stays disabled.
+                    }
                 };
             }
 
@@ -4026,6 +4141,15 @@
 
             const turnData = lessonData.chatResponses[currentDialogueTurnIndex];
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
+
+            // Hide the input area of the *previous* turn, if one exists and is visible
+            const previousTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex - 1}"]`);
+            if (previousTurnDiv) {
+                const prevInputArea = previousTurnDiv.querySelector('.current-input-area');
+                if (prevInputArea) {
+                    prevInputArea.style.display = 'none';
+                }
+            }
 
             const turnDiv = document.createElement('div');
             turnDiv.classList.add('dialogue-practice-turn');
@@ -4048,7 +4172,6 @@
 
             const dialogueText = document.createElement('div');
             dialogueText.classList.add('dialogue-text');
-            // MODIFIED: Removed pinyin and englishTranslation from direct display here
             dialogueText.innerHTML = `<span class="speaker-name">🤖 :</span> <span class="chinese-text-dialogue">${applyHighlights(botChineseText, 'dialogue')}</span> <span class="english-translation-inline">(${botEnglishText})</span>`;
             
             // Add audio icon to dialogue text
@@ -4063,72 +4186,46 @@
             dialogueText.appendChild(audioIcon);
             turnDiv.appendChild(dialogueText);
 
-            // Removed pinyinDisplay and englishTranslation elements
-            // const pinyinDisplay = document.createElement('p');
-            // pinyinDisplay.classList.add('pinyin-display');
-            // pinyinDisplay.textContent = botPinyinText;
-            // turnDiv.appendChild(pinyinDisplay);
-
-            // const englishTranslation = document.createElement('p');
-            // englishTranslation.classList.add('english-translation');
-            // englishTranslation.textContent = `(${botEnglishText})`;
-            // turnDiv.appendChild(englishTranslation);
-
-            const userResponseArea = document.createElement('div');
-            userResponseArea.classList.add('user-response-area');
-            turnDiv.appendChild(userResponseArea);
-
-            const recognizedTextDisplay = document.createElement('p');
-            recognizedTextDisplay.classList.add('recognized-text-display');
-            recognizedTextDisplay.textContent = '点击麦克风开始说话...';
-            userResponseArea.appendChild(recognizedTextDisplay);
-
-            const startVoiceInputButton = document.createElement('button');
-            startVoiceInputButton.classList.add('start-voice-input-btn');
-            startVoiceInputButton.innerHTML = '🎤 <span class="listening-status"></span>';
-            startVoiceInputButton.onclick = () => {
-                recognizedTextDisplay.textContent = ''; // Clear previous recognition
-                startVoiceInputButton.disabled = true; // Disable button while listening
-                // The 'listening' class is added in onstart
-                speechRecognition.start();
-                interactionCounts.totalInteractionCount++; // Voice input attempt is an interaction
-                updateStats();
-            };
-            userResponseArea.appendChild(startVoiceInputButton);
-
+            // User's permanent response display (this will be filled by checkVoiceAnswer/showDialogueAnswer)
+            const userDialogueAttempt = document.createElement('p');
+            userDialogueAttempt.classList.add('user-dialogue-attempt'); // New class for user's permanent response
+            userDialogueAttempt.style.display = 'none'; // Hidden until recognized
+            turnDiv.appendChild(userDialogueAttempt);
 
             const dialogueFeedback = document.createElement('p');
             dialogueFeedback.classList.add('dialogue-feedback');
+            dialogueFeedback.style.display = 'none'; // Hidden until feedback is given
             turnDiv.appendChild(dialogueFeedback);
 
             const dialogueAnswer = document.createElement('p');
             dialogueAnswer.classList.add('dialogue-practice-answer');
-            dialogueAnswer.textContent = ''; // Will be filled by showAnswer
+            dialogueAnswer.style.display = 'none'; // Hidden until shown by button
             turnDiv.appendChild(dialogueAnswer);
 
-            const buttonsDiv = document.createElement('div');
-            buttonsDiv.classList.add('dialogue-practice-buttons');
+            // Current input area with mic button - only for the active turn
+            const currentInputArea = document.createElement('div');
+            currentInputArea.classList.add('current-input-area');
+            turnDiv.appendChild(currentInputArea);
 
-            const showAnswerBtn = document.createElement('button');
-            showAnswerBtn.classList.add('show-answer-btn');
-            showAnswerBtn.textContent = '显示答案';
-            showAnswerBtn.onclick = () => showDialogueAnswer(turnDiv, turnData, botChineseText); // Pass botChineseText
-            buttonsDiv.appendChild(showAnswerBtn);
+            const recognizedTextDisplay = document.createElement('p');
+            recognizedTextDisplay.classList.add('recognized-text-display');
+            recognizedTextDisplay.textContent = '点击麦克风开始说话...';
+            currentInputArea.appendChild(recognizedTextDisplay);
 
-            const nextBtn = document.createElement('button');
-            nextBtn.classList.add('next-dialogue-btn');
-            nextBtn.textContent = '下一句';
-            nextBtn.style.display = 'none'; // Hidden until answer is correct or shown
-            nextBtn.onclick = nextDialogueTurn;
-            buttonsDiv.appendChild(nextBtn);
+            const startVoiceInputButton = document.createElement('button');
+            startVoiceInputButton.classList.add('start-voice-input-btn');
+            startVoiceInputButton.innerHTML = '🎤 <span>开始说话</span>'; // Changed text to Chinese
+            startVoiceInputButton.onclick = () => {
+                recognizedTextDisplay.textContent = ''; // Clear previous recognition
+                recognizedTextDisplay.classList.add('expanded'); // Expand while waiting for input
+                // The 'listening' class and button disable/enable are handled in speechRecognition.onstart/onend
+                speechRecognition.start();
+                interactionCounts.totalInteractionCount++; // Voice input attempt is an interaction
+                updateStats();
+            };
+            currentInputArea.appendChild(startVoiceInputButton);
 
-            const restartBtn = document.createElement('button');
-            restartBtn.classList.add('restart-dialogue-btn');
-            restartBtn.textContent = '重新开始';
-            restartBtn.onclick = startDialoguePractice;
-            buttonsDiv.appendChild(restartBtn);
 
-            turnDiv.appendChild(buttonsDiv);
             dialoguePracticeArea.appendChild(turnDiv);
             dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight;
             interactionCounts.totalInteractionCount++; // Loading a turn is an interaction
@@ -4138,6 +4235,10 @@
             speak(botChineseText);
             interactionCounts.audioPlayCount++;
             updateStats();
+
+            // Manage global buttons visibility for the current active turn
+            document.getElementById('showDialogueAnswerButton').style.display = 'inline-block';
+            document.getElementById('nextDialogueButton').style.display = 'none'; // Initially hidden for new turns
         }
 
         /**
@@ -4148,10 +4249,18 @@
          */
         function checkVoiceAnswer(recognizedText, turnIndex, turnDiv) {
             const turnData = lessonData.chatResponses[turnIndex];
-            const feedback = turnDiv.querySelector('.dialogue-feedback');
-            const nextBtn = turnDiv.querySelector('.next-dialogue-btn');
-            const showAnswerBtn = turnDiv.querySelector('.show-answer-btn');
-            const startVoiceInputButton = turnDiv.querySelector('.start-voice-input-btn');
+            const userDialogueAttempt = turnDiv.querySelector('.user-dialogue-attempt'); // Get the permanent user attempt display
+            const dialogueFeedback = turnDiv.querySelector('.dialogue-feedback');
+            const dialogueAnswer = turnDiv.querySelector('.dialogue-practice-answer');
+            const currentInputArea = turnDiv.querySelector('.current-input-area');
+            const recognizedTextDisplay = currentInputArea.querySelector('.recognized-text-display');
+            const startVoiceInputButton = currentInputArea.querySelector('.start-voice-input-btn');
+            const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
+            const nextDialogueButton = document.getElementById('nextDialogueButton');
+
+            // Display the user's recognized text immediately and permanently within the turn's history
+            userDialogueAttempt.textContent = `你: ${recognizedText}`;
+            userDialogueAttempt.style.display = 'block';
 
             const lowerRecognizedText = recognizedText.toLowerCase().replace(/[可通过，。？！,?!]/g, '').replace(/\s+/g, '');
             let isCorrect = false;
@@ -4174,13 +4283,19 @@
             }
 
             if (isCorrect) {
-                feedback.textContent = '✅ 太好了！你的回答很棒！';
-                feedback.classList.remove('incorrect');
-                feedback.classList.add('correct');
+                dialogueFeedback.textContent = '✅ 太好了！你的回答很棒！';
+                dialogueFeedback.classList.remove('incorrect');
+                dialogueFeedback.classList.add('correct');
+                dialogueFeedback.style.display = 'block'; // Ensure feedback is visible
                 interactionCounts.correctAnswersCount++;
-                nextBtn.style.display = 'inline-block';
-                startVoiceInputButton.disabled = true; // Disable voice input after correct answer
-                showAnswerBtn.disabled = true; // Disable show answer button
+                
+                nextDialogueButton.style.display = 'none'; // Hide next button if auto-advancing
+                showDialogueAnswerButton.style.display = 'none'; // Hide global show answer
+                
+                // Hide the current input area (mic button and temporary recognized text display)
+                currentInputArea.style.display = 'none';
+                startVoiceInputButton.disabled = true; // Ensure button is disabled
+
                 // Store the correct answer in history
                 dialoguePracticeHistory.push({
                     botChinese: turnData.bot, // Store original bot text
@@ -4189,25 +4304,26 @@
                     isCorrect: true
                 });
                 speak('太好了！你的回答很棒！');
+
+                // Automatically advance to the next turn after a short delay
+                setTimeout(() => {
+                    nextDialogueTurn();
+                }, 1500); // 1.5 second delay before next question
+
             } else {
-                feedback.textContent = '❌ 对不起，你的回答不对，请再试一次。';
-                feedback.classList.remove('correct');
-                feedback.classList.add('incorrect');
+                dialogueFeedback.textContent = '❌ 对不起，你的回答不对，请再试一次。';
+                dialogueFeedback.classList.remove('correct');
+                dialogueFeedback.classList.add('incorrect');
+                dialogueFeedback.style.display = 'block'; // Ensure feedback is visible
                 interactionCounts.incorrectAnswersCount++;
-                // Store the incorrect attempt in history
-                dialoguePracticeHistory.push({
-                    botChinese: turnData.bot, // Store original bot text
-                    userResponse: recognizedText || '（未识别）',
-                    correctAnswer: turnData.expectedUser[0] ? turnData.expectedUser[0].replace('[名字]', studentName).replace('[国家名]', '美国').replace('[语言名]', '中文') : '（无预期答案）', // Provide a sample correct answer
-                    isCorrect: false
-                });
-                speak('对不起，你的回答不对，请再试一次。');
-                // Re-enable voice input button for another try
-                startVoiceInputButton.disabled = false;
+                
+                // The currentInputArea remains visible. Re-enable mic if it was disabled.
+                recognizedTextDisplay.textContent = '点击麦克风开始说话...'; // Reset text for retry
+                startVoiceInputButton.disabled = false; // Re-enable for retry
             }
-            feedback.style.display = 'block';
             interactionCounts.totalInteractionCount++; // Checking answer is an interaction
             updateStats();
+            dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight; // Scroll to bottom
         }
 
         /**
@@ -4217,18 +4333,20 @@
          * @param {string} botQuestionChinese - The processed Chinese question from the bot.
          */
         function showDialogueAnswer(turnDiv, turnData, botQuestionChinese) {
-            const recognizedTextDisplay = turnDiv.querySelector('.recognized-text-display');
+            const userDialogueAttempt = turnDiv.querySelector('.user-dialogue-attempt'); // Get the permanent user attempt display
+            const dialogueFeedback = turnDiv.querySelector('.dialogue-feedback');
             const dialogueAnswer = turnDiv.querySelector('.dialogue-practice-answer');
-            const feedback = turnDiv.querySelector('.dialogue-feedback');
-            const nextBtn = turnDiv.querySelector('.next-dialogue-btn');
-            const showAnswerBtn = turnDiv.querySelector('.show-answer-btn');
-            const startVoiceInputButton = turnDiv.querySelector('.start-voice-input-btn');
+            const currentInputArea = turnDiv.querySelector('.current-input-area');
+            const startVoiceInputButton = currentInputArea.querySelector('.start-voice-input-btn'); // Corrected query scope
+            const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
+            const nextDialogueButton = document.getElementById('nextDialogueButton');
 
             let correctAnswerText = '';
             if (turnData.expectedUser && turnData.expectedUser.length > 0) {
                 // For simplicity, just show the first expected answer.
                 correctAnswerText = turnData.expectedUser[0]
                     .replace('[名字]', studentName)
+                    .replace('[姓氏]', studentSurname)
                     .replace('[国家名]', '美国') // Example country
                     .replace('[语言名]', '中文'); // Example language
             } else {
@@ -4237,17 +4355,20 @@
 
             dialogueAnswer.textContent = `正确答案: ${correctAnswerText}`;
             dialogueAnswer.style.display = 'block';
-            feedback.style.display = 'none'; // Hide previous feedback
+            dialogueFeedback.style.display = 'none'; // Hide previous feedback
 
-            recognizedTextDisplay.textContent = '（已显示答案）'; // Indicate answer was shown
+            userDialogueAttempt.textContent = `你: （答案已显示）`; // Indicate answer was shown
+            userDialogueAttempt.style.display = 'block'; // Ensure it's visible
+            
+            currentInputArea.style.display = 'none'; // Hide the input area
             startVoiceInputButton.disabled = true; // Disable voice input
-            showAnswerBtn.disabled = true;
-            nextBtn.style.display = 'inline-block';
+            showDialogueAnswerButton.style.display = 'none'; // Hide global show answer
+            nextDialogueButton.style.display = 'none'; // Hide next button if auto-advancing
             
             // Store the turn in history as incorrect since answer was shown
             dialoguePracticeHistory.push({
                 botChinese: botQuestionChinese, // Store the processed bot question
-                userResponse: recognizedTextDisplay.textContent, // User's last recognized text or '（已显示答案）'
+                userResponse: userDialogueAttempt.textContent, // User's last recognized text or '（已显示答案）'
                 correctAnswer: correctAnswerText,
                 isCorrect: false // Marked as incorrect if answer was shown
             });
@@ -4255,16 +4376,35 @@
             interactionCounts.totalInteractionCount++; // Showing answer is an interaction
             updateStats();
             speak(`正确答案是：${correctAnswerText}`);
+            
+            // Automatically advance to the next turn after a short delay
+            setTimeout(() => {
+                nextDialogueTurn();
+            }, 1500); // 1.5 second delay before next question
+            dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight; // Scroll to bottom
         }
 
         /**
          * Moves to the next dialogue turn.
          */
         function nextDialogueTurn() {
+            // Hide the input area of the *just completed* turn
+            const previousTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
+            if (previousTurnDiv) {
+                const prevInputArea = previousTurnDiv.querySelector('.current-input-area');
+                if (prevInputArea) {
+                    prevInputArea.style.display = 'none';
+                }
+            }
+
             currentDialogueTurnIndex++;
             loadDialogueTurn();
             interactionCounts.totalInteractionCount++; // Moving to next turn is an interaction
             updateStats();
+            // Ensure global buttons are managed for the new turn
+            document.getElementById('showDialogueAnswerButton').style.display = 'inline-block'; // Show for new turn
+            document.getElementById('nextDialogueButton').style.display = 'none'; // Hide until answer is given/shown
+            dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight; // Scroll to bottom
         }
 
         /**
@@ -4272,14 +4412,22 @@
          */
         function showDialogueCompletion() {
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
-            dialoguePracticeArea.innerHTML = '<div class="completion-message">恭喜你，所有对话练习都完成了！</div>';
-            
-            // Hide all buttons except print and back to home
-            document.querySelectorAll('#dialoguePracticeScreen .dialogue-practice-buttons button').forEach(button => {
-                button.style.display = 'none';
-            });
-            document.getElementById('printDialogueButton').style.display = 'inline-block';
-            document.getElementById('backToHomeFromDialogue').style.display = 'inline-block';
+            // Hide the input area of the *last* turn to clean up
+            const lastTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex - 1}"]`);
+            if (lastTurnDiv) {
+                const lastInputArea = lastTurnDiv.querySelector('.current-input-area');
+                if (lastInputArea) {
+                    lastInputArea.style.display = 'none';
+                }
+            }
+
+            dialoguePracticeArea.innerHTML += '<div class="completion-message">恭喜你，所有对话练习都完成了！</div>';
+            dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight; // Scroll to bottom
+
+            // Hide the active dialogue specific buttons, but keep global print/back buttons
+            document.getElementById('showDialogueAnswerButton').style.display = 'none';
+            document.getElementById('nextDialogueButton').style.display = 'none';
+            // The restart and print/back home buttons are always visible in the global group
 
             dialoguePracticeCount++; // Not directly used in stats, but keep for now
             interactionCounts.totalInteractionCount++; // Completion is an interaction
@@ -4292,6 +4440,9 @@
          * This function is called when the "重新开始" button is clicked, or implicitly after completion.
          */
         function finishDialoguePractice() {
+            // This function is no longer called directly from UI buttons,
+            // as startDialoguePractice is used for "重新开始" and showScreen('homeScreen') for "返回主页".
+            // Left here for potential future use or clarity.
             startDialoguePractice(); // For now, restart the practice
             // Or, if you want to go back to home:
             // showScreen('homeScreen');
@@ -4300,3 +4451,4 @@
     </script>
 </body>
 </html>
+�
