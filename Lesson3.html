@@ -1438,7 +1438,7 @@
 
                 <div class="task-instructions">
                     <p>输入你的名字，点击你想开始的练习模式！</p>
-                    <p>完成所有回合以获得奖励: 👍 "太棒了！"</p>
+                    <p>完成所有回合以获得奖励: � "太棒了！"</p>
                 </div>
             </div>
 
@@ -1566,8 +1566,8 @@
                 </div>
                 <!-- NEW GLOBAL VOICE INPUT AREA -->
                 <div id="globalVoiceInputArea" class="current-input-area">
-                    <p id="globalRecognizedTextDisplay" class="recognized-text-display">点击麦克风开始说话...</p>
-                    <button id="globalStartVoiceInputBtn" class="start-voice-input-btn">🎤 <span>开始说话</span></button>
+                    <p id="globalRecognizedTextDisplay" class="recognized-text-display"></p>
+                    <button id="globalStartVoiceInputBtn" class="start-voice-input-btn">🎤 <span>点击说话</span></button>
                 </div>
                 <!-- END NEW GLOBAL VOICE INPUT AREA -->
                 <!-- Global button group for dialogue practice -->
@@ -3252,7 +3252,7 @@
                 p.addEventListener('mouseover', (event) => {
                     hideAllPinyinEnglishDisplays(); // Hide any other open translations
                     pinyinEnglishClickDisplay.style.display = 'block';
-                    // No interactionCounts update here
+                    // No interactionCounts update here, as it's a transient hover effect
                     // updateStats(); // Avoid excessive updates on hover
                 });
                 p.addEventListener('mouseout', (event) => {
@@ -4043,6 +4043,13 @@
             const globalRecognizedTextDisplay = document.getElementById('globalRecognizedTextDisplay');
             const globalStartVoiceInputBtn = document.getElementById('globalStartVoiceInputBtn');
 
+            // Re-enable global voice input button for a new session
+            globalStartVoiceInputBtn.disabled = false;
+            globalVoiceInputArea.style.display = 'flex'; // Ensure it's visible at the start of a session
+            globalRecognizedTextDisplay.textContent = ''; // Clear text, no initial "点击麦克风开始说话..."
+            globalRecognizedTextDisplay.classList.remove('expanded'); // Reset size
+
+
             // Check for SpeechRecognition API support
             if (!('webkitSpeechRecognition' in window)) {
                 globalTemporaryHint.textContent = '您的浏览器不支持语音识别功能，请使用支持的浏览器（如 Chrome）。';
@@ -4226,7 +4233,7 @@
             document.getElementById('nextDialogueButton').style.display = 'none'; // Initially hidden for new turns
 
             // Ensure global voice input area is enabled and ready for the new turn
-            globalRecognizedTextDisplay.textContent = '点击麦克风开始说话...';
+            globalRecognizedTextDisplay.textContent = ''; // Clear text for new turn
             globalRecognizedTextDisplay.classList.remove('expanded');
             globalStartVoiceInputBtn.disabled = false; // Re-enable mic for new turn
             globalStartVoiceInputBtn.classList.remove('listening');
@@ -4307,7 +4314,7 @@
                 interactionCounts.incorrectAnswersCount++;
                 
                 // Re-enable global mic for retry
-                globalRecognizedTextDisplay.textContent = '点击麦克风开始说话...'; // Reset text for retry
+                globalRecognizedTextDisplay.textContent = ''; // Clear text for retry
                 globalRecognizedTextDisplay.classList.remove('expanded');
                 globalStartVoiceInputBtn.disabled = false; // Re-enable for retry
                 globalStartVoiceInputBtn.classList.remove('listening');
@@ -4396,7 +4403,7 @@
          */
         function showDialogueCompletion() {
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
-            // Hide the global input area on completion
+            // Disable the global input area on completion
             globalStartVoiceInputBtn.disabled = true;
             globalVoiceInputArea.style.display = 'none';
 
@@ -4405,6 +4412,7 @@
 
             // Hide the active dialogue specific buttons, but keep global print/back buttons
             document.getElementById('showDialogueAnswerButton').style.display = 'none';
+            document.getElementById('showDialogueAnswerButton').disabled = true; // Disable the show answer button
             document.getElementById('nextDialogueButton').style.display = 'none';
             // The restart and print/back home buttons are always visible in the global group
 
@@ -4421,7 +4429,7 @@
         function finishDialoguePractice() {
             // This function is no longer called directly from UI buttons,
             // as startDialoguePractice is used for "重新开始" and showScreen('homeScreen') for "返回主页".
-            // Left here for potential future use or clarity.
+            // Left here for potential future code.
             startDialoguePractice(); // For now, restart the practice
             // Or, if you want to go back to home:
             // showScreen('homeScreen');
@@ -4430,3 +4438,4 @@
     </script>
 </body>
 </html>
+�
