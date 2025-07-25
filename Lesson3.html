@@ -1261,24 +1261,24 @@
             box-sizing: border-box;
             word-wrap: break-word; /* Ensure text wraps */
         }
-        /* NEW: Style for the current active input area within the turn */
-        .dialogue-practice-turn .current-input-area {
+        /* NEW: Styles for the global input area, positioned at the bottom */
+        #globalVoiceInputArea { /* Changed from .dialogue-practice-turn .current-input-area */
             display: flex;
             flex-direction: row; /* Changed to row */
             align-items: center; /* Vertically center items in the row */
             justify-content: center; /* Center horizontally */
             width: 100%;
-            margin-top: 10px;
+            margin-top: auto; /* Push to bottom of dialoguePracticeScreen */
             gap: 15px; /* Slightly increased gap for visual separation */
             background-color: #e0f7fa; /* Light blue background for the input panel */
             border-radius: 8px;
             padding: 10px 15px; /* Reduced vertical padding for compactness */
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             min-height: auto; /* Let content dictate height, remove fixed min-height if not needed */
+            flex-shrink: 0; /* Prevent it from shrinking */
         }
 
-
-        .dialogue-practice-turn .recognized-text-display {
+        #globalRecognizedTextDisplay { /* Changed from .dialogue-practice-turn .recognized-text-display */
             font-size: 1.2em;
             color: #1a73e8; /* Blue for user's recognized text */
             font-weight: bold;
@@ -1298,7 +1298,7 @@
             max-width: 70%; /* Limit its max width to leave space for button */
         }
         /* Make recognized-text-display expand more */
-        .dialogue-practice-turn .recognized-text-display.expanded {
+        #globalRecognizedTextDisplay.expanded { /* Changed from .dialogue-practice-turn .recognized-text-display.expanded */
             min-height: 50px; /* Reduced expanded min-height to make it less tall */
             align-items: center; /* Center text vertically when expanded */
             padding-top: 5px;
@@ -1306,7 +1306,7 @@
         }
 
 
-        .dialogue-practice-turn .start-voice-input-btn {
+        #globalStartVoiceInputBtn { /* Changed from .dialogue-practice-turn .start-voice-input-btn */
             padding: 12px 25px;
             font-size: 1.5em; /* Larger button */
             border: none;
@@ -1321,19 +1321,19 @@
             align-items: center;
             gap: 8px;
         }
-        .dialogue-practice-turn .start-voice-input-btn:hover:not(:disabled) {
+        #globalStartVoiceInputBtn:hover:not(:disabled) { /* Changed from .dialogue-practice-turn .start-voice-input-btn:hover:not(:disabled) */
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
             background: linear-gradient(45deg, #E64A19, #F4511E);
         }
-        .dialogue-practice-turn .start-voice-input-btn:disabled {
+        #globalStartVoiceInputBtn:disabled { /* Changed from .dialogue-practice-turn .start-voice-input-btn:disabled */
             background-color: #cccccc;
             cursor: not-allowed;
             opacity: 0.7;
             box-shadow: none;
             transform: none;
         }
-        .dialogue-practice-turn .start-voice-input-btn.listening {
+        #globalStartVoiceInputBtn.listening { /* Changed from .dialogue-practice-turn .start-voice-input-btn.listening */
             background: linear-gradient(45deg, #4CAF50, #8BC34A); /* Green when listening */
             box-shadow: 0 0 15px rgba(76, 175, 80, 0.5); /* Green glow */
             animation: pulse 1.5s infinite;
@@ -1345,12 +1345,13 @@
             100% { transform: scale(1); box-shadow: 0 0 10px rgba(76, 175, 80, 0.3); }
         }
 
-        .dialogue-practice-turn .start-voice-input-btn .listening-status {
+        #globalStartVoiceInputBtn .listening-status { /* Changed from .dialogue-practice-turn .start-voice-input-btn .listening-status */
             font-size: 0.7em; /* Smaller text for status */
             color: white;
             opacity: 0.8;
         }
 
+        /* Removed local feedback elements, now feedback is directly on user response or global hint */
         .dialogue-practice-turn .dialogue-feedback {
             font-size: 1.1em;
             font-weight: bold;
@@ -1563,6 +1564,12 @@
                 <div id="dialoguePracticeArea" style="width: 100%;">
                     <!-- Dialogue practice turns will be dynamically inserted here -->
                 </div>
+                <!-- NEW GLOBAL VOICE INPUT AREA -->
+                <div id="globalVoiceInputArea" class="current-input-area">
+                    <p id="globalRecognizedTextDisplay" class="recognized-text-display">点击麦克风开始说话...</p>
+                    <button id="globalStartVoiceInputBtn" class="start-voice-input-btn">🎤 <span>开始说话</span></button>
+                </div>
+                <!-- END NEW GLOBAL VOICE INPUT AREA -->
                 <!-- Global button group for dialogue practice -->
                 <div class="dialogue-global-buttons">
                     <button id="showDialogueAnswerButton" class="show-answer-btn" style="display: none;">显示答案</button>
@@ -1668,6 +1675,8 @@
             const isDialoguePracticeScreen = (screenId === 'dialoguePracticeScreen');
             // Manage visibility of the global dialogue buttons
             const globalDialogueButtons = document.querySelector('.dialogue-global-buttons');
+            const globalVoiceInputArea = document.getElementById('globalVoiceInputArea'); // Get the global voice input area
+
             if (globalDialogueButtons) {
                 globalDialogueButtons.style.display = isDialoguePracticeScreen ? 'flex' : 'none';
                 // Initially hide "显示答案" and "下一句" when starting a new dialogue practice, they will be controlled by JS
@@ -1676,6 +1685,10 @@
                 document.getElementById('restartDialogueButton').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none'; // Always show restart if on screen
                 document.getElementById('printDialogueButton').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none';
                 document.getElementById('backToHomeFromDialogue').style.display = isDialoguePracticeScreen ? 'inline-block' : 'none';
+            }
+            // Control visibility of the global voice input area
+            if (globalVoiceInputArea) {
+                globalVoiceInputArea.style.display = isDialoguePracticeScreen ? 'flex' : 'none';
             }
 
 
@@ -2200,6 +2213,10 @@
             const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
             const nextDialogueButton = document.getElementById('nextDialogueButton');
             const restartDialogueButton = document.getElementById('restartDialogueButton');
+            // Get references to the global voice input elements
+            const globalVoiceInputArea = document.getElementById('globalVoiceInputArea');
+            const globalRecognizedTextDisplay = document.getElementById('globalRecognizedTextDisplay');
+            const globalStartVoiceInputBtn = document.getElementById('globalStartVoiceInputBtn');
 
 
             // Event Listeners
@@ -2558,7 +2575,7 @@
                     botReplyToSpeak = botReplyToDisplay; // Speak the same as display
                 } else {
                     // Final message after all turns, using captured name and surname
-                    botReplyToDisplay = `� 你太棒了！ 结束对话。`; // Simplified final message
+                    botReplyToDisplay = `👍 你太棒了！ 结束对话。`; // Simplified final message
                     botReplyToSpeak = botReplyToDisplay;
                     document.getElementById('userInput').disabled = true; // Disable input after final message
                     document.getElementById('sendButton').disabled = true; // Disable send button
@@ -4021,6 +4038,11 @@
             currentDialogueTurnIndex = 0;
             dialoguePracticeHistory = [];
             
+            // Get references to global voice input elements
+            const globalVoiceInputArea = document.getElementById('globalVoiceInputArea');
+            const globalRecognizedTextDisplay = document.getElementById('globalRecognizedTextDisplay');
+            const globalStartVoiceInputBtn = document.getElementById('globalStartVoiceInputBtn');
+
             // Check for SpeechRecognition API support
             if (!('webkitSpeechRecognition' in window)) {
                 globalTemporaryHint.textContent = '您的浏览器不支持语音识别功能，请使用支持的浏览器（如 Chrome）。';
@@ -4032,6 +4054,10 @@
                 document.getElementById('showDialogueAnswerButton').style.display = 'none';
                 document.getElementById('nextDialogueButton').style.display = 'none';
                 document.getElementById('restartDialogueButton').style.display = 'none';
+                // Disable global voice input area if not supported
+                if (globalVoiceInputArea) {
+                    globalVoiceInputArea.style.display = 'none';
+                }
                 return;
             }
 
@@ -4044,51 +4070,30 @@
                 speechRecognition.lang = 'zh-CN'; // Default language for recognition (Chinese)
 
                 speechRecognition.onstart = () => {
-                    const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
-                    if (currentTurnDiv) {
-                        const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
-                        recognizedTextDisplay.textContent = '正在聆听...';
-                        recognizedTextDisplay.classList.add('expanded'); // Expand while listening
-                        const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                        if (startVoiceInputButton) {
-                            startVoiceInputButton.classList.add('listening'); // Add listening class for visual feedback
-                            startVoiceInputButton.disabled = true; // Disable during listening
-                        }
-                    }
+                    globalRecognizedTextDisplay.textContent = '正在聆听...';
+                    globalRecognizedTextDisplay.classList.add('expanded'); // Expand while listening
+                    globalStartVoiceInputBtn.classList.add('listening'); // Add listening class for visual feedback
+                    globalStartVoiceInputBtn.disabled = true; // Disable during listening
                 };
 
                 speechRecognition.onresult = (event) => {
-                    const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
-                    if (!currentTurnDiv) return;
-
-                    const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
                     const transcript = event.results[0][0].transcript;
-                    recognizedTextDisplay.textContent = transcript;
-                    recognizedTextDisplay.classList.remove('expanded'); // Shrink after result
+                    globalRecognizedTextDisplay.textContent = transcript;
+                    globalRecognizedTextDisplay.classList.remove('expanded'); // Shrink after result
 
                     // Re-enable mic button here if not automatically advancing
-                    const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    if (startVoiceInputButton) {
-                        startVoiceInputButton.classList.remove('listening');
-                        startVoiceInputButton.disabled = false; // Re-enable for retry
-                    }
+                    globalStartVoiceInputBtn.classList.remove('listening');
+                    globalStartVoiceInputBtn.disabled = false; // Re-enable for retry
                     
-                    checkVoiceAnswer(transcript, currentDialogueTurnIndex, currentTurnDiv);
+                    checkVoiceAnswer(transcript); // Pass transcript directly, currentTurnDiv not needed here
                 };
 
                 speechRecognition.onerror = (event) => {
-                    const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
-                    if (!currentTurnDiv) return;
+                    globalRecognizedTextDisplay.textContent = '语音识别失败，请重试。';
+                    globalRecognizedTextDisplay.classList.remove('expanded'); // Shrink on error
 
-                    const recognizedTextDisplay = currentTurnDiv.querySelector('.recognized-text-display');
-                    recognizedTextDisplay.textContent = '语音识别失败，请重试。';
-                    recognizedTextDisplay.classList.remove('expanded'); // Shrink on error
-
-                    const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    if (startVoiceInputButton) {
-                        startVoiceInputButton.classList.remove('listening'); // Remove listening class
-                        startVoiceInputButton.disabled = false; // Re-enable button
-                    }
+                    globalStartVoiceInputBtn.classList.remove('listening'); // Remove listening class
+                    globalStartVoiceInputBtn.disabled = false; // Re-enable button
 
                     let errorMessage = '语音识别错误。请重试。';
                     if (event.error === 'not-allowed') {
@@ -4117,17 +4122,19 @@
                 };
 
                 speechRecognition.onend = () => {
-                    const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
-                    if (!currentTurnDiv) return;
-
-                    const startVoiceInputButton = currentTurnDiv.querySelector('.start-voice-input-btn');
-                    if (startVoiceInputButton) { // Check if element exists before modifying
-                        startVoiceInputButton.classList.remove('listening');
-                        // Button re-enabled in checkVoiceAnswer or onerror
-                        // If it's still disabled, it means the answer was correct, so it stays disabled.
-                    }
+                    globalStartVoiceInputBtn.classList.remove('listening');
+                    // Button re-enabled in checkVoiceAnswer or onerror
                 };
             }
+            
+            // Set up click listener for the global mic button
+            globalStartVoiceInputBtn.onclick = () => {
+                globalRecognizedTextDisplay.textContent = ''; // Clear previous recognition
+                globalRecognizedTextDisplay.classList.add('expanded'); // Expand while waiting for input
+                speechRecognition.start();
+                interactionCounts.totalInteractionCount++; // Voice input attempt is an interaction
+                updateStats();
+            };
 
             loadDialogueTurn();
             interactionCounts.pageViewCount++; // Viewing dialogue practice is a page view
@@ -4146,13 +4153,11 @@
             const turnData = lessonData.chatResponses[currentDialogueTurnIndex];
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
 
-            // Hide the input area of the *previous* turn, if one exists and is visible
+            // Hide the input area of the *previous* turn if it was embedded locally
+            // (This logic is no longer strictly needed as input area is global, but harmless)
             const previousTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex - 1}"]`);
             if (previousTurnDiv) {
-                const prevInputArea = previousTurnDiv.querySelector('.current-input-area');
-                if (prevInputArea) {
-                    prevInputArea.style.display = 'none';
-                }
+                // No current-input-area inside turnDiv anymore
             }
 
             const turnDiv = document.createElement('div');
@@ -4206,30 +4211,6 @@
             dialogueAnswer.style.display = 'none'; // Hidden until shown by button
             turnDiv.appendChild(dialogueAnswer);
 
-            // Current input area with mic button - only for the active turn
-            const currentInputArea = document.createElement('div');
-            currentInputArea.classList.add('current-input-area');
-            turnDiv.appendChild(currentInputArea);
-
-            const recognizedTextDisplay = document.createElement('p');
-            recognizedTextDisplay.classList.add('recognized-text-display');
-            recognizedTextDisplay.textContent = '点击麦克风开始说话...';
-            currentInputArea.appendChild(recognizedTextDisplay);
-
-            const startVoiceInputButton = document.createElement('button');
-            startVoiceInputButton.classList.add('start-voice-input-btn');
-            startVoiceInputButton.innerHTML = '🎤 <span>开始说话</span>'; // Changed text to Chinese
-            startVoiceInputButton.onclick = () => {
-                recognizedTextDisplay.textContent = ''; // Clear previous recognition
-                recognizedTextDisplay.classList.add('expanded'); // Expand while waiting for input
-                // The 'listening' class and button disable/enable are handled in speechRecognition.onstart/onend
-                speechRecognition.start();
-                interactionCounts.totalInteractionCount++; // Voice input attempt is an interaction
-                updateStats();
-            };
-            currentInputArea.appendChild(startVoiceInputButton);
-
-
             dialoguePracticeArea.appendChild(turnDiv);
             dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight;
             interactionCounts.totalInteractionCount++; // Loading a turn is an interaction
@@ -4243,29 +4224,29 @@
             // Manage global buttons visibility for the current active turn
             document.getElementById('showDialogueAnswerButton').style.display = 'inline-block';
             document.getElementById('nextDialogueButton').style.display = 'none'; // Initially hidden for new turns
+
+            // Ensure global voice input area is enabled and ready for the new turn
+            globalRecognizedTextDisplay.textContent = '点击麦克风开始说话...';
+            globalRecognizedTextDisplay.classList.remove('expanded');
+            globalStartVoiceInputBtn.disabled = false; // Re-enable mic for new turn
+            globalStartVoiceInputBtn.classList.remove('listening');
+            globalVoiceInputArea.style.display = 'flex'; // Ensure visible
         }
 
         /**
          * Checks the user's voice answer for the current dialogue turn.
          * @param {string} recognizedText - The text recognized from user's speech.
-         * @param {number} turnIndex - The index of the current dialogue turn.
-         * @param {HTMLElement} turnDiv - The div element for the current turn.
          */
-        function checkVoiceAnswer(recognizedText, turnIndex, turnDiv) {
-            const turnData = lessonData.chatResponses[turnIndex];
-            const userDialogueAttempt = turnDiv.querySelector('.user-dialogue-attempt'); // Get the permanent user attempt display
-            const dialogueFeedback = turnDiv.querySelector('.dialogue-feedback');
-            const dialogueAnswer = turnDiv.querySelector('.dialogue-practice-answer');
-            const currentInputArea = turnDiv.querySelector('.current-input-area');
-            const recognizedTextDisplay = currentInputArea.querySelector('.recognized-text-display');
-            const startVoiceInputButton = currentInputArea.querySelector('.start-voice-input-btn');
+        function checkVoiceAnswer(recognizedText) {
+            const turnData = lessonData.chatResponses[currentDialogueTurnIndex];
+            const currentTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
+            if (!currentTurnDiv) return;
+
+            const userDialogueAttempt = currentTurnDiv.querySelector('.user-dialogue-attempt');
+            const dialogueFeedback = currentTurnDiv.querySelector('.dialogue-feedback');
+            const dialogueAnswer = currentTurnDiv.querySelector('.dialogue-practice-answer'); // Ensure this reference exists
             const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
             const nextDialogueButton = document.getElementById('nextDialogueButton');
-
-            // Display the user's recognized text immediately and permanently within the turn's history
-            const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
-            userDialogueAttempt.textContent = `${userEmoji} ${recognizedText}`; // Initially without the 👍
-            userDialogueAttempt.style.display = 'block';
 
             const lowerRecognizedText = recognizedText.toLowerCase().replace(/[可通过，。？！,?!]/g, '').replace(/\s+/g, '');
             let isCorrect = false;
@@ -4288,17 +4269,18 @@
             }
 
             if (isCorrect) {
+                const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
                 userDialogueAttempt.innerHTML = `${userEmoji}👍 ${recognizedText}`; // Update with 👍 emoji
+                userDialogueAttempt.style.display = 'block';
                 dialogueFeedback.style.display = 'none'; // Hide feedback section completely for correct answers
 
                 interactionCounts.correctAnswersCount++;
                 
-                nextDialogueButton.style.display = 'none'; // Hide next button if auto-advancing
                 showDialogueAnswerButton.style.display = 'none'; // Hide global show answer
-                
-                // Hide the current input area (mic button and temporary recognized text display)
-                currentInputArea.style.display = 'none';
-                startVoiceInputButton.disabled = true; // Ensure button is disabled
+
+                // Disable the global mic and hide its area temporarily
+                globalStartVoiceInputBtn.disabled = true;
+                globalVoiceInputArea.style.display = 'none'; // Hide global input area
 
                 // Store the correct answer in history
                 dialoguePracticeHistory.push({
@@ -4307,7 +4289,7 @@
                     correctAnswer: recognizedText, // User's correct answer
                     isCorrect: true
                 });
-                speak('太好了！你的回答很棒！');
+                speak('太好了！'); // Speak only "太好了！"
 
                 // Automatically advance to the next turn after a short delay
                 setTimeout(() => {
@@ -4315,15 +4297,20 @@
                 }, 1500); // 1.5 second delay before next question
 
             } else {
+                const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
+                userDialogueAttempt.textContent = `${userEmoji} ${recognizedText}`; // Show user's attempt without 👍
+                userDialogueAttempt.style.display = 'block';
                 dialogueFeedback.textContent = '❌ 对不起，你的回答不对，请再试一次。';
                 dialogueFeedback.classList.remove('correct');
                 dialogueFeedback.classList.add('incorrect');
                 dialogueFeedback.style.display = 'block'; // Ensure feedback is visible
                 interactionCounts.incorrectAnswersCount++;
                 
-                // The currentInputArea remains visible. Re-enable mic if it was disabled.
-                recognizedTextDisplay.textContent = '点击麦克风开始说话...'; // Reset text for retry
-                startVoiceInputButton.disabled = false; // Re-enable for retry
+                // Re-enable global mic for retry
+                globalRecognizedTextDisplay.textContent = '点击麦克风开始说话...'; // Reset text for retry
+                globalRecognizedTextDisplay.classList.remove('expanded');
+                globalStartVoiceInputBtn.disabled = false; // Re-enable for retry
+                globalStartVoiceInputBtn.classList.remove('listening');
             }
             interactionCounts.totalInteractionCount++; // Checking answer is an interaction
             updateStats();
@@ -4340,8 +4327,6 @@
             const userDialogueAttempt = turnDiv.querySelector('.user-dialogue-attempt'); // Get the permanent user attempt display
             const dialogueFeedback = turnDiv.querySelector('.dialogue-feedback');
             const dialogueAnswer = turnDiv.querySelector('.dialogue-practice-answer');
-            const currentInputArea = turnDiv.querySelector('.current-input-area');
-            const startVoiceInputButton = currentInputArea.querySelector('.start-voice-input-btn'); // Corrected query scope
             const showDialogueAnswerButton = document.getElementById('showDialogueAnswerButton');
             const nextDialogueButton = document.getElementById('nextDialogueButton');
 
@@ -4365,8 +4350,10 @@
             userDialogueAttempt.textContent = `${userEmoji} （答案已显示）`; // Indicate answer was shown, with emoji
             userDialogueAttempt.style.display = 'block'; // Ensure it's visible
             
-            currentInputArea.style.display = 'none'; // Hide the input area
-            startVoiceInputButton.disabled = true; // Disable voice input
+            // Disable global mic and hide its area
+            globalStartVoiceInputBtn.disabled = true;
+            globalVoiceInputArea.style.display = 'none';
+            
             showDialogueAnswerButton.style.display = 'none'; // Hide global show answer
             nextDialogueButton.style.display = 'none'; // Hide next button if auto-advancing
             
@@ -4393,15 +4380,7 @@
          * Moves to the next dialogue turn.
          */
         function nextDialogueTurn() {
-            // Hide the input area of the *just completed* turn
-            const previousTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex}"]`);
-            if (previousTurnDiv) {
-                const prevInputArea = previousTurnDiv.querySelector('.current-input-area');
-                if (prevInputArea) {
-                    prevInputArea.style.display = 'none';
-                }
-            }
-
+            // No need to hide previous input area as it's now global
             currentDialogueTurnIndex++;
             loadDialogueTurn();
             interactionCounts.totalInteractionCount++; // Moving to next turn is an interaction
@@ -4417,14 +4396,9 @@
          */
         function showDialogueCompletion() {
             const dialoguePracticeArea = document.getElementById('dialoguePracticeArea');
-            // Hide the input area of the *last* turn to clean up
-            const lastTurnDiv = document.querySelector(`.dialogue-practice-turn[data-turn-index="${currentDialogueTurnIndex - 1}"]`);
-            if (lastTurnDiv) {
-                const lastInputArea = lastTurnDiv.querySelector('.current-input-area');
-                if (lastInputArea) {
-                    lastInputArea.style.display = 'none';
-                }
-            }
+            // Hide the global input area on completion
+            globalStartVoiceInputBtn.disabled = true;
+            globalVoiceInputArea.style.display = 'none';
 
             dialoguePracticeArea.innerHTML += '<div class="completion-message">恭喜你，所有对话练习都完成了！</div>';
             dialoguePracticeArea.scrollTop = dialoguePracticeArea.scrollHeight; // Scroll to bottom
@@ -4456,4 +4430,3 @@
     </script>
 </body>
 </html>
-�
