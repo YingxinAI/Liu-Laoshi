@@ -1254,7 +1254,7 @@
             margin-left: 25px; /* Indent user's response */
             margin-top: 5px;
             padding: 5px 10px;
-            border-left: 3px solid #64B5F6; /* Lighter blue bar */
+            /* Removed border-left: 3px solid #64B5F6; */
             background-color: #f0f8ff; /* Light blue background */
             border-radius: 0 5px 5px 0;
             width: calc(100% - 25px); /* Adjust width for indent */
@@ -1438,7 +1438,7 @@
 
                 <div class="task-instructions">
                     <p>输入你的名字，点击你想开始的练习模式！</p>
-                    <p>完成所有回合以获得奖励: � "太棒了！"</p>
+                    <p>完成所有回合以获得奖励: 👍 "太棒了！"</p>
                 </div>
             </div>
 
@@ -2557,7 +2557,7 @@
                     return new RegExp(`^${pattern}$`).test(lowerUserText);
                 });
             } else {
-                // If expectedUser is empty, it means the conversation is at an end point.
+                // If expectedUser is empty, it means the conversation is at an F.
                 correct = true; // Any input is fine to acknowledge the end
             }
 
@@ -2575,7 +2575,7 @@
                     botReplyToSpeak = botReplyToDisplay; // Speak the same as display
                 } else {
                     // Final message after all turns, using captured name and surname
-                    botReplyToDisplay = `👍 你太棒了！ 结束对话。`; // Simplified final message
+                    botReplyToDisplay = `� 你太棒了！ 结束对话。`; // Simplified final message
                     botReplyToSpeak = botReplyToDisplay;
                     document.getElementById('userInput').disabled = true; // Disable input after final message
                     document.getElementById('sendButton').disabled = true; // Disable send button
@@ -4277,7 +4277,7 @@
 
             if (isCorrect) {
                 const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
-                userDialogueAttempt.innerHTML = `${userEmoji}👍 ${recognizedText}`; // Update with 👍 emoji
+                userDialogueAttempt.innerHTML = `${userEmoji}：👍 ${recognizedText}`; // Updated: Added colon
                 userDialogueAttempt.style.display = 'block';
                 dialogueFeedback.style.display = 'none'; // Hide feedback section completely for correct answers
 
@@ -4305,7 +4305,7 @@
 
             } else {
                 const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
-                userDialogueAttempt.textContent = `${userEmoji} ${recognizedText}`; // Show user's attempt without 👍
+                userDialogueAttempt.innerHTML = `${userEmoji}： ${recognizedText}`; // Updated: Added colon, changed to innerHTML
                 userDialogueAttempt.style.display = 'block';
                 dialogueFeedback.textContent = '❌ 对不起，你的回答不对，请再试一次。';
                 dialogueFeedback.classList.remove('correct');
@@ -4354,7 +4354,7 @@
             dialogueFeedback.style.display = 'none'; // Hide previous feedback
 
             const userEmoji = (studentGender === 'male') ? '👨‍🎓' : '👩‍🎓';
-            userDialogueAttempt.textContent = `${userEmoji} （答案已显示）`; // Indicate answer was shown, with emoji
+            userDialogueAttempt.innerHTML = `${userEmoji}： （答案已显示）`; // Updated: Added colon, changed to innerHTML
             userDialogueAttempt.style.display = 'block'; // Ensure it's visible
             
             // Disable global mic and hide its area
