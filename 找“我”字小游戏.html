@@ -2,102 +2,277 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>找“我”小游戏</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>找字小游戏</title>
   <style>
+    :root { --gap: 6px; }
+    * { box-sizing: border-box; }
     body {
       font-family: KaiTi, SimKai, sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 30px;
+      flex-direction: row;
+      align-items: stretch;
+      height: 100vh;
+      margin: 0;
+      padding: 8px;
       background-color: #f9f9f9;
       color: black;
+      gap: 28px;
+      overflow: hidden;
+    }
+
+    #leftPanel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 420px;
+      background-color: #eef6ff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      overflow-y: auto;
     }
 
     h1 {
       color: #3b82f6;
       font-size: 24px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      line-height: 1.4;
+      text-align: center;
+      width: 100%;
+    }
+
+    .highlight-target {
+      color: #d97706;
+      font-weight: bold;
+      font-size: 28px;
+    }
+
+    #instructions {
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #444;
+      white-space: pre-wrap;
+      align-self: flex-start;
+      text-align: left;
+    }
+    
+    .instruction-heading {
+      color: #004aad;
+      font-weight: bold;
+    }
+
+    #statusSection {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      text-align: center;
+      margin-top: 0;
     }
 
     #progress {
       font-size: 18px;
       font-weight: bold;
-      margin-bottom: 10px;
       color: #3b82f6;
+      margin-bottom: 8px;
+    }
+
+    #timerDisplayAndConfig {
+      width: 100%;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f766e;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #winMessage {
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: none;
+      white-space: pre-line;
+      width: 100%;
+    }
+
+    #controls {
+      margin-top: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px; /* Added for consistent spacing between buttons */
+    }
+
+    .control-btn {
+      padding: 12px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      color: white;
+    }
+
+    /* Styles for the different buttons */
+    #startBtn, #restartBtn {
+      background-color: #3b82f6; /* Fallback for older browsers */
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+    #startBtn:hover, #restartBtn:hover {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+    }
+
+    #timerModeBtn {
+      background-color: #059669; /* Fallback for older browsers */
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    #timerModeBtn:hover {
+      background: linear-gradient(135deg, #047857, #065f46);
+    }
+
+    #toggleBtn {
+      background-color: #8b5cf6; /* Fallback for older browsers */
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+    #toggleBtn:hover {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    /* Container to hold the Start and Restart buttons in the same place */
+    #startRestartContainer {
+      position: relative;
+      height: 44px; /* Set a fixed height for the container */
+      width: 100%;
+    }
+
+    /* Position the start and restart buttons absolutely within their container */
+    #startBtn, #restartBtn {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    #gameContainer {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #boardWrap {
+      width: 100%;
+      height: 100%;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     #game {
       display: grid;
-      grid-template-columns: repeat(8, 70px);
-      gap: 4px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(8, var(--cell));
+      grid-auto-rows: var(--cell);
+      gap: var(--gap);
     }
 
     .cell {
-      width: 70px;
-      height: 70px;
-      background-color: #d0e7ff; /* 淡蓝色 */
+      width: var(--cell);
+      height: var(--cell);
+      background-color: #d0e7ff;
       border: none;
-      font-size: 30px;
+      font-size: calc(var(--cell) * 0.4);
       text-align: center;
-      line-height: 70px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       user-select: none;
       color: black;
       position: relative;
       overflow: hidden;
       font-family: KaiTi, SimKai, sans-serif;
+      border-radius: 6px;
     }
 
-    .correct {
-      background-color: #a3e635; /* 绿色 */
-      color: white;
-    }
-
-    .wrong {
-      background-color: #ef4444; /* 红色 */
-      color: white;
-    }
+    /* New colors for correct and wrong cells */
+    .correct { background-color: #ef4444; color: white; } /* Changed to red */
+    .wrong   { background-color: #a3e635; color: white; } /* Changed to green */
 
     .bang-icon {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 24px;
+      font-size: calc(var(--cell) * 0.3);
       color: white;
       pointer-events: none;
     }
 
-    #winMessage {
-      font-size: 24px;
-      color: green;
-      font-weight: bold;
-      margin-top: -10px;
-      display: none;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #2563eb;
+    #countdownSelect{
+      padding:6px 8px;
+      border:1px solid #cbd5e1;
+      border-radius:6px;
+      font-size: 14px;
+      font-weight: normal;
     }
   </style>
 </head>
 <body>
-  <h1>🔍 找“我”小游戏</h1>
-  <div id="progress">已找到 0 / 10 个“我”</div>
-  <div id="game"></div>
-  <div id="winMessage">你赢了！🎉</div>
-  <button onclick="restartGame()">重新开始</button>
+  <div id="leftPanel">
+    <h1 id="gameTitle">🔍 找<span class="highlight-target">“我”</span>小游戏<br>Find <span class="highlight-target">“我”</span> Game</h1>
+    <div id="instructions"><span class="instruction-heading">游戏玩法：</span><br>
+1. 点击“开始游戏”后，棋盘中会出现汉字。<br>
+2. 请在棋盘中寻找并点击所有的目标字。<br>
+3. 找到所有目标字即可获胜！<br>
+<span class="instruction-heading">How to Play:</span><br>
+1. Click "Start Game" to reveal characters on the board.<br>
+2. Find and click all the target characters.<br>
+3. Win the game when all targets are found!<br>
+<span class="instruction-heading">Did You Know?</span><br>
+“我” (wǒ) = I / me<br>
+“找” (zhǎo) = to look for / to search</div>
+
+    <div id="statusSection">
+      <div id="progress"></div>
+      <div id="timerDisplayAndConfig">
+        <span id="timerText"></span>
+        <select id="countdownSelect" title="倒计时秒数 / Countdown seconds" onchange="updateCountdownPreset()">
+          <option value="30">30s</option>
+          <option value="60" selected>60s</option>
+          <option value="90">90s</option>
+        </select>
+      </div>
+      <div id="winMessage"></div>
+    </div>
+
+    <div id="controls">
+      <button class="control-btn" id="timerModeBtn" onclick="toggleTimerMode()"></button>
+      <div id="startRestartContainer">
+        <button class="control-btn" id="startBtn" onclick="startGame()">▶️ 点击开始 / Start Game</button>
+        <button class="control-btn" id="restartBtn" onclick="restartGame()" style="display:none;">🔄 重新开始 / Restart</button>
+      </div>
+      <button class="control-btn" id="toggleBtn" onclick="toggleTarget()"></button>
+    </div>
+  </div>
+
+  <div id="gameContainer">
+    <div id="boardWrap">
+      <div id="game" aria-label="game-board"></div>
+    </div>
+  </div>
+
+  <audio id="winSound" src="applause.mp3" preload="auto"></audio>
 
   <script>
     const rows = 8;
@@ -106,74 +281,185 @@
 
     let board = [];
     let foundCount = 0;
+    let currentTarget = "我";
+    let hasStarted = false;
+
+    const WIN_TEXT = `你赢了！🎉 You Win! 🎉`;
+
+    let timerId = null;
+    let timerMode = 'down';
+    let durationSec = 60;
+    let timeLeft = durationSec;
+    let elapsed = 0;
+
+    window.addEventListener('load', () => {
+      createBoard();
+      updateProgressDisplay();
+      resizeBoard();
+      updateTimerDisplay();
+      updateCountdownVisibility();
+      updateButtonText();
+      runSelfTests();
+    });
+    window.addEventListener('resize', resizeBoard);
+
+    function resizeBoard() {
+      const wrap = document.getElementById('boardWrap');
+      const game = document.getElementById('game');
+      if (!wrap || !game) return;
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 6;
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      const cellW = Math.floor((w - gap * (cols - 1)) / cols);
+      const cellH = Math.floor((h - gap * (rows - 1)) / rows);
+      const cell = Math.max(20, Math.min(cellW, cellH));
+      game.style.setProperty('--cell', cell + 'px');
+    }
+
+    function ensureBoardReady() {
+      const ok = Array.isArray(board) && board.length === rows && Array.isArray(board[0]) && board[0].length === cols;
+      if (!ok) createBoard();
+    }
+
+    function getFillerChar() { return currentTarget === "我" ? "找" : "我"; }
+
+    function updateProgressDisplay() {
+      const progress = document.getElementById('progress');
+      progress.innerHTML = `已找到 / Found: ${foundCount} / ${targetCount} <span class="highlight-target">“${currentTarget}”</span>`;
+    }
+
+    function updateTitle() {
+      const title = document.getElementById('gameTitle');
+      title.innerHTML = `🔍 找<span class="highlight-target">“${currentTarget}”</span>小游戏<br>Find <span class="highlight-target">“${currentTarget}”</span> Game`;
+    }
+    
+    function updateButtonText() {
+        const toggleBtn = document.getElementById('toggleBtn');
+        toggleBtn.textContent = currentTarget === '我' ? "🔎 找“找” / Switch to '找'" : "😊 找“我” / Switch to '我'";
+        const timerModeBtn = document.getElementById('timerModeBtn');
+        timerModeBtn.textContent = timerMode === 'down' ? '⏱️ 切换为 计时 / Switch to Count-Up' : '⏳ 切换为 倒计时 / Switch to Countdown';
+    }
+
+    function resetWinSound() {
+      const winSound = document.getElementById('winSound');
+      winSound.pause();
+      try { winSound.currentTime = 0; } catch (e) {}
+    }
+
+    function playWinSound() {
+      const winSound = document.getElementById('winSound');
+      winSound.volume = 0.85;
+      winSound.play().catch(() => {});
+    }
+
+    function formatTime(sec){
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+    }
+
+    function updateTimerDisplay(){
+      const el = document.getElementById('timerText');
+      if (timerMode === 'down'){
+        const show = hasStarted ? timeLeft : durationSec;
+        el.textContent = `倒计时 Countdown: ${formatTime(show)}`;
+      } else {
+        const show = hasStarted ? elapsed : 0;
+        el.textContent = `计时 Timer: ${formatTime(show)}`;
+      }
+    }
+
+    function startTimer(){
+      stopTimer();
+      if (timerMode === 'down'){
+        timeLeft = durationSec;
+      } else {
+        elapsed = 0;
+      }
+      updateTimerDisplay();
+      timerId = setInterval(()=>{
+        if (timerMode === 'down'){
+          timeLeft -= 1;
+          updateTimerDisplay();
+          if (timeLeft <= 0){
+            timeLeft = 0;
+            updateTimerDisplay();
+            timeUp();
+          }
+        } else {
+          elapsed += 1;
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+
+    function stopTimer(){
+      if (timerId){
+        clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function timeUp(){
+      stopTimer();
+      hasStarted = false;
+      const winMsg = document.getElementById('winMessage');
+      winMsg.style.display = 'block';
+      winMsg.style.color = '#b91c1c';
+      winMsg.innerHTML = `时间到！⏰ Time's up!`;
+    }
 
     function createBoard() {
       board = [];
       foundCount = 0;
       document.getElementById('winMessage').style.display = 'none';
-      document.getElementById('progress').textContent = `已找到 0 / ${targetCount} 个“我”`;
+      resetWinSound();
+      updateTitle();
 
       const game = document.getElementById('game');
       game.innerHTML = '';
 
-      // 创建棋盘并填充“找”
       for (let r = 0; r < rows; r++) {
         const row = [];
         for (let c = 0; c < cols; c++) {
           const cell = document.createElement('button');
           cell.className = 'cell';
-          cell.dataset.row = r;
-          cell.dataset.col = c;
-          cell.textContent = "找";
+          cell.dataset.row = String(r);
+          cell.dataset.col = String(c);
+          cell.textContent = '';
           cell.onclick = () => handleClick(cell);
           game.appendChild(cell);
-
           row.push({ element: cell, isTarget: false, revealed: false });
         }
         board.push(row);
       }
-
-      // 随机设置 10 个“我”
-      let placed = 0;
-      while (placed < targetCount) {
-        const r = Math.floor(Math.random() * rows);
-        const c = Math.floor(Math.random() * cols);
-        if (!board[r][c].isTarget) {
-          board[r][c].isTarget = true;
-          board[r][c].element.textContent = '我';
-          placed++;
-        }
-      }
     }
 
     function handleClick(cell) {
-      // 查找数据
-      let data;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (board[r][c].element === cell) {
-            data = board[r][c];
-            break;
-          }
-        }
-      }
-
+      if (!hasStarted) return;
+      ensureBoardReady();
+      const r = Number(cell.dataset.row);
+      const c = Number(cell.dataset.col);
+      const data = (board[r] && board[r][c]) ? board[r][c] : null;
       if (!data || data.revealed) return;
       data.revealed = true;
 
       if (data.isTarget) {
         cell.classList.add('correct');
-        cell.textContent = '我';
+        cell.textContent = currentTarget;
         foundCount++;
-        document.getElementById('progress').textContent = `已找到 ${foundCount} / ${targetCount} 个“我”`;
-
+        updateProgressDisplay();
         if (foundCount === targetCount) {
-          document.getElementById('winMessage').style.display = 'block';
+          stopTimer();
+          const winMsg = document.getElementById('winMessage');
+          winMsg.style.display = 'block';
+          winMsg.style.color = 'green';
+          winMsg.innerHTML = WIN_TEXT;
+          playWinSound();
         }
       } else {
         cell.classList.add('wrong');
-
-        // 在“找”字上方添加 💥 图标
         const bang = document.createElement('span');
         bang.className = 'bang-icon';
         bang.textContent = '💥';
@@ -181,11 +467,146 @@
       }
     }
 
-    function restartGame() {
-      createBoard();
+    function startGame() {
+      hasStarted = true;
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('restartBtn').style.display = 'inline-block';
+      const msg = document.getElementById('winMessage');
+      msg.style.display = 'none';
+      msg.style.color = 'green';
+      resetWinSound();
+      placeTargets();
+      startTimer();
     }
 
-    window.onload = createBoard;
+    function restartGame() {
+      hasStarted = true;
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('restartBtn').style.display = 'inline-block';
+      const msg = document.getElementById('winMessage');
+      msg.style.display = 'none';
+      msg.style.color = 'green';
+      resetWinSound();
+      placeTargets();
+      startTimer();
+    }
+
+    function placeTargets() {
+      ensureBoardReady();
+
+      const filler = getFillerChar();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cellState = board[r][c];
+          cellState.isTarget = false;
+          cellState.revealed = false;
+          const el = cellState.element;
+          el.className = 'cell';
+          el.textContent = filler;
+          if (el.querySelector('.bang-icon')) {
+            el.querySelectorAll('.bang-icon').forEach(n => n.remove());
+          }
+        }
+      }
+
+      foundCount = 0;
+      updateProgressDisplay();
+
+      let placed = 0;
+      while (placed < targetCount) {
+        const r = Math.floor(Math.random() * rows);
+        const c = Math.floor(Math.random() * cols);
+        const cellState = board[r][c];
+        if (!cellState.isTarget) {
+          cellState.isTarget = true;
+          cellState.element.textContent = currentTarget;
+          placed++;
+        }
+      }
+    }
+
+    function toggleTarget() {
+      currentTarget = currentTarget === '我' ? '找' : '我';
+      updateButtonText();
+      updateTitle();
+
+      const msg = document.getElementById('winMessage');
+      msg.style.display = 'none';
+      msg.style.color = 'green';
+      resetWinSound();
+
+      if (hasStarted) {
+        placeTargets();
+        updateProgressDisplay();
+        startTimer();
+      } else {
+        updateProgressDisplay();
+        updateTimerDisplay();
+      }
+    }
+
+    function toggleTimerMode(){
+      timerMode = (timerMode === 'down') ? 'up' : 'down';
+      updateButtonText();
+      updateCountdownVisibility();
+      if (!hasStarted){
+        updateTimerDisplay();
+      } else {
+        startTimer();
+      }
+    }
+
+    function updateCountdownPreset(){
+      const sel = document.getElementById('countdownSelect');
+      if (sel){
+        durationSec = Number(sel.value) || 60;
+        if (!hasStarted){
+          timeLeft = durationSec;
+          updateTimerDisplay();
+        }
+      }
+    }
+
+    function updateCountdownVisibility(){
+      const sel = document.getElementById('countdownSelect');
+      if (!sel) return;
+      sel.style.display = (timerMode === 'down') ? 'inline-block' : 'none';
+    }
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => resizeBoard());
+      ro.observe(document.getElementById('boardWrap'));
+    } else {
+      setInterval(resizeBoard, 500);
+    }
+
+    function runSelfTests(){
+      try {
+        console.assert(formatTime(0) === '00:00', 'formatTime(0) 应为 00:00');
+        console.assert(formatTime(65) === '01:05', 'formatTime(65) 应为 01:05');
+        const before = timerMode;
+        toggleTimerMode();
+        console.assert(timerMode !== before, 'toggleTimerMode 应改变模式');
+        const modeBtn = document.getElementById('timerModeBtn');
+        console.assert(modeBtn && modeBtn.textContent.length > 0, 'timer 按钮应更新文案');
+        updateCountdownVisibility();
+        const sel = document.getElementById('countdownSelect');
+        console.assert(sel.style.display === ((timerMode === 'down') ? 'inline-block' : 'none'), '倒计时配置显隐应与模式一致');
+        toggleTimerMode();
+        updateTimerDisplay();
+        console.assert(board.length === rows && board[0].length === cols, '棋盘应为 8x8');
+        console.assert(!WIN_TEXT.includes('已找到'), 'WIN_TEXT 不应包含进度文案');
+        console.log('[SelfTests] 全部通过');
+      } catch (e){
+        console.warn('[SelfTests] 失败：', e);
+      }
+    }
+
+    window.startGame = startGame;
+    window.restartGame = restartGame;
+    window.toggleTarget = toggleTarget;
+    window.toggleTimerMode = toggleTimerMode;
+    window.updateCountdownPreset = updateCountdownPreset;
   </script>
 </body>
 </html>
