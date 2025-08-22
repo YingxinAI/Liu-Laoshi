@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>中文学习聊天游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll */
+            background-color: #f9f9f9;
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 36px;
+            color: #2e7d32;
+            font-weight: bold;
+            padding: 20px 0;
+            background-color: #e6ffe6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto 20px auto;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            height: calc(100vh - 120px); /* Adjust height to account for title */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden; /* Keep container content within bounds */
+            flex-grow: 1;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for left panel if its content overflows */
+        }
+
+        .left-panel h3,
+        .left-panel p,
+        .left-panel ul,
+        .left-panel pre,
+        .left-panel .stats-box {
+            margin: 0 0 10px 0;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .left-panel ul {
+            list-style: inside;
+            padding-left: 0;
+        }
+
+        .left-panel li {
+            margin: 0;
+        }
+
+        .left-panel pre {
+            background: #f0f0f0;
+            padding: 10px;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .right-panel {
+            flex: 2.5;
+            display: flex;
+            flex-direction: column;
+            background-color: #fffde7;
+            height: 100%; /* Ensure right panel takes full height of container */
+        }
+
+        /* Main content display containers in right panel */
+        .main-content-display {
+            flex: 1; /* Allow these to fill available space */
+            padding: 20px;
+            background-color: #fffde7;
+            display: flex; /* Using flex to center elements for home screen/typing mode selection */
+            flex-direction: column;
+            align-items: center; /* Center horizontally */
+            justify-content: center; /* Center vertically */
+            overflow-y: auto; /* IMPORTANT: Enable scrolling for content *inside* these divs */
+            box-sizing: border-box; /* Include padding in height/width */
+        }
+        
+        /* Specific override for learningCenter to align content to start */
+        #learningCenter {
+            align-items: flex-start; /* Align content to top-left */
+            justify-content: flex-start; /* Align content to top-left */
+            padding-top: 20px; /* Ensure consistent padding from top */
+        }
+
+
+        .main-content-display.active {
+            display: flex;
+        }
+        .main-content-display:not(.active) {
+            display: none;
+        }
+
+        /* Styles for learning center content elements within main-content-display */
+        #learningCenter h4 {
+            color: #00796b;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #00796b;
+            padding-bottom: 5px;
+            width: 100%; /* Ensure headings take full width */
+            box-sizing: border-box;
+            text-align: left; /* Ensure h4 is left-aligned */
+        }
+        #learningCenter h5 { /* For "补充词" and grammar subtitles - align to left */
+            color: #00796b;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            /* No border-bottom for h5 to differentiate from h4 if desired, or add if you want a line */
+            /* border-bottom: 1px solid #00796b; */
+            padding-bottom: 5px;
+            width: 100%; /* Ensure headings take full width */
+            box-sizing: border-box;
+            text-align: left; /* Ensure h5 is left-aligned */
+            font-size: 1.1em; /* Slightly smaller than h4, but still prominent */
+        }
+        #learningCenter table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 14px;
+            table-layout: fixed; /* Ensures columns are sized evenly or by content */
+        }
+        #learningCenter th,
+        #learningCenter td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word; /* Allow long words to break */
+        }
+        #learningCenter th {
+            background-color: #f2f2f2;
+        }
+        #learningCenter .dialogue-box,
+        #learningCenter .grammar-box { /* Apply similar styles to both dialogue and grammar boxes */
+            background: linear-gradient(to right, rgba(230, 255, 230, 0.7), rgba(230, 255, 230, 0)); /* Light green fading to transparent */
+            padding: 10px;
+            padding-bottom: 10px; /* Ensure enough space at the bottom */
+            margin-bottom: 10px; /* Space between boxes */
+            border-left: 5px solid #4CAF50; /* A solid border on the left to emphasize it */
+            border-radius: 0 5px 5px 0; /* Rounded on the right side only */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+            position: relative; /* Needed for potential future pseudo-elements */
+            
+            width: 100%; /* Make it take full width of its container */
+            box-sizing: border-box; /* Include padding in the width calculation */
+            white-space: normal; /* Ensure text wraps naturally */
+            overflow: visible; /* Ensure content is not clipped by overflow */
+            height: auto; /* Allow height to adjust to content */
+            
+            /* NEW: Flexbox for internal layout to manage dialogue lines or grammar content */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align text to the left within the box */
+            text-align: left; /* Ensure text is aligned left */
+        }
+        #learningCenter .dialogue-line {
+            margin-bottom: 5px; /* Add space between lines */
+            line-height: 1.4; /* Ensure good line spacing */
+            white-space: normal; /* Ensure text wraps within each line */
+            width: 100%; /* Ensure each line takes full width of dialogue-box */
+            box-sizing: border-box;
+        }
+        /* Styles for content *inside* grammar-box */
+        #learningCenter .grammar-box p,
+        #learningCenter .grammar-box pre {
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+            width: 100%; /* Ensure content takes full width within the box */
+            box-sizing: border-box;
+            text-align: left; /* Explicitly align left */
+        }
+        #learningCenter .grammar-box pre {
+            background: #f0f0f0;
+            padding: 10px;
+            font-size: 15px;
+            white-space: pre-wrap;
+            margin-top: 5px; /* Add some space above pre within grammar-box */
+        }
+
+
+        /* New style for highlighted grammar words */
+        .grammar-word {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* NEW: Color Coding for Grammar Components */
+        .subject { color: #007bff; font-weight: bold; } /* Blue */
+        .verb { color: #28a745; font-weight: bold; }    /* Green */
+        .object { color: #dc3545; font-weight: bold; }   /* Red */
+        .particle { color: #6f42c1; font-weight: bold; } /* Purple */
+        .adverb { color: #fd7e14; font-weight: bold; }    /* Orange */
+        .negation { color: #ffc107; font-weight: bold; } /* Yellow-Orange */
+
+        /* NEW: Styles for audio icon */
+        .audio-icon {
+            cursor: pointer;
+            font-size: 1.1em; /* Slightly larger than surrounding text */
+            margin-left: 5px; /* Space between Chinese character and icon */
+            color: #007bff; /* Blue to indicate clickable */
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .audio-icon:hover {
+            color: #0056b3; /* Darker blue on hover */
+            transform: scale(1.1); /* Slightly enlarge on hover */
+        }
+
+
+        .name-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff5cc;
+            padding: 40px;
+            flex: 1;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .input-and-emoji-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"]#studentNameInput {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            width: 200px;
+            text-align: center;
+        }
+
+        select#studentEmojiSelect {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fffbe6;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap; /* Allow buttons to wrap if screen is small */
+            justify-content: center;
+        }
+
+        .start-btn, .typing-mode-btn, .back-home-btn, .hint-btn, .listen-btn, .learning-center-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #66ccff, #ff99cc);
+            color: white;
+        }
+
+        .typing-mode-btn {
+            background: linear-gradient(45deg, #99ff99, #ffff99);
+            color: #333;
+        }
+
+        .back-home-btn {
+            background: linear-gradient(45deg, #ccccff, #ff9999);
+            color: #333;
+        }
+
+        .hint-btn {
+            background: linear-gradient(45deg, #ffe082, #ffc107);
+            color: #333;
+        }
+
+        .listen-btn {
+            background: linear-gradient(45deg, #a0c4ff, #8d9eff);
+            color: white;
+        }
+        .learning-center-btn {
+            background: linear-gradient(45deg, #9e9e9e, #616161);
+            color: white;
+        }
+
+        .start-btn:hover,
+        .typing-mode-btn:hover,
+        .back-home-btn:hover,
+        .hint-btn:hover,
+        .listen-btn:hover,
+        .learning-center-btn:hover {
+            background: linear-gradient(45deg, #5cd6d6, #ff99cc);
+        }
+
+        .chat-area {
+            display: none; /* Controlled by JS now */
+            flex-direction: column;
+            flex: 2; /* Still flexible to take space */
+            padding: 20px;
+            height: 100%; /* Ensure it takes full height */
+            box-sizing: border-box;
+        }
+
+        .chat-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: #fffde7;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto; /* Enable scrolling for chat messages */
+            font-size: 20px;
+            scroll-behavior: smooth;
+            max-height: calc(100vh - 220px); /* Adjust for header/footer */
+            min-height: 100px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            display: block;
+            max-width: 100%;
+        }
+
+        .bot {
+            color: #3e944e;
+            background-color: #e6ffe6;
+            text-align: left;
+        }
+
+        .user {
+            color: #1a73e8;
+            background-color: #fff5e6;
+            text-align: left;
+        }
+
+        .hint-message {
+            font-size: 16px;
+            color: #7a7a7a;
+            font-style: italic;
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: right;
+        }
+
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff5cc;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            max-width: 400px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .print-btn,
+        .replay-btn,
+        .print-typing-btn { 
+            padding: 10px 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ffcc99, #99ccff);
+            color: #333;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .print-btn:hover,
+        .replay-btn:hover,
+        .print-typing-btn:hover {
+            background: linear-gradient(45deg, #ff9966, #66ccff);
+        }
+
+        .typing-finish-buttons-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .typing-mode-select {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 30px;
+            background-color: #e0f7fa;
+            border-radius: 10px;
+            box-shadow: 0 44px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .typing-mode-select h4 {
+            color: #00796b;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .typing-mode-select button {
+            padding: 12px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .typing-mode-select button.sight-typing-btn {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        .typing-mode-select button.sight-typing-btn:hover {
+            background: linear-gradient(45deg, #43A047, #7CB342);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .typing-mode-select button.listening-typing-btn {
+            background: linear-gradient(45deg, #2196F3, #64B5F6);
+        }
+        .typing-mode-select button.listening-typing-btn:hover {
+            background: linear-gradient(45deg, #1976D2, #42A5F5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .typing-mode-select button.mix-typing-btn {
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+        }
+        .typing-mode-select button.mix-typing-btn:hover {
+            background: linear-gradient(45deg, #FB8C00, #FFB300);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .main-title {
+                box-shadow: none;
+                background-color: white;
+            }
+
+            .container {
+                box-shadow: none;
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-panel, .right-panel {
+                border: none;
+                overflow: visible !important;
+                height: auto;
+            }
+            /* Ensure learning content is visible when printing if it's the active view */
+            .main-content-display {
+                display: flex !important; /* Ensure it's visible for printing */
+                overflow: visible !important;
+                flex-direction: column; /* Ensure proper layout for print */
+                align-items: flex-start !important; /* Reset alignment for print */
+                justify-content: flex-start !important; /* Reset alignment for print */
+            }
+            .name-input-group, .typing-mode-select, .chat-area {
+                display: none !important; /* Hide other views when printing active content */
+            }
+            /* Specific print styles for #learningCenter elements */
+            #learningCenter h3,
+            #learningCenter h4,
+            #learningCenter h5,
+            #learningCenter p,
+            #learningCenter pre,
+            #learningCenter table,
+            #learningCenter .dialogue-box,
+            #learningCenter .grammar-box { /* Include grammar-box for print styles */
+                margin: 0 0 10px 0;
+                padding: 0;
+                font-size: 16px;
+                line-height: 1.4;
+                width: 100%; /* Ensure full width in print */
+                box-sizing: border-box;
+                /* Remove backgrounds/borders for cleaner print */
+                background: none !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            #learningCenter ul {
+                list-style: none; /* Already removed in main CSS for consistency */
+                padding-left: 0;
+            }
+            #learningCenter li { /* This rule is now mostly irrelevant for grammar points */
+                /* Reset print styles for li */
+                background: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0;
+                margin: 0 0 10px 0;
+                display: block !important; /* Revert to block for print */
+                text-align: left;
+            }
+            #learningCenter li p,
+            #learningCenter li pre {
+                padding: 0;
+                margin: 0;
+                width: 100% !important; /* Ensure content in li takes full width */
+                box-sizing: border-box;
+            }
+            #learningCenter li p:before {
+                display: none; /* Hide custom bullet for print */
+            }
+            #learningCenter pre {
+                background: #f0f0f0;
+                padding: 10px;
+                font-size: 15px;
+                white-space: pre-wrap;
+            }
+            #learningCenter table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+                font-size: 14px;
+                table-layout: auto; /* Allow print to adjust column width */
+            }
+            #learningCenter th,
+            #learningCenter td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            #learningCenter th {
+                background-color: #f2f2f2;
+            }
+            #learningCenter .dialogue-line {
+                margin-bottom: 5px;
+            }
+            .left-panel .game-instructions, .left-panel .learning-content {
+                display: block !important;
+                overflow: visible !important;
+            }
+            .left-panel .stats-box {
+                display: none;
+            }
+
+            .name-input-group, .typing-mode-select {
+                display: none;
+            }
+
+            .chat-box {
+                background: white;
+                max-height: none;
+            }
+
+            .message {
+                background: white !important;
+                border: 1px solid #ccc;
+                margin: 10px 0;
+                padding: 10px;
+            }
+
+            .bot {
+                background: #e6ffe6 !important;
+            }
+
+            .user {
+                background: #e6f7ff !important;
+            }
+
+            .print-btn, .print-typing-btn, .back-home-btn, .replay-btn, .hint-btn, .listen-btn, .learning-center-btn {
+                display: none !important;
+            }
+            .typing-section {
+                display: none !important;
+            }
+            .typing-exercise {
+                background-color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                font-size: 18px !important;
+                padding: 5px 0 !important;
+                min-height: auto !important;
+            }
+            .typing-exercise span {
+                display: block;
+                text-align: left;
+            }
+            .correct-char, .wrong-char, .untyped-char {
+                color: black !important;
+                font-weight: normal !important;
+                text-decoration: none !important;
+            }
+            .pinyin-text {
+                display: none !important;
+            }
+            .typing-finish-buttons-group {
+                display: none !important;
+            }
+        }
+
+        .typing-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 0 15px;
+            flex-wrap: wrap; /* Allow elements to wrap */
+            justify-content: center;
+        }
+
+        .typing-exercise {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 24px;
+            background-color: #fffbe6;
+            text-align: center;
+            border: 2px dashed #ff9900;
+            color: #333;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            word-break: break-all;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            margin-left: 15px;
+            margin-right: 15px;
+            width: calc(100% - 30px); /* Adjust for margins */
+            box-sizing: border-box;
+        }
+
+        .correct-char {
+            color: green;
+            font-weight: bold;
+        }
+
+        .wrong-char {
+            color: red;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .untyped-char {
+            color: gray;
+        }
+
+        #typingInput {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            box-sizing: border-box;
+            text-align: center;
+            max-width: 400px; /* Limit input width */
+        }
+
+        .pinyin-text {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+        }
+
+        .pinyin-text.show {
+            opacity: 1;
+        }
+
+        .pinyin-text .mic-icon {
+            font-size: 18px;
+            color: #2196F3;
+        }
+
+    </style>
+</head>
+<body>
+
+
+<div class="main-title">
+    🤖 中文学习聊天游戏 👩‍🎓
+</div>
+
+<div class="container">
+
+
+<div class="left-panel">
+        <div id="gameInstructions" class="game-instructions active">
+            <h3>🎮 游戏说明</h3>
+            <p>欢迎来到中文会话练习游戏！</p>
+            <p>在这个活动中，你将使用基础中文句子与AI机器人对话。</p>
+
+            <p><strong>🎯 目标:</strong></p>
+            <ul>
+                <li>用中文问候他人</li>
+                <li>提出并回答简单的“是/否”问题</li>
+                <li>完成所有回合以获得奖励: 👍 "太棒了！"</li>
+            </ul>
+
+            <p><strong>📘 对话示例:</strong></p>
+            <pre style="background:#f0f0f0; padding:10px;">
+🤖 你好，迎新！我是AI聊天机器人
+👨🏻‍🎓 你好
+...
+🤖 他是老师吗？
+👨🏻‍🎓 是，他是老师。
+🤖 👍 太棒了！
+            </pre>
+
+            <p>输入你的名字，点击“和🤖练习对话”或“⌨ 打字练习”开始。</p>
+        </div>
+
+
+<div class="stats-box" id="statsBox">
+            🎮 练习次数: 0 | ✅ 正确: 0 | ❌ 错误: 0 | 📊 正确率: 0%
+        </div>
+    </div>
+
+
+<div class="right-panel">
+
+
+<div class="main-content-display active" id="homeScreen">
+            <div class="name-input-group">
+                <div class="input-and-emoji-select">
+                    <input type="text" id="studentNameInput" placeholder="输入你的名字..." />
+                    <select id="studentEmojiSelect">
+                        <option value="👩🏼‍🎓">👩🏼‍🎓 女学生</option>
+                        <option value="👨🏻‍🎓">👨🏻‍🎓 男学生</option>
+                    </select>
+                </div>
+                <div class="button-row">
+                    <button class="typing-mode-btn" onclick="showTypingModeSelection()">⌨ 打字练习</button>
+                    <button class="start-btn" onclick="startWithName()">和🤖练习对话</button>
+                    <button class="learning-center-btn" onclick="showLearningCenterInRightPanel()">📚 学习中心</button>
+                </div>
+            </div>
+        </div>
+
+
+<div id="learningCenter" class="main-content-display">
+            <h3>📚 学习中心</h3>
+
+            <h4>词汇</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>简体</th>
+                        <th>拼音</th>
+                        <th>词性</th>
+                        <th>英文释义</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>你 <span class="audio-icon" data-pinyin="ni">🔊</span></td><td>nǐ</td><td>Pron.</td><td>you</td></tr>
+                    <tr><td>好 <span class="audio-icon" data-pinyin="hao">🔊</span></td><td>hǎo</td><td>Adj.</td><td>good, well</td></tr>
+                    <tr><td>是 <span class="audio-icon" data-pinyin="shi">🔊</span></td><td>shì</td><td>V.</td><td>to be, (affirmative answer) yes</td></tr>
+                    <tr><td>学生 <span class="audio-icon" data-pinyin="xuesheng">🔊</span></td><td>xuésheng</td><td>N.</td><td>student</td></tr>
+                    <tr><td>学 <span class="audio-icon" data-pinyin="xue">🔊</span></td><td>xué</td><td>V.</td><td>to study, to learn</td></tr>
+                    <tr><td>吗 <span class="audio-icon" data-pinyin="ma">🔊</span></td><td>ma</td><td>Part.</td><td>(used at the end of a declarative sentence to transform it into a question)</td></tr>
+                    <tr><td>我 <span class="audio-icon" data-pinyin="wo">🔊</span></td><td>wǒ</td><td>Pron.</td><td>I, me</td></tr>
+                    <tr><td>呢 <span class="audio-icon" data-pinyin="ne">🔊</span></td><td>ne</td><td>Part.</td><td>(used at the end of an interrogative sentence)</td></tr>
+                    <tr><td>也 <span class="audio-icon" data-pinyin="ye">🔊</span></td><td>yě</td><td>Adv.</td><td>also</td></tr>
+                    <tr><td>他 <span class="audio-icon" data-pinyin="ta">🔊</span></td><td>tā</td><td>Pron.</td><td>he, him</td></tr>
+                    <tr><td>不 <span class="audio-icon" data-pinyin="bu">🔊</span></td><td>bù</td><td>Adv.</td><td>(used to form a negative) not, no</td></tr>
+                    <tr><td>老师 <span class="audio-icon" data-pinyin="laoshi">🔊</span></td><td>lǎoshī</td><td>N.</td><td>teacher</td></tr>
+                </tbody>
+            </table>
+
+            <h5>补充词</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>简体</th>
+                        <th>拼音</th>
+                        <th>词性</th>
+                        <th>英文释义</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>中文 <span class="audio-icon" data-pinyin="zhongwen">🔊</span></td><td>Zhōngwén</td><td>N.</td><td>Chinese (language)</td></tr>
+                    <tr><td>她 <span class="audio-icon" data-pinyin="ta_she">🔊</span></td><td>tā</td><td>Pron.</td><td>she, her</td></tr>
+                    <tr><td>教授 <span class="audio-icon" data-pinyin="jiaoshou">🔊</span></td><td>jiàoshòu</td><td>N.</td><td>professor</td></tr>
+                </tbody>
+            </table>
+
+            <h4>句型</h4>
+            <p><strong>你好！ (Nǐhǎo!)</strong> - Hello!</p>
+            <div class="dialogue-box">
+                <div class="dialogue-line">A: 你好！(Nǐhǎo!)</div>
+                <div class="dialogue-line">B: 你好！(Nǐhǎo!)</div>
+            </div>
+
+            <p><strong>你是学生吗？ (Nǐ shì xuésheng ma?)</strong> - Are you a student?</p>
+            <div class="dialogue-box">
+                <div class="dialogue-line">A: 你是学生吗？(Nǐ shì xuésheng ma?)</div>
+                <div class="dialogue-line">B: 我是学生。你呢？(Wǒ shì xuésheng. Nǐ ne?)</div>
+            </div>
+
+            <p><strong>他也是学生吗？ (Tā yě shì xuésheng ma?)</strong> - Is he also a student?</p>
+            <div class="dialogue-box">
+                <div class="dialogue-line">A: 他也是学生吗？(Tā yě shì xuésheng ma?)</div>
+                <div class="dialogue-line">B: 不，他不是学生。(Bù, tā bú shì xuésheng.)</div>
+            </div>
+
+            <h4>语法</h4>
+
+            <h5>Pronouns 我 (wǒ), 你 (nǐ), and 他/她 (tā)</h5>
+            <div class="grammar-box">
+                <p>In Chinese, pronouns like "<span class="grammar-word">我</span>" (wǒ - I/me), "<span class="grammar-word">你</span>" (nǐ - you), and "<span class="grammar-word">他/她</span>" (tā - he/him, she/her) are straightforward. They do not change form based on gender, number, or case (subject/object), unlike in English.</p>
+                <pre><span class="subject">我</span> (wǒ) - I / me</pre>
+                <pre><span class="subject">你</span> (nǐ) - you</pre>
+                <pre><span class="subject">他</span> (tā) - he / him</pre>
+                <pre><span class="subject">她</span> (tā) - she / her</pre>
+                <p>Although "他" and "她" are pronounced identically (tā), they have different written characters to distinguish gender.</p>
+            </div>
+
+            <h5>Chinese Word Order</h5>
+            <div class="grammar-box">
+                <p>The basic word order is SVO (Subject-Verb-Object).</p>
+                <pre><span class="subject">我</span> <span class="verb">学</span> <span class="object">中文</span></pre>
+                <p><span class="subject">I</span> <span class="verb">learn</span> <span class="object">Chinese</span>.</p>
+                <pre><span class="subject">你</span> <span class="verb">是</span> <span class="object">学生</span></pre>
+                <p><span class="subject">You</span> <span class="verb">are</span> <span class="object">a student</span>.</p>
+            </div>
+
+            <h5>Using 是 (shì) - "To Be"</h5>
+            <div class="grammar-box">
+                <p>"<span class="grammar-word">是</span>" (shì) is the verb "to be" in Chinese. It's used to link two nouns or pronouns, indicating identity or classification.</p>
+                <pre><span class="subject">我</span> <span class="verb">是</span> <span class="object">学生</span></pre>
+                <p><span class="subject">I</span> <span class="verb">am</span> <span class="object">a student</span>.</p>
+                <pre><span class="subject">他</span> <span class="verb">是</span> <span class="object">老师</span></pre>
+                <p><span class="subject">He</span> <span class="verb">is</span> <span class="object">a teacher</span>.</p>
+            </div>
+
+            <h5>The Question Particle 吗 (ma)</h5>
+            <div class="grammar-box">
+                <p>To turn a declarative sentence into a "yes/no" question, simply add "<span class="grammar-word">吗</span>" (ma) at the end of the sentence. No change in word order is needed.</p>
+                <pre>你是学生<span class="particle">吗</span>？</pre>
+                <p>Nǐ shì xuésheng <span class="particle">ma</span>?</p>
+                <p>Are you a student?</p>
+            </div>
+
+            <h5>The Question Particle 呢 (ne)</h5>
+            <div class="grammar-box">
+                <p>"<span class="grammar-word">呢</span>" (ne) is an interrogative particle often used to ask "what about...?" or "how about...?" It's used when the context of the previous question applies to a different subject.</p>
+                <pre>我是学生。你<span class="particle">呢</span>？</pre>
+                <p>Wǒ shì xuésheng. Nǐ <span class="particle">ne</span>?</p>
+                <p>I am a student. What about you?</p>
+            </div>
+
+            <h5>The Adverb 也 (yě) - "Also"</h5>
+            <div class="grammar-box">
+                <p>"<span class="grammar-word">也</span>" (yě) means "also" or "too." It is placed before the verb or adjective it modifies.</p>
+                <pre><span class="subject">他</span> <span class="adverb">也</span> <span class="verb">是</span> <span class="object">学生</span></pre>
+                <p><span class="subject">He</span> <span class="adverb">also</span> <span class="verb">is</span> <span class="object">a student</span>.</p>
+            </div>
+
+            <h5>The Negative Adverb 不 (bù) - "Not, No"</h5>
+            <div class="grammar-box">
+                <p>"<span class="grammar-word">不</span>" (bù) is used to negate verbs or adjectives. It is placed directly before the verb or adjective.</p>
+                <p>Note: When "<span class="grammar-word">不</span>" is followed by a word with a 4th tone (like "是" shì), "<span class="grammar-word">不</span>" itself changes its tone to a 2nd tone (bú).</p>
+                <pre><span class="negation">不</span> <span class="verb">是</span></pre>
+                <p><span class="negation">Bù</span> <span class="verb">shì</span> (regular tone)</p>
+                <p><span class="negation">Bú</span> <span class="verb">shì</span> (changed tone when followed by 4th tone)</p>
+                <pre><span class="subject">他</span> <span class="negation">不</span> <span class="verb">是</span> <span class="object">老师</span></pre>
+                <p><span class="subject">He</span> <span class="negation">is not</span> <span class="object">a teacher</span>.</p>
+            </div>
+
+
+            <div class="button-row" style="margin-top: 30px;">
+                <button class="print-btn" onclick="printLearningContent()">🖨️ 打印学习内容</button>
+                <button class="back-home-btn" onclick="showHomeScreen()">🏠 返回主页</button>
+            </div>
+        </div>
+
+
+        <div id="typingModeSelection" class="main-content-display">
+            <div class="typing-mode-select">
+                <h4>选择打字练习模式</h4>
+                <button class="sight-typing-btn" onclick="startTypingGame('sight')">👁️ 看字打字</button>
+                <button class="listening-typing-btn" onclick="startTypingGame('listening')">👂 听音打字</button>
+                <button class="mix-typing-btn" onclick="startTypingGame('mix')">🔀 混合打字</button>
+                <button class="back-home-btn" onclick="showHomeScreen()">🏠 返回主页</button>
+            </div>
+        </div>
+
+
+        <div class="chat-area" id="chatArea">
+            <div class="chat-wrapper">
+                <div class="chat-box" id="chatBox">
+                </div>
+
+                <div class="typing-exercise" id="typingExercise" style="display: none;">
+                    <span id="chinesePhrase"></span>
+                    <span class="pinyin-text" id="pinyinText"><span class="mic-icon">🔊</span> <span id="pinyinContent"></span></span>
+                </div>
+
+                <div class="typing-finish-buttons-group" id="typingFinishButtons" style="display: none;">
+                    <button class="print-typing-btn" onclick="printTypingContent()">🖨️ 打印打字内容</button>
+                    <button class="back-home-btn" onclick="showHomeScreen()">🏠 返回主页</button>
+                    <button class="replay-btn" onclick="startTypingGame(currentTypingMode)">🔄 再玩一次</button>
+                </div>
+
+
+                <div class="input-group">
+                    <input type="text" id="userInput" placeholder="输入你的回答..." autofocus />
+                    <div class="button-group">
+                        <button class="listen-btn" onclick="speakCurrentPhrase()">🔊 听</button>
+                        <button class="hint-btn" onclick="getHint()">💡 提示</button>
+                        <button class="start-btn" onclick="sendMessage()">发送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let studentName = '';
+    let studentEmoji = '👨🏻‍🎓'; // Default emoji
+    let currentRound = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let chatHistory = []; // To store chat messages for printing
+
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const studentNameInput = document.getElementById('studentNameInput');
+    const studentEmojiSelect = document.getElementById('studentEmojiSelect');
+    const homeScreen = document.getElementById('homeScreen');
+    const chatArea = document.getElementById('chatArea');
+    const typingModeSelection = document.getElementById('typingModeSelection');
+    const typingExercise = document.getElementById('typingExercise');
+    const typingInput = document.getElementById('typingInput'); // This will be used in JS
+    const chinesePhraseSpan = document.getElementById('chinesePhrase');
+    const pinyinTextSpan = document.getElementById('pinyinText');
+    const pinyinContentSpan = document.getElementById('pinyinContent');
+    const statsBox = document.getElementById('statsBox');
+    const gameInstructions = document.getElementById('gameInstructions');
+    const learningCenter = document.getElementById('learningCenter');
+    const typingFinishButtons = document.getElementById('typingFinishButtons');
+
+    let currentTypingMode = '';
+    let currentTypingPhrase = '';
+    let currentPinyinPhrase = '';
+    let currentTypingIndex = 0;
+    let originalTypingText = '';
+
+
+    // Dialogues for the conversation game
+    const dialogues = [
+        {
+            bot: "你好，%name%！我是AI聊天机器人。",
+            expected: "你好",
+            pinyin: "nǐ hǎo",
+            hint: "你好 (nǐ hǎo) means 'Hello'.",
+            nextBot: "我是AI聊天机器人。你是学生吗？"
+        },
+        {
+            bot: "我是AI聊天机器人。你是学生吗？",
+            expected: "我是学生",
+            pinyin: "wǒ shì xuésheng",
+            hint: "我是学生 (wǒ shì xuésheng) means 'I am a student'.",
+            nextBot: "你呢？"
+        },
+        {
+            bot: "你呢？",
+            expected: "我是学生",
+            pinyin: "wǒ shì xuésheng",
+            hint: "我是学生 (wǒ shì xuésheng) means 'I am a student'.",
+            nextBot: "他也是学生吗？"
+        },
+        {
+            bot: "他也是学生吗？",
+            expected: "是，他也是学生",
+            pinyin: "shì, tā yě shì xuésheng",
+            hint: "Yes, he is also a student. Use 是 (shì) for 'yes'.",
+            altExpected: "不，他不是学生",
+            altPinyin: "bù, tā bú shì xuésheng",
+            altHint: "No, he is not a student. Use 不 (bù) for 'not'.",
+            nextBot: "太棒了！我们再来一次吗？",
+            isFinalQuestion: true // Mark this as a question that concludes a round
+        }
+    ];
+
+    // Phrases for typing game
+    const typingPhrases = [
+        { chinese: "你好", pinyin: "nǐ hǎo" },
+        { chinese: "我是学生", pinyin: "wǒ shì xuésheng" },
+        { chinese: "他是老师", pinyin: "tā shì lǎoshī" },
+        { chinese: "她不是教授", pinyin: "tā bú shì jiàoshòu" },
+        { chinese: "你学中文吗", pinyin: "nǐ xué Zhōngwén ma" }
+    ];
+
+    function speakChinese(text, pinyin) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            speechSynthesis.speak(utterance);
+        } else if (pinyin) {
+            // Fallback for browsers without SpeechSynthesis, show pinyin instead of speaking
+            alert(`Voice synthesis not supported. Pronunciation for "${text}": ${pinyin}`);
+        } else {
+            alert('Voice synthesis not supported in this browser.');
+        }
+    }
+
+
+    // Function to handle audio icons in learning center
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('audio-icon')) {
+            const pinyin = event.target.dataset.pinyin;
+            const chineseText = event.target.previousSibling.textContent.trim(); // Get the Chinese character/word
+            // For 'ta_she' pinyin, it refers to '她', which also uses 'tā'.
+            // The purpose of 'ta_she' was for distinction in the data, but
+            // for speaking, 'ta' is sufficient for both.
+            // If specific tonal variations are needed for 'tā' based on actual character,
+            // a more sophisticated pinyin-to-audio library might be needed.
+            // For now, let's keep it simple and speak the Chinese text.
+            speakChinese(chineseText, pinyin);
+        }
+    });
+
+    function showHomeScreen() {
+        homeScreen.classList.add('active');
+        chatArea.classList.remove('active');
+        typingModeSelection.classList.remove('active');
+        learningCenter.classList.remove('active');
+        // Reset chat and typing areas
+        chatBox.innerHTML = '';
+        userInput.value = '';
+        typingExercise.style.display = 'none';
+        typingInput.style.display = 'none';
+        typingFinishButtons.style.display = 'none';
+        resetTypingGame(); // Reset typing game state
+        updateStats(0, 0); // Reset stats display
+        chatHistory = []; // Clear chat history
+        // Ensure the input group is for chat
+        document.querySelector('.input-group .button-group').innerHTML = `
+            <button class="listen-btn" onclick="speakCurrentPhrase()">🔊 听</button>
+            <button class="hint-btn" onclick="getHint()">💡 提示</button>
+            <button class="start-btn" onclick="sendMessage()">发送</button>
+        `;
+        userInput.removeEventListener('input', handleTypingInput);
+        userInput.removeEventListener('keydown', handleTypingEnter);
+        userInput.addEventListener('keydown', handleChatEnter);
+        userInput.placeholder = "输入你的回答...";
+    }
+
+    function showTypingModeSelection() {
+        homeScreen.classList.remove('active');
+        chatArea.classList.remove('active');
+        typingModeSelection.classList.add('active');
+        learningCenter.classList.remove('active');
+    }
+
+    function showLearningCenterInRightPanel() {
+        homeScreen.classList.remove('active');
+        chatArea.classList.remove('active');
+        typingModeSelection.classList.remove('active');
+        learningCenter.classList.add('active');
+    }
+
+    function addMessage(sender, message, emoji = '') {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender);
+        messageDiv.innerHTML = `${emoji} ${message}`;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+        chatHistory.push({ sender, message, emoji });
+    }
+
+    function startWithName() {
+        studentName = studentNameInput.value.trim();
+        studentEmoji = studentEmojiSelect.value;
+        if (studentName === '') {
+            alert('请输入你的名字！');
+            return;
+        }
+
+        homeScreen.classList.remove('active');
+        chatArea.classList.add('active');
+        learningCenter.classList.remove('active');
+
+        currentRound = 0;
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        updateStats(0, 0);
+        chatBox.innerHTML = ''; // Clear previous chat
+        chatHistory = []; // Clear chat history
+
+        addMessage('bot', `你好，${studentName}！我是AI聊天机器人。`, '🤖');
+        speakChinese(`你好，${studentName}！我是AI聊天机器人。`);
+        userInput.value = '';
+        userInput.focus();
+        userInput.removeEventListener('input', handleTypingInput); // Ensure typing listener is off
+        userInput.removeEventListener('keydown', handleTypingEnter);
+        userInput.addEventListener('keydown', handleChatEnter); // Ensure chat listener is on
+        userInput.placeholder = "输入你的回答...";
+        document.querySelector('.input-group .button-group').innerHTML = `
+            <button class="listen-btn" onclick="speakCurrentPhrase()">🔊 听</button>
+            <button class="hint-btn" onclick="getHint()">💡 提示</button>
+            <button class="start-btn" onclick="sendMessage()">发送</button>
+        `;
+    }
+
+    function sendMessage() {
+        let message = userInput.value.trim();
+        if (message === '') return;
+
+        addMessage('user', message, studentEmoji);
+        userInput.value = '';
+
+        processBotResponse(message);
+    }
+
+    function handleChatEnter(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function processBotResponse(userMessage) {
+        const currentDialogue = dialogues[currentRound];
+        let botResponse = '';
+        let isCorrect = false;
+
+        const normalizedUserMessage = userMessage.toLowerCase().replace(/[，。？！,?!]/g, '').trim();
+        const expectedNormalized = currentDialogue.expected.toLowerCase().replace(/[，。？！,?!]/g, '').trim();
+        const altExpectedNormalized = currentDialogue.altExpected ? currentDialogue.altExpected.toLowerCase().replace(/[，。？！,?!]/g, '').trim() : null;
+
+        if (normalizedUserMessage === expectedNormalized || (altExpectedNormalized && normalizedUserMessage === altExpectedNormalized)) {
+            isCorrect = true;
+            correctAnswers++;
+            botResponse = '👍 太棒了！';
+            if (currentDialogue.nextBot) {
+                botResponse += currentDialogue.nextBot;
+            }
+        } else {
+            wrongAnswers++;
+            botResponse = `❌ 不对。${studentName}，请再试一次。`;
+            if (currentDialogue.nextBot) {
+                botResponse += `期待的答案是 "${currentDialogue.expected}" 或者 "${currentDialogue.altExpected || ''}"。`;
+                // No currentDialogue.nextBot if incorrect, ask to try again.
+                // The currentRound doesn't advance here, so the same question will be asked again.
+            }
+        }
+        updateStats(correctAnswers, wrongAnswers);
+
+        addMessage('bot', botResponse, '🤖');
+        speakChinese(botResponse);
+
+        if (isCorrect && !currentDialogue.isFinalQuestion) {
+            currentRound++;
+            if (currentRound < dialogues.length) {
+                setTimeout(() => {
+                    // Send the next bot message after a short delay
+                    const nextBotMessage = dialogues[currentRound].bot.replace('%name%', studentName);
+                    addMessage('bot', nextBotMessage, '🤖');
+                    speakChinese(nextBotMessage);
+                }, 1000);
+            }
+        } else if (isCorrect && currentDialogue.isFinalQuestion) {
+            // End of the game, reset for a new game
+            setTimeout(() => {
+                addMessage('bot', `恭喜你，${studentName}！你完成了所有对话！`, '🤖');
+                speakChinese(`恭喜你，${studentName}！你完成了所有对话！`);
+                // Offer to restart or go home
+                setTimeout(() => {
+                    addMessage('bot', '要再玩一次吗？点击“和🤖练习对话”重新开始，或者点击“🏠 返回主页”。', '🤖');
+                    speakChinese('要再玩一次吗？点击“和机器人练习对话”重新开始，或者点击“返回主页”。');
+                    // Optionally, disable input and buttons here, enable only "start" and "home"
+                    userInput.disabled = true;
+                    document.querySelectorAll('.input-group button').forEach(btn => btn.disabled = true);
+                }, 1500);
+            }, 1000);
+        }
+    }
+
+    function getHint() {
+        const currentDialogue = dialogues[currentRound];
+        if (currentDialogue) {
+            addMessage('bot', `💡 提示: "${currentDialogue.hint}"`, '🤖');
+            speakChinese(currentDialogue.hint);
+            if (currentDialogue.altHint) {
+                addMessage('bot', `💡 提示 (另一种): "${currentDialogue.altHint}"`, '🤖');
+                speakChinese(currentDialogue.altHint);
+            }
+        }
+    }
+
+    function speakCurrentPhrase() {
+        if (chatArea.classList.contains('active')) { // If in chat mode
+            const currentDialogue = dialogues[currentRound];
+            if (currentDialogue) {
+                // Speak the bot's current question/statement again
+                const botMessageToSpeak = currentDialogue.bot.replace('%name%', studentName);
+                speakChinese(botMessageToSpeak);
+            }
+        } else if (typingModeSelection.classList.contains('active') || typingExercise.style.display === 'flex') { // If in typing mode
+            if (currentTypingPhrase) {
+                speakChinese(currentTypingPhrase, currentPinyinPhrase);
+            }
+        }
+    }
+
+
+    function updateStats(correct, wrong) {
+        const total = correct + wrong;
+        const accuracy = total > 0 ? ((correct / total) * 100).toFixed(0) : 0;
+        statsBox.innerHTML = `🎮 练习次数: ${total} | ✅ 正确: ${correct} | ❌ 错误: ${wrong} | 📊 正确率: ${accuracy}%`;
+    }
+
+    function printLearningContent() {
+        window.print();
+    }
+
+    // --- Typing Game Logic ---
+
+    function startTypingGame(mode) {
+        currentTypingMode = mode;
+        homeScreen.classList.remove('active');
+        chatArea.classList.add('active'); // Still use chatArea for display
+        typingModeSelection.classList.remove('active');
+        learningCenter.classList.remove('active');
+
+        chatBox.innerHTML = ''; // Clear chat history for typing game
+        chatHistory = []; // Clear chat history for typing game
+        userInput.value = '';
+        userInput.focus();
+        userInput.placeholder = "开始打字...";
+        userInput.disabled = false;
+        typingInput.style.display = 'block'; // Make typing input visible
+        typingFinishButtons.style.display = 'none';
+
+        // Change buttons in input group for typing mode
+        document.querySelector('.input-group .button-group').innerHTML = `
+            <button class="listen-btn" onclick="speakCurrentPhrase()">🔊 听</button>
+            <button class="back-home-btn" onclick="showHomeScreen()">🏠 返回主页</button>
+            `;
+        userInput.removeEventListener('keydown', handleChatEnter);
+        userInput.addEventListener('input', handleTypingInput);
+        userInput.addEventListener('keydown', handleTypingEnter);
+
+        nextTypingPhrase();
+    }
+
+    function nextTypingPhrase() {
+        if (typingPhrases.length === 0) {
+            endTypingGame();
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * typingPhrases.length);
+        const phrase = typingPhrases[randomIndex];
+        currentTypingPhrase = phrase.chinese;
+        currentPinyinPhrase = phrase.pinyin;
+        currentTypingIndex = 0;
+        originalTypingText = currentTypingPhrase; // Store original for comparison
+
+        renderTypingExercise();
+
+        if (currentTypingMode === 'listening' || currentTypingMode === 'mix') {
+            speakChinese(currentTypingPhrase, currentPinyinPhrase);
+        }
+
+        if (currentTypingMode === 'mix') {
+            pinyinTextSpan.classList.add('show');
+            pinyinContentSpan.textContent = currentPinyinPhrase;
+        } else {
+            pinyinTextSpan.classList.remove('show');
+            pinyinContentSpan.textContent = '';
+        }
+
+        typingExercise.style.display = 'flex'; // Show the typing exercise box
+        userInput.value = '';
+        userInput.focus();
+    }
+
+    function renderTypingExercise() {
+        let html = '';
+        for (let i = 0; i < originalTypingText.length; i++) {
+            if (i < currentTypingIndex) {
+                // Compare character typed with original
+                if (userInput.value[i] === originalTypingText[i]) {
+                    html += `<span class="correct-char">${originalTypingText[i]}</span>`;
+                } else {
+                    html += `<span class="wrong-char">${originalTypingText[i]}</span>`;
+                }
+            } else {
+                html += `<span class="untyped-char">${originalTypingText[i]}</span>`;
+            }
+        }
+        chinesePhraseSpan.innerHTML = html;
+    }
+
+
+    function handleTypingInput() {
+        const typedText = userInput.value;
+        currentTypingIndex = typedText.length;
+        renderTypingExercise();
+
+        // Check if typing is complete
+        if (typedText === originalTypingText) {
+            addMessage('bot', `👍 太棒了！你正确打出了 "${originalTypingText}"！`, '🤖');
+            speakChinese(`太棒了！你正确打出了 ${originalTypingText}！`);
+            correctAnswers++;
+            updateStats(correctAnswers, wrongAnswers);
+            setTimeout(nextTypingPhrase, 1500);
+        } else if (typedText.length > originalTypingText.length) {
+            addMessage('bot', `❌ 输入过长。请重新开始。`, '🤖');
+            speakChinese(`输入过长。请重新开始。`);
+            wrongAnswers++;
+            updateStats(correctAnswers, wrongAnswers);
+            userInput.value = ''; // Clear input to retry
+            currentTypingIndex = 0;
+            renderTypingExercise(); // Reset display
+        }
+    }
+
+    function handleTypingEnter(event) {
+        if (event.key === 'Enter') {
+            const typedText = userInput.value;
+            if (typedText !== originalTypingText) {
+                addMessage('bot', `❌ 不对。正确的答案是 "${originalTypingText}"。请再试一次。`, '🤖');
+                speakChinese(`不对。正确的答案是 ${originalTypingText}。请再试一次。`);
+                wrongAnswers++;
+                updateStats(correctAnswers, wrongAnswers);
+                userInput.value = ''; // Clear input to retry
+                currentTypingIndex = 0;
+                renderTypingExercise(); // Reset display
+            }
+            // If correct, handleTypingInput already calls nextTypingPhrase
+        }
+    }
+
+
+    function endTypingGame() {
+        typingExercise.style.display = 'none';
+        userInput.style.display = 'none'; // Hide the input field
+        typingFinishButtons.style.display = 'flex'; // Show replay and home buttons
+        addMessage('bot', `🎉 打字练习完成！你一共正确了 ${correctAnswers} 次，错误了 ${wrongAnswers} 次。`, '🤖');
+        speakChinese(`打字练习完成！你一共正确了 ${correctAnswers} 次，错误了 ${wrongAnswers} 次。`);
+        userInput.disabled = true; // Disable input after game ends
+        document.querySelector('.input-group .button-group').innerHTML = ''; // Hide buttons in input group
+    }
+
+    function resetTypingGame() {
+        currentTypingPhrase = '';
+        currentPinyinPhrase = '';
+        currentTypingIndex = 0;
+        originalTypingText = '';
+        typingPhrases.push( // Re-populate if needed, or simply ensure it's not empty
+            { chinese: "你好", pinyin: "nǐ hǎo" },
+            { chinese: "我是学生", pinyin: "wǒ shì xuésheng" },
+            { chinese: "他是老师", pinyin: "tā shì lǎoshī" },
+            { chinese: "她不是教授", pinyin: "tā bú shì jiàoshòu" },
+            { chinese: "你学中文吗", pinyin: "nǐ xué Zhōngwén ma" }
+        );
+        chinesePhraseSpan.textContent = '';
+        pinyinContentSpan.textContent = '';
+        pinyinTextSpan.classList.remove('show');
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        updateStats(0, 0);
+    }
+
+    function printTypingContent() {
+        // Create a temporary div for printing
+        const printContent = document.createElement('div');
+        printContent.innerHTML = `
+            <h1>中文打字练习报告</h1>
+            <p><strong>学生姓名:</strong> ${studentName} ${studentEmoji}</p>
+            <p><strong>打字模式:</strong> ${currentTypingMode === 'sight' ? '看字打字' : currentTypingMode === 'listening' ? '听音打字' : '混合打字'}</p>
+            <p><strong>总练习次数:</strong> ${correctAnswers + wrongAnswers}</p>
+            <p><strong>正确次数:</strong> ${correctAnswers}</p>
+            <p><strong>错误次数:</strong> ${wrongAnswers}</p>
+            <p><strong>正确率:</strong> ${((correctAnswers / (correctAnswers + wrongAnswers)) * 100).toFixed(0)}%</p>
+            <h2>练习短语</h2>
+        `;
+
+        // Add phrases from typingPhrases for reference
+        const phraseList = document.createElement('ul');
+        typingPhrases.forEach(phrase => {
+            const li = document.createElement('li');
+            li.textContent = `${phrase.chinese} (${phrase.pinyin})`;
+            phraseList.appendChild(li);
+        });
+        printContent.appendChild(phraseList);
+
+        // This approach might be more complex if you want to print the *actual* user attempts and corrections.
+        // For simplicity, this will print the summary and the list of phrases.
+        // If chat history for typing mode is desired, it needs to be captured during gameplay.
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<html><head><title>打字练习报告</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write(`
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1, h2 { color: #333; }
+            p { margin-bottom: 5px; }
+            ul { list-style: inside; padding-left: 20px; }
+            li { margin-bottom: 5px; }
+        `);
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+
+    // Initial setup
+    showHomeScreen();
+    updateStats(0, 0); // Initialize stats display
+</script>
+
+</body>
+</html>
