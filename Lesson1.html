@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>中文学习聊天游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 36px;
+            color: #2e7d32;
+            font-weight: bold;
+            padding: 20px 0;
+            background-color: #e6ffe6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto 20px auto;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            height: calc(100vh - 120px);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel h3,
+        .left-panel p,
+        .left-panel ul,
+        .left-panel pre,
+        .left-panel .stats-box {
+            margin: 0 0 10px 0;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .left-panel ul {
+            list-style: inside;
+            padding-left: 0;
+        }
+
+        .left-panel li {
+            margin: 0;
+        }
+
+        .left-panel pre {
+            background: #f0f0f0;
+            padding: 10px;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .right-panel {
+            flex: 2.5;
+            display: flex;
+            flex-direction: column;
+            background-color: #fffde7;
+        }
+
+        .name-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff5cc;
+            padding: 40px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .input-and-emoji-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px; /* Add some space below this group */
+        }
+
+        input[type="text"]#studentNameInput {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            width: 200px; /* Adjust width to accommodate select */
+            text-align: center;
+        }
+
+        select#studentEmojiSelect {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fffbe6;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .start-btn, .typing-mode-btn, .back-home-btn, .hint-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #66ccff, #ff99cc);
+            color: white;
+        }
+
+        .typing-mode-btn {
+            background: linear-gradient(45deg, #99ff99, #ffff99);
+            color: #333;
+        }
+
+        .back-home-btn {
+            background: linear-gradient(45deg, #ccccff, #ff9999);
+            color: #333;
+        }
+
+        .hint-btn {
+            background: linear-gradient(45deg, #ffe082, #ffc107);
+            color: #333;
+        }
+
+        .start-btn:hover,
+        .typing-mode-btn:hover,
+        .back-home-btn:hover,
+        .hint-btn:hover {
+            background: linear-gradient(45deg, #5cd6d6, #ff99cc);
+        }
+
+        .chat-area {
+            display: none;
+            flex-direction: column;
+            flex: 2;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .chat-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: #fffde7;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 20px;
+            scroll-behavior: smooth;
+            max-height: calc(100vh - 220px);
+            min-height: 100px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            display: block;
+            max-width: 100%;
+        }
+
+        .bot {
+            color: #3e944e;
+            background-color: #e6ffe6;
+            text-align: left;
+        }
+
+        .user {
+            color: #1a73e8;
+            background-color: #fff5e6;
+            text-align: left;
+        }
+
+        .hint-message {
+            font-size: 16px;
+            color: #7a7a7a;
+            font-style: italic;
+            background-color: #f0f0f0;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: right;
+        }
+
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff5cc;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            max-width: 400px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .print-btn,
+        .replay-btn,
+        .print-typing-btn { 
+            padding: 10px 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ffcc99, #99ccff);
+            color: #333;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .print-btn:hover,
+        .replay-btn:hover,
+        .print-typing-btn:hover {
+            background: linear-gradient(45deg, #ff9966, #66ccff);
+        }
+
+        /* New styles for buttons at the end of typing exercise */
+        .typing-finish-buttons-group {
+            display: flex;
+            justify-content: center; /* Center the buttons horizontally */
+            gap: 20px; /* Space between buttons */
+            margin-top: 20px;
+            padding: 0 20px; /* Add some padding to match other sections */
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .main-title {
+                box-shadow: none;
+                background-color: white;
+            }
+
+            .container {
+                box-shadow: none;
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-panel, .right-panel {
+                border: none;
+                overflow: visible !important;
+                height: auto;
+            }
+
+            .name-input-group {
+                display: none;
+            }
+
+            .chat-box {
+                background: white;
+                max-height: none;
+            }
+
+            .message {
+                background: white !important;
+                border: 1px solid #ccc;
+                margin: 10px 0;
+                padding: 10px;
+            }
+
+            .bot {
+                background: #e6ffe6 !important;
+            }
+
+            .user {
+                background: #e6f7ff !important;
+            }
+
+            /* Hide print buttons when printing */
+            .print-btn, .print-typing-btn, .back-home-btn, .replay-btn, .hint-btn {
+                display: none !important;
+            }
+             .typing-section { /* Hide typing input area for print */
+                display: none !important;
+            }
+             .typing-exercise { /* Reset background for print */
+                background-color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                font-size: 18px !important; /* Adjust font size for print */
+                padding: 5px 0 !important;
+                min-height: auto !important;
+            }
+            .typing-exercise span {
+                display: block;
+                text-align: left;
+            }
+            .correct-char, .wrong-char, .untyped-char {
+                color: black !important; /* Ensure black for print readability */
+                font-weight: normal !important;
+                text-decoration: none !important;
+            }
+            .pinyin-text {
+                display: none !important; /* Hide pinyin hint in print */
+            }
+             .typing-finish-buttons-group { /* Hide these buttons when printing */
+                display: none !important;
+            }
+        }
+
+        .typing-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 0 15px;
+        }
+
+        .typing-exercise {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 24px;
+            background-color: #fffbe6;
+            text-align: center;
+            border: 2px dashed #ff9900;
+            color: #333;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            word-break: break-all;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+
+        .correct-char {
+            color: green;
+            font-weight: bold;
+        }
+
+        .wrong-char {
+            color: red;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .untyped-char {
+            color: gray;
+        }
+
+        #typingInput {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            background-color: #fffbe6;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .pinyin-text {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .pinyin-text.show {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="main-title">
+    🤖 中文学习聊天游戏 👩‍🎓
+</div>
+
+<div class="container">
+
+    <div class="left-panel">
+        <h3>🎮 Game Instructions</h3>
+        <p>Welcome to the Chinese chat practice game!</p>
+        <p>In this activity, you will talk with an AI robot using basic Chinese sentences.</p>
+
+        <p><strong>🎯 Goal:</strong></p>
+        <ul>
+            <li>Greet people in Chinese</li>
+            <li>Ask and answer simple yes/no questions</li>
+            <li>Complete all rounds to get a reward: 👍 "太棒了！"</li>
+        </ul>
+
+        <p><strong>📘 Example Dialog:</strong></p>
+        <pre style="background:#f0f0f0; padding:10px;">
+🤖 你好，迎新！我是AI聊天机器人
+👨🏻‍🎓 你好
+...
+🤖 他是老师吗？
+👨🏻‍🎓 是，他是老师。
+🤖 👍 太棒了！
+        </pre>
+
+        <p>Enter your name and click "和🤖练习对话" or "⌨ 打字练习" to begin.</p>
+
+        <div class="stats-box" id="statsBox">
+            🎮 练习次数: 0 | ✅ 正确: 0 | ❌ 错误: 0 | 📊 正确率: 0%
+        </div>
+    </div>
+
+    <div class="right-panel">
+
+        <div class="name-input-group" id="nameInputGroup">
+            <div class="input-and-emoji-select">
+                <input type="text" id="studentNameInput" placeholder="输入你的名字..." />
+                <select id="studentEmojiSelect">
+                    <option value="👩🏼‍🎓">👩🏼‍🎓 女学生</option>
+                    <option value="👨🏻‍🎓">👨🏻‍🎓 男学生</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button class="typing-mode-btn" onclick="startTypingMode()">⌨ 打字练习</button>
+                <button class="start-btn" onclick="startWithName()">和🤖练习对话</button>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="chat-wrapper">
+                <div class="chat-box" id="chatBox"></div>
+
+                <div class="input-group" id="chatInputGroup" style="display: none;">
+                    <input type="text" id="userInput" placeholder="👩‍🎓 Type your answer..." disabled />
+                    <div class="button-group">
+                        <button class="replay-btn" onclick="startGame()">🔄 Replay</button>
+                        <button class="hint-btn" onclick="toggleChatHint()">💡 提示</button>
+                        <button class="print-btn" onclick="printChat()">🖨️ 打印对话</button>
+                        <button class="back-home-btn" onclick="goBackToHome()">🏠 返回主页</button>
+                    </div>
+                </div>
+
+                <div class="typing-exercise" id="typingExercise" style="display: none;"
+                     oncopy="return false;" oncut="return false;" onselectstart="return false;" oncontextmenu="return false;">
+                </div>
+
+                <div class="typing-section" id="typingSection" style="display: none;">
+                    <input type="text" id="typingInput" placeholder="逐字输入下面的句子..." />
+                    <button class="hint-btn" onclick="togglePinyin()">💡 提示</button>
+                </div>
+
+                <div id="typingFinishButtons" class="typing-finish-buttons-group" style="display: none;">
+                    <button class="print-typing-btn" onclick="printTypingExercise()">🖨️ 打印练习记录</button>
+                    <button class="back-home-btn" onclick="goBackToHome()">🏠 返回主页</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<audio id="correctSound" src="sound.mp3" preload="auto"></audio>
+<audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
+
+<script>
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const studentNameInput = document.getElementById("studentNameInput");
+    const studentEmojiSelect = document.getElementById("studentEmojiSelect");
+
+    const typingInput = document.getElementById("typingInput");
+    const typingExercise = document.getElementById("typingExercise");
+    const typingFinishButtons = document.getElementById("typingFinishButtons");
+    const typingSection = document.getElementById("typingSection");
+
+    const statsBox = document.getElementById("statsBox");
+    const correctSound = document.getElementById("correctSound");
+    const applauseSound = document.getElementById("applauseSound");
+
+    let step = 0;
+    let totalAnswers = 0;
+    let correctAnswers = 0;
+    let pinyinVisible = false;
+    let chatHintVisible = false;
+    let studentEmoji = "👩🏼‍🎓"; // Default student emoji
+
+    const typingSpeed = 50;
+    const lineDelay = 1000;
+
+    // Array to store typing exercise results for printing
+    let typingResults = []; 
+
+    const chatHints = [
+        "**Hint:** Say hello to the robot. (e.g., 'Hello')",
+        "**Hint:** Ask if the robot is a student or a teacher. (e.g., 'Are you a student?', 'Are you a teacher?')",
+        "**Hint:** Answer if you are a student or not. (e.g., 'I am not a student.', 'I am not a student either.')",
+        "**Hint:** Confirm 'he' is not a student. (e.g., 'No, he is not a student.')",
+        "**Hint:** State that 'he' is a teacher. (e.g., 'He is a teacher.', 'Yes, he is a teacher.')"
+    ];
+
+    function cleanText(text) {
+        let cleaned = text.replace(/　/g, ' ');
+        cleaned = cleaned.replace(/[^a-zA-Z0-9\u4e00-\u9fa5\s]/g, '');
+        cleaned = cleaned.replace(/\s+/g, ' ');
+        return cleaned.trim().toLowerCase();
+    }
+
+    function updateStats(correct = false) {
+        totalAnswers++;
+        if (correct) correctAnswers++;
+
+        const accuracy = totalAnswers === 0 ? 0 : Math.round((correctAnswers / totalAnswers) * 100);
+        statsBox.textContent = "🎮 练习次数: " + totalAnswers +
+                                 " | ✅ 正确: " + correctAnswers +
+                                 " | ❌ 错误: " + (totalAnswers - correctAnswers) +
+                                 " | 📊 正确率: " + accuracy + "%";
+    }
+
+    function startWithName() {
+        const name = studentNameInput.value.trim();
+        const display_name = name || "迎新";
+        studentEmoji = studentEmojiSelect.value;
+        
+        document.getElementById("nameInputGroup").style.display = "none";
+        document.getElementById("chatArea").style.display = "flex";
+        document.getElementById("chatInputGroup").style.display = "flex";
+        document.getElementById("typingExercise").style.display = "none";
+        typingSection.style.display = "none";
+        typingFinishButtons.style.display = "none";
+
+        userInput.disabled = false;
+        userInput.focus();
+        userInput.placeholder = studentEmoji + " Type your answer..."; 
+        chatBox.innerHTML = '';
+        addBotMessage(["你好，" + display_name + "！我是AI聊天机器人"], "🤖");
+        step = 0;
+        totalAnswers = 0;
+        correctAnswers = 0;
+        updateStats(false);
+        chatHintVisible = false;
+    }
+
+    function startTypingMode() {
+        const name = studentNameInput.value.trim();
+        if (!name) {
+            alert("请输入你的名字！");
+            return;
+        }
+        studentEmoji = studentEmojiSelect.value;
+
+        document.getElementById("nameInputGroup").style.display = "none";
+        document.getElementById("chatArea").style.display = "flex";
+        document.getElementById("chatInputGroup").style.display = "none";
+        document.getElementById("typingExercise").style.display = "flex";
+        typingSection.style.display = "flex";
+        typingFinishButtons.style.display = "none";
+
+        chatBox.innerHTML = '';
+        addBotMessage(["现在开始打字练习。请根据提示输入句子。"], "🤖");
+
+        typingInput.focus();
+        typingInput.placeholder = "逐字输入下面的句子...";
+        step = 0;
+        totalAnswers = 0;
+        correctAnswers = 0;
+        updateStats(false);
+        pinyinVisible = false;
+        typingResults = []; // Clear previous typing results
+        startTypingExercise();
+    }
+
+    const typingTargetsDisplay = [
+        "你好",
+        "你是学生吗？",
+        "不，我不是学生。",
+        "不是，他不是学生。", 
+        "他是老师吗？", 
+        "是，他是老师。"
+    ];
+
+    const typingTargets = [
+        "你好",
+        "你是学生吗",
+        "不我不是学生", 
+        "不是他不是学生",
+        "他是老师吗",
+        "是他是老师" 
+    ];
+
+    const typingPinyins = [
+        "nǐ hǎo",
+        "nǐ shì xué shēng ma?",
+        "bù, wǒ bú shì xué shēng.",
+        "bú shì, tā bú shì xué shēng.", 
+        "tā shì lǎo shī ma?",
+        "shì, tā shì lǎo shī."
+    ];
+
+    function startTypingExercise() {
+        if (step >= typingTargets.length) {
+            finishTypingExercise();
+            return;
+        }
+
+        const targetDisplay = typingTargetsDisplay[step];
+        const targetForComparison = typingTargets[step];
+
+        typingExercise.innerHTML = `<span>🧾 ${formatTypingSentence(targetDisplay, "")}</span>`;
+        typingInput.value = "";
+
+        const existingPinyin = typingExercise.querySelector('.pinyin-text');
+        if (existingPinyin) {
+            existingPinyin.remove();
+        }
+        pinyinVisible = false;
+
+        typingInput.oninput = () => {
+            const typed = typingInput.value;
+            const chineseSpan = typingExercise.querySelector('span');
+            if (chineseSpan) {
+                chineseSpan.innerHTML = `🧾 ${formatTypingSentence(targetDisplay, typed)}`;
+            }
+            if (pinyinVisible) {
+                const pinyinDiv = typingExercise.querySelector('.pinyin-text');
+                if (pinyinDiv) {
+                    pinyinDiv.textContent = typingPinyins[step];
+                }
+            }
+        };
+
+        typingInput.onkeydown = function(e) {
+            if (e.key === "Enter") {
+                const typed = typingInput.value;
+                const isCorrect = cleanText(typed) === cleanText(targetForComparison);
+
+                // Store result for printing
+                typingResults.push({
+                    target: targetDisplay,
+                    typed: typed,
+                    correct: isCorrect
+                });
+
+                if (isCorrect) {
+                    if (correctSound) {
+                        correctSound.currentTime = 0;
+                        correctSound.play().catch(e => console.error("Error playing sound:", e));
+                    }
+
+                    addBotMessage([`“${targetDisplay}” ✅ 正确！下一个句子是：`], "🤖");
+                    step++;
+                    updateStats(true);
+                    typingInput.value = "";
+                    hidePinyin();
+                    setTimeout(startTypingExercise, lineDelay);
+                } else {
+                    addBotMessage(["❌ 错误。句子不完全正确，请再试一次！"], "🤖");
+                    updateStats(false);
+                    typingInput.value = "";
+                    const chineseSpan = typingExercise.querySelector('span');
+                    if (chineseSpan) {
+                        chineseSpan.innerHTML = `🧾 ${formatTypingSentence(targetDisplay, "")}`;
+                    }
+                }
+            }
+        };
+    }
+
+    function formatTypingSentence(targetDisplay, typed) {
+        let result = "";
+        for (let i = 0; i < targetDisplay.length; i++) {
+            if (i < typed.length) {
+                if (typed[i] === targetDisplay[i]) {
+                    result += "<span class='correct-char'>" + targetDisplay[i] + "</span>";
+                } else {
+                    result += "<span class='wrong-char'>" + targetDisplay[i] + "</span>";
+                }
+            } else {
+                result += "<span class='untyped-char'>" + targetDisplay[i] + "</span>";
+            }
+        }
+        return result;
+    }
+
+    function togglePinyin() {
+        const pinyinDiv = typingExercise.querySelector('.pinyin-text');
+        if (pinyinVisible) {
+            if (pinyinDiv) {
+                pinyinDiv.classList.remove('show');
+                setTimeout(() => pinyinDiv.remove(), 300);
+            }
+        } else {
+            if (step < typingPinyins.length) {
+                const newPinyinDiv = document.createElement("div");
+                newPinyinDiv.className = "pinyin-text";
+                newPinyinDiv.textContent = typingPinyins[step];
+                typingExercise.appendChild(newPinyinDiv);
+                newPinyinDiv.offsetWidth;
+                newPinyinDiv.classList.add('show');
+            }
+        }
+        pinyinVisible = !pinyinVisible;
+    }
+
+    function hidePinyin() {
+        const pinyinDiv = typingExercise.querySelector('.pinyin-text');
+        if (pinyinDiv) {
+            pinyinDiv.classList.remove('show');
+            setTimeout(() => pinyinDiv.remove(), 300);
+        }
+        pinyinVisible = false;
+    }
+
+    function finishTypingExercise() {
+        typingExercise.style.display = "none";
+        typingSection.style.display = "none";
+        typingFinishButtons.style.display = "flex"; // Show both buttons
+
+        if (applauseSound) {
+            applauseSound.currentTime = 0;
+            applauseSound.play().catch(e => console.error("Error playing sound:", e));
+        }
+
+        const finishMsg = document.createElement("div");
+        finishMsg.className = "message bot";
+        finishMsg.textContent = "🤖 👍 太棒了！你完成了所有打字练习！";
+        chatBox.appendChild(finishMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function goBackToHome() {
+        document.getElementById("nameInputGroup").style.display = "flex";
+        document.getElementById("chatArea").style.display = "none";
+        document.getElementById("chatInputGroup").style.display = "none";
+        document.getElementById("chatBox").innerHTML = "";
+        document.getElementById("typingExercise").style.display = "none";
+        typingSection.style.display = "none";
+        typingFinishButtons.style.display = "none";
+        document.getElementById("studentNameInput").value = "";
+        userInput.value = "";
+        userInput.disabled = true;
+        step = 0;
+        totalAnswers = 0;
+        correctAnswers = 0;
+        updateStats(false);
+        hidePinyin();
+        chatHintVisible = false;
+        removeExistingChatHint();
+        typingResults = []; // Clear typing results on going home
+    }
+
+    function startGame() {
+        step = 0;
+        chatBox.innerHTML = "";
+        userInput.disabled = false;
+        userInput.focus();
+        userInput.placeholder = studentEmoji + " Type your answer..."; 
+        addBotMessage(["我是AI 聊天机器人"], "🤖");
+        document.getElementById("chatInputGroup").style.display = "flex";
+        document.getElementById("typingExercise").style.display = "none";
+        typingSection.style.display = "none";
+        typingFinishButtons.style.display = "none";
+
+        totalAnswers = 0;
+        correctAnswers = 0;
+        updateStats(false);
+        chatHintVisible = false;
+        removeExistingChatHint();
+    }
+
+    function addUserMessage(text) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message user";
+        msgDiv.textContent = studentEmoji + " " + text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function toggleChatHint() {
+        const existingHint = chatBox.querySelector('.chat-hint-message');
+
+        if (chatHintVisible) {
+            if (existingHint) {
+                existingHint.remove();
+            }
+            chatHintVisible = false;
+        } else {
+            if (step < chatHints.length) {
+                const hintMsg = document.createElement("div");
+                hintMsg.className = "hint-message chat-hint-message";
+                hintMsg.innerHTML = chatHints[step];
+                chatBox.appendChild(hintMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                chatHintVisible = true;
+            } else {
+                const noHintMsg = document.createElement("div");
+                noHintMsg.className = "hint-message chat-hint-message";
+                noHintMsg.textContent = "No more hints available for this conversation!";
+                chatBox.appendChild(noHintMsg);
+                chatBox.scrollTop = chatBox.boxscrollHeight;
+                chatHintVisible = true;
+            }
+        }
+    }
+
+    function removeExistingChatHint() {
+        const existingHint = chatBox.querySelector('.chat-hint-message');
+        if (existingHint) {
+            existingHint.remove();
+        }
+        chatHintVisible = false;
+    }
+
+
+    function sendMessage() {
+        const userText = userInput.value.trim();
+        if (!userText) return;
+
+        addUserMessage(userText);
+        removeExistingChatHint();
+
+        console.log("原始用户输入:", userText);
+        const cleanedUserText = cleanText(userText);
+        console.log("清理后的用户输入:", cleanedUserText);
+
+        if (step === 0) {
+            const target = "你好";
+            if (cleanedUserText.includes(target)) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotMessage(["你好"], "🤖");
+                step++;
+                updateStats(true);
+            } else {
+                addBotMessage(["请重新回答：正确的说法是 “你好”"], "🤖");
+                updateStats(false);
+            }
+
+        } else if (step === 1) {
+            const targetStudent = "你是学生吗";
+            const targetTeacher = "你是老师吗";
+
+            if (cleanedUserText.includes(targetStudent)) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotMultiLineMessage([
+                    "不，我不是学生，我是机器人",
+                    "你是学生吗？"
+                ], "🤖");
+                step++;
+                updateStats(true);
+
+            } else if (cleanedUserText.includes(targetTeacher)) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotMultiLineMessage([
+                    "不，我不是老师，我是机器人",
+                    "你是学生吗？"
+                ], "🤖");
+                step++;
+                updateStats(true);
+
+            } else {
+                addBotMessage(["请重新回答：可以说“你是学生吗？”或“你是老师吗？”"], "🤖");
+                updateStats(false);
+            }
+
+        } else if (step === 2) {
+            const targetNotStudent = "不我不是学生"; 
+            const targetNotStudentAlso = "不也不是学生";
+            const targetIsStudent = "我是学生"; 
+
+            let isCorrect = false;
+            let botResponseLines = [];
+
+            if (cleanedUserText.includes(targetNotStudent) || cleanedUserText.includes(targetNotStudentAlso)) {
+                botResponseLines = ["你不是学生。", "他呢？他是学生吗？"];
+                isCorrect = true;
+            } else if (cleanedUserText.includes(targetIsStudent)) {
+                botResponseLines = ["你是学生。", "他呢？他是学生吗？"];
+                isCorrect = true;
+            }
+            
+            if (isCorrect) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotMultiLineMessage(botResponseLines, "🤖");
+                step++;
+                updateStats(true);
+
+            } else {
+                addBotMessage(["请重新回答：可以说“不，我不是学生”或“是，我是学生”"], "🤖");
+                updateStats(false);
+            }
+
+        } else if (step === 3) {
+            const acceptedAnswers = [
+                "不是他也不是学生",
+                "不是他不是学生",
+                "不他也不是学生",
+                "不他不是学生"
+            ];
+
+            let isCorrectAnswer = false;
+            for (let i = 0; i < acceptedAnswers.length; i++) {
+                if (cleanedUserText.includes(cleanText(acceptedAnswers[i]))) {
+                    isCorrectAnswer = true;
+                    break;
+                }
+            }
+
+            if (isCorrectAnswer) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotMultiLineMessage([
+                    "他不是学生。", 
+                    "他是老师吗？"  
+                ], "🤖");
+                step++;
+                updateStats(true);
+            } else {
+                addBotMessage(["请重新回答：可以说“不是，他不是学生”或“不，他也不是学生”"], "🤖");
+                updateStats(false);
+            }
+
+        } else if (step === 4) {
+            const targetIsTeacher = "是他是老师";
+            const targetIsTeacherSimple = "他是老师";
+
+            if (cleanedUserText.includes(targetIsTeacher) || cleanedUserText.includes(targetIsTeacherSimple)) {
+                if (correctSound) {
+                    correctSound.currentTime = 0;
+                    correctSound.play().catch(e => console.error("Error playing sound:", e));
+                }
+                addBotFinalMessageWithThumbsUp("太棒了！");
+                step++; 
+                userInput.disabled = true; 
+                updateStats(true);
+            } else {
+                addBotMessage(["请重新回答：正确的说法是 “是，他是老师” 或 “他是老师”"], "🤖");
+                updateStats(false);
+            }
+        }
+
+        userInput.value = "";
+    }
+
+    function addBotMessage(lines, emoji = "🤖") {
+        let cumulativeDelay = 0;
+        lines.forEach(line => {
+            setTimeout(() => {
+                const msgDiv = document.createElement("div");
+                msgDiv.className = "message bot";
+                chatBox.appendChild(msgDiv);
+
+                let charIndex = 0;
+                function typeChar() {
+                    if (charIndex <= line.length) {
+                        msgDiv.textContent = emoji + " " + line.substring(0, charIndex);
+                        charIndex++;
+                        setTimeout(typeChar, typingSpeed);
+                    } else {
+                        msgDiv.textContent = emoji + " " + line;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+
+                setTimeout(typeChar, 0);
+            }, cumulativeDelay);
+            cumulativeDelay += (line.length * typingSpeed) + lineDelay;
+        });
+    }
+
+    function addBotMultiLineMessage(lines, emoji = "🤖") {
+        let cumulativeDelay = 0;
+        lines.forEach(line => {
+            setTimeout(() => {
+                const msgDiv = document.createElement("div");
+                msgDiv.className = "message bot";
+                chatBox.appendChild(msgDiv);
+
+                let charIndex = 0;
+                function typeChar() {
+                    if (charIndex <= line.length) {
+                        msgDiv.textContent = emoji + " " + line.substring(0, charIndex);
+                        charIndex++;
+                        setTimeout(typeChar, typingSpeed);
+                    } else {
+                        msgDiv.textContent = emoji + " " + line;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+
+                setTimeout(typeChar, 0);
+            }, cumulativeDelay);
+            cumulativeDelay += (line.length * typingSpeed) + lineDelay;
+        });
+    }
+
+    function addBotFinalMessageWithThumbsUp(finalText) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message bot";
+        chatBox.appendChild(msgDiv);
+
+        msgDiv.textContent = "🤖 👍";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        if (applauseSound) {
+            applauseSound.currentTime = 0;
+            applauseSound.play().catch(e => console.error("Error playing sound:", e));
+        }
+
+        setTimeout(() => {
+            let charIndex = 0;
+            function typeChar() {
+                if (charIndex <= finalText.length) {
+                    msgDiv.textContent = "🤖 👍 " + finalText.substring(0, charIndex);
+                    charIndex++;
+                    setTimeout(typeChar, typingSpeed);
+                } else {
+                    msgDiv.textContent = "🤖 👍 太棒了！";
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            }
+
+            setTimeout(typeChar, 0);
+        }, lineDelay);
+    }
+
+    function printChat() {
+        const name = studentNameInput.value.trim() || "匿名学生";
+        const selectedEmoji = studentEmojiSelect.value;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>对话记录 - ` + name + `</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 20px;
+                        background: white;
+                    }
+                    .message {
+                        margin: 10px 0;
+                        padding: 10px;
+                        background: #f9f9f9;
+                        border: 1px solid #ccc;
+                        word-wrap: break-word;
+                    }
+                    .bot {
+                        background: #e6ffe6;
+                    }
+                    .user {
+                        background: #e6f7ff;
+                    }
+                    .print-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    /* Ensure emojis are printed correctly */
+                    .message span {
+                        font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <h2>🤖 中文学习聊天游戏 👩‍🎓</h2>
+                    <p>学生姓名：` + name + `</p>
+                    <p>` + statsBox.textContent + `</p>
+                    <hr>
+                </div>
+                <div id="printChatBox"></div>
+            </body>
+            </html>
+        `);
+
+        let chatContentForPrint = chatBox.innerHTML;
+        chatContentForPrint = chatContentForPrint.replace(/👩🏼‍🎓 /g, selectedEmoji + " ");
+        chatContentForPrint = chatContentForPrint.replace(/👨🏻‍🎓 /g, selectedEmoji + " ");
+
+
+        const printChatBox = printWindow.document.getElementById("printChatBox");
+        printChatBox.innerHTML = chatContentForPrint;
+
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 500);
+    }
+
+    function printTypingExercise() {
+        const name = studentNameInput.value.trim() || "匿名学生";
+        const selectedEmoji = studentEmojiSelect.value;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>打字练习记录 - ` + name + `</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 20px;
+                        background: white;
+                    }
+                    .print-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .typing-record-item {
+                        margin-bottom: 15px;
+                        padding: 10px;
+                        border: 1px solid #eee;
+                        border-radius: 5px;
+                        background-color: #fcfcfc;
+                    }
+                    .typing-record-item p {
+                        margin: 5px 0;
+                    }
+                    .correct {
+                        color: green;
+                        font-weight: bold;
+                    }
+                    .incorrect {
+                        color: red;
+                        font-weight: bold;
+                    }
+                    /* Ensure emojis are printed correctly */
+                    .print-header span {
+                        font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <h2>⌨ 打字练习记录</h2>
+                    <p>学生姓名：` + selectedEmoji + ` ` + name + `</p>
+                    <p>` + statsBox.textContent + `</p>
+                    <hr>
+                </div>
+                <div id="printTypingRecords"></div>
+            </body>
+            </html>
+        `);
+
+        const printTypingRecords = printWindow.document.getElementById("printTypingRecords");
+        
+        typingResults.forEach((record, index) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "typing-record-item";
+            itemDiv.innerHTML = `
+                <p><strong>句子 ${index + 1}:</strong> ${record.target}</p>
+                <p><strong>你的输入:</strong> <span class="${record.correct ? 'correct' : 'incorrect'}">${record.typed || '(未输入)'}</span></p>
+                <p><strong>结果:</strong> ${record.correct ? '✅ 正确' : '❌ 错误'}</p>
+            `;
+            printTypingRecords.appendChild(itemDiv);
+        });
+
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 500);
+    }
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        userInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+        studentEmoji = studentEmojiSelect.value;
+    });
+
+</script>
+</body>
+</html>
