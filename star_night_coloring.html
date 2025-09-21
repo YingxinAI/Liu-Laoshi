@@ -92,32 +92,6 @@
                 height: 20px !important;
                 border-radius: 10px !important;
             }
-            .progress-completion {
-                font-size: 1rem !important;
-            }
-        }
-
-        .countdown-container {
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 12px;
-            background-color: #f8e0e0;
-            margin-bottom: 15px;
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .countdown-container.animate {
-            animation: pulse 0.4s ease;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
 
         #pixelCanvas {
@@ -125,7 +99,7 @@
             grid-template-columns: repeat(29, 28px);
             grid-template-rows: repeat(26, 20px);
             gap: 1px;
-            margin: 0 auto 15px auto;
+            margin: 0 auto;
             background-color: #333;
             padding: 8px;
             border-radius: 8px;
@@ -214,13 +188,6 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        #clearBtn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        #clearBtn:hover {
-            background-color: #c0392b;
-        }
         #eraserBtn {
             background-color: #95a5a6;
             color: white;
@@ -277,21 +244,20 @@
             flex-wrap: wrap;
         }
 
-        /* ✅ 进度条 + 完成提示容器（一行） */
-        .progress-combined {
+        /* ✅ 进度条容器（一行） */        .progress-combined {
             width: 100%;
             max-width: 500px;
             margin: 0 auto 15px auto;
             display: flex;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .progress-bar-container {
-            flex: 1;
-            min-width: 300px;
+            width: 100%;
+            min-width: 200px;
         }
 
         .progress-bar {
@@ -312,8 +278,7 @@
             position: relative;
         }
 
-        /* 完成时闪光动画 */
-        .progress-fill.completed {
+        /* 完成时闪光动画 */        .progress-fill.completed {
             animation: shine 1.5s ease-in-out;
             background: linear-gradient(90deg, #FFD700, #FFA500);
         }
@@ -344,11 +309,12 @@
             100% { transform: translateX(100%); }
         }
 
-        .progress-completion {
+        /* ✅ 百分比文字 */
+        .progress-percent {
             font-size: 1.3rem;
             font-weight: bold;
             color: #e65100;
-            min-width: 200px;
+            min-width: 60px;
             text-align: center;
             padding: 5px 10px;
             border-radius: 10px;
@@ -356,34 +322,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* ✅ 开始游戏按钮容器 */
-        #startGameContainer {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-        }
-
-        #startGameBtn {
-            padding: 12px 24px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.2s;
-        }
-
-        #startGameBtn:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-        }
-
-        /* ✅ 原图容器 */
-        #artworkContainer {
+        /* ✅ 原图容器 */        #artworkContainer {
             width: 100%;
             max-height: 500px;
             overflow: auto;
@@ -401,8 +340,7 @@
             border: 3px solid #fff;
         }
 
-        /* 分享弹窗 */
-        .share-modal {
+        /* 分享弹窗 */        .share-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -436,8 +374,7 @@
     <h1>🌌 梵高《星夜》在线数字填色游戏</h1>
 
     <div class="main-container">
-        <!-- 左侧：颜色说明 + 色盘 + 工具按钮 -->
-        <div class="legend-section" id="leftPanel">
+        <!-- 左侧：颜色说明 + 色盘 + 工具按钮 -->        <div class="legend-section" id="leftPanel">
             <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明</h3>
             <div class="legend">
                 <div class="legend-item" onclick="speakText('黑色')">1 = 黑色</div>
@@ -455,45 +392,31 @@
 
             <div class="button-group">
                 <button id="eraserBtn">🧽 橡皮擦</button>
-                <button id="clearBtn">🔄 重置</button>
                 <button id="saveBtn">💾 保存进度</button>
                 <button id="shareBtn">📤 分享杰作</button>
                 <button id="musicBtn">🎵 音乐开/关</button>
             </div>
         </div>
 
-        <!-- 右侧：涂色画布 -->
-        <div class="canvas-section" id="rightPanel">
-            <!-- ✅ 开始游戏按钮 -->
-            <div id="startGameContainer">
-                <button id="startGameBtn">🎮 开始游戏</button>
-            </div>
-
-            <!-- ✅ 进度条 + 完成提示（一行） -->
-            <div class="progress-combined">
+        <!-- 右侧：涂色画布 -->        <div class="canvas-section" id="rightPanel">
+            <!-- ✅ 只保留进度条 + 百分比 -->            <div class="progress-combined">
                 <div class="progress-bar-container">
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
                 </div>
-                <div class="progress-completion" id="completionText"></div>
+                <div class="progress-percent" id="progressPercent">0%</div>
             </div>
 
-            <!-- 倒计时容器（初始为空） -->
-            <div class="countdown-container" id="countdownContainer"></div>
+            <!-- 画布 -->            <div id="pixelCanvas"></div>
 
-            <!-- 画布 -->
-            <div id="pixelCanvas"></div>
-
-            <!-- ✅ 原图容器 -->
-            <div id="artworkContainer">
+            <!-- ✅ 原图容器 -->            <div id="artworkContainer">
                 <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
             </div>
         </div>
     </div>
 
-    <!-- 分享弹窗 -->
-    <div class="share-modal" id="shareModal">
+    <!-- 分享弹窗 -->    <div class="share-modal" id="shareModal">
         <div class="share-content">
             <h3>🎨 你的《星夜》杰作</h3>
             <div id="shareCanvasContainer"></div>
@@ -502,9 +425,7 @@
         </div>
     </div>
 
-    <!-- 音频元素 -->
-    <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
-    <!-- ✅ 使用你指定的背景音乐文件 -->
+    <!-- 音频元素 -->    <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
     <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
 
     <script>
@@ -522,13 +443,7 @@
 
         const numberToColorName = {
             1: '黑色',
-            2: '深蓝色',
-            3: '黄色',
-            4: '浅蓝色',
-            5: '紫色',
-            6: '绿色',
-            7: '白色',
-            8: '橙色'
+            2: '深蓝色',            3: '黄色',            4: '浅蓝色',            5: '紫色',            6: '绿色',            7: '白色',            8: '橙色'
         };
 
         let selectedColor = null;
@@ -540,7 +455,7 @@
 
         // ✅ 修改后的 gridData（8→7, 10→8）
         const gridData = [
-           [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
+            [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
             [1,4,4,4,2,1,2,4,2,4,2,3,3,4,2,2,4,3,3,4,4,4,2,4,2,3,3,3,3],
             [1,2,2,2,2,1,2,3,2,2,2,2,2,2,2,2,2,3,3,2,2,2,2,4,4,3,8,8,3],
             [2,2,2,2,2,1,3,3,3,2,4,4,4,4,4,4,2,4,4,2,2,2,4,4,3,3,8,3,3],
@@ -589,8 +504,20 @@
                     
                     pixel.onclick = function() {
                         if (!gameStarted) {
-                            alert("请先点击「开始游戏」按钮！");
-                            return;
+                            gameStarted = true;
+                            alert("游戏已自动开始！请根据数字提示选择对应颜色进行填色。");
+                            
+                            // 自动播放背景音乐
+                            const bgMusic = document.getElementById('bgMusic');
+                            if (!isMusicPlaying) {
+                                bgMusic.muted = false;
+                                bgMusic.play().then(() => {
+                                    isMusicPlaying = true;
+                                    document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
+                                }).catch(e => {
+                                    console.log("自动播放被阻止，等待用户手动点击");
+                                });
+                            }
                         }
 
                         if (isEraserMode) {
@@ -636,13 +563,6 @@
             }
         }
 
-        function updateCountdown(message) {
-            const countdownContainer = document.getElementById('countdownContainer');
-            countdownContainer.textContent = message;
-            countdownContainer.classList.add('animate');
-            setTimeout(() => countdownContainer.classList.remove('animate'), 400);
-        }
-
         function playApplause() {
             const audio = document.getElementById('applauseSound');
             audio.currentTime = 0;
@@ -657,12 +577,10 @@
             const artworkContainer = document.getElementById('artworkContainer');
             const finalArtwork = document.getElementById('finalArtwork');
             const progressFill = document.getElementById('progressFill');
-            const completionText = document.getElementById('completionText');
+            const progressPercent = document.getElementById('progressPercent');
             
             progressFill.classList.add('completed');
-
-            // ✅ 显示完成文字
-            completionText.textContent = '🌟 祝贺你完成杰作！';
+            progressPercent.textContent = '100%';
 
             pixelCanvas.style.opacity = '0';
             setTimeout(() => {
@@ -701,21 +619,14 @@
             const percent = Math.round((completedCells / totalFillableCells) * 100);
             const progressFill = document.getElementById('progressFill');
             progressFill.style.width = `${percent}%`;
+            const progressPercent = document.getElementById('progressPercent');
+            progressPercent.textContent = `${percent}%`;
 
-            const completionText = document.getElementById('completionText');
             if (percent === 100) {
                 progressFill.classList.add('completed');
+                setTimeout(showCompletion, 500);
             } else {
                 progressFill.classList.remove('completed');
-                // ✅ 非完成状态清空文字
-                completionText.textContent = '';
-            }
-
-            const remaining = totalFillableCells - completedCells;
-            console.log(`已完成: ${completedCells}, 总数: ${totalFillableCells}, 剩余: ${remaining}`);
-
-            if (completedCells === totalFillableCells) {
-                setTimeout(showCompletion, 500);
             }
         }
 
@@ -765,7 +676,6 @@
                     if (hasData) {
                         console.log("进度已恢复");
                         gameStarted = true;
-                        document.getElementById('startGameContainer').style.display = 'none';
                         updateProgressBar();
                     }
                 } catch(e) {
@@ -895,10 +805,6 @@
             loadProgress();
             updateProgressBar();
 
-            // ✅ 初始化清空
-            document.getElementById('countdownContainer').textContent = '';
-            document.getElementById('completionText').textContent = '';
-
             // ✅ 图片加载失败提示
             const finalImg = document.getElementById('finalArtwork');
             finalImg.onerror = function() {
@@ -908,7 +814,7 @@
 
             document.getElementById('eraserBtn').onclick = function() {
                 if (!gameStarted) {
-                    alert("请先点击「开始游戏」按钮！");
+                    alert("请先点击画布格子开始游戏！");
                     return;
                 }
                 isEraserMode = true;
@@ -917,29 +823,9 @@
                 this.style.opacity = '0.6';
             };
             
-            document.getElementById('clearBtn').onclick = function() {
-                if (confirm("确定要重置画布吗？")) {
-                    document.querySelectorAll('.pixel').forEach(pixel => pixel.style.backgroundColor = '#f8e0e0');
-                    selectedColor = null;
-                    isEraserMode = false;
-                    isCountingDown = false;
-                    gameStarted = false;
-                    localStorage.removeItem('starNightProgress');
-                    document.getElementById('eraserBtn').style.opacity = '1';
-                    document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
-                    document.getElementById('pixelCanvas').style.display = 'grid';
-                    document.getElementById('pixelCanvas').style.opacity = '1';
-                    document.getElementById('artworkContainer').style.display = 'none';
-                    document.getElementById('progressFill').style.width = '0%';
-                    document.getElementById('progressFill').classList.remove('completed');
-                    document.getElementById('completionText').textContent = '';
-                    document.getElementById('countdownContainer').textContent = '';
-                }
-            };
-
             document.getElementById('saveBtn').onclick = function() {
                 if (!gameStarted) {
-                    alert("请先点击「开始游戏」按钮！");
+                    alert("请先点击画布格子开始游戏！");
                     return;
                 }
                 saveProgress();
@@ -948,7 +834,7 @@
 
             document.getElementById('shareBtn').onclick = function() {
                 if (!gameStarted) {
-                    alert("请先点击「开始游戏」按钮！");
+                    alert("请先点击画布格子开始游戏！");
                     return;
                 }
                 shareArtwork();
@@ -956,24 +842,6 @@
 
             document.getElementById('musicBtn').onclick = function() {
                 toggleMusic();
-            };
-
-            document.getElementById('startGameBtn').onclick = function() {
-                gameStarted = true;
-                document.getElementById('startGameContainer').style.display = 'none';
-                alert("游戏开始！请根据数字提示选择对应颜色进行填色。");
-                
-                // ✅ 自动播放背景音乐（如果用户已交互）
-                const bgMusic = document.getElementById('bgMusic');
-                if (!isMusicPlaying) {
-                    bgMusic.muted = false;
-                    bgMusic.play().then(() => {
-                        isMusicPlaying = true;
-                        document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
-                    }).catch(e => {
-                        console.log("自动播放被阻止，等待用户手动点击");
-                    });
-                }
             };
 
             document.body.addEventListener('click', function initAudio() {
