@@ -51,7 +51,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
             min-height: 400px;
         }
 
@@ -93,6 +92,9 @@
                 height: 20px !important;
                 border-radius: 10px !important;
             }
+            .progress-completion {
+                font-size: 1rem !important;
+            }
         }
 
         .countdown-container {
@@ -133,6 +135,8 @@
             overflow: auto;
             aspect-ratio: 29 / 26;
         }
+
+        /* ✅ 立体感格子样式 */
         .pixel {
             width: 28px;
             height: 20px;
@@ -147,12 +151,33 @@
             user-select: none;
             transition: all 0.2s ease;
             position: relative;
-            border-radius: 2px;
+            border-radius: 3px;
+            
+            /* ✅ 立体感：内阴影 + 边框 */
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.2),
+                0 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
         }
+
         .pixel:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.2),
+                0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
         }
+
+        .pixel:active {
+            transform: scale(0.98) translateY(1px);
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.6),
+                inset -1px -1px 2px rgba(0,0,0,0.3),
+                0 1px 3px rgba(0,0,0,0.15);
+        }
+
         .legend {
             display: flex;
             flex-direction: column;
@@ -251,52 +276,22 @@
             margin-top: 15px;
             flex-wrap: wrap;
         }
-        #finalArtwork {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            aspect-ratio: 29 / 26;
-            border-radius: 8px;
-            display: none;
-            opacity: 0;
-            transition: opacity 2s ease;
-        }
 
-        /* 分享弹窗 */
-        .share-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .share-content {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 90%;
-        }
-        .share-content img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .close-btn {
-            margin-top: 15px;
-            background: #7f8c8d;
-        }
-
-        /* ✅ 动态进度条容器 */
-        .progress-bar-container {
+        /* ✅ 进度条 + 完成提示容器（一行） */
+        .progress-combined {
             width: 100%;
             max-width: 500px;
             margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            min-width: 300px;
         }
 
         .progress-bar {
@@ -349,6 +344,18 @@
             100% { transform: translateX(100%); }
         }
 
+        .progress-completion {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e65100;
+            min-width: 200px;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 10px;
+            background-color: rgba(255,243,224,0.8);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         /* ✅ 开始游戏按钮容器 */
         #startGameContainer {
             margin-bottom: 15px;
@@ -374,6 +381,55 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
+
+        /* ✅ 原图容器 */
+        #artworkContainer {
+            width: 100%;
+            max-height: 500px;
+            overflow: auto;
+            padding: 10px 0;
+            display: none;
+        }
+
+        #finalArtwork {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border: 3px solid #fff;
+        }
+
+        /* 分享弹窗 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .share-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 90%;
+        }
+        .share-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .close-btn {
+            margin-top: 15px;
+            background: #7f8c8d;
+        }
     </style>
 </head>
 <body>
@@ -390,8 +446,8 @@
                 <div class="legend-item" onclick="speakText('浅蓝色')">4 = 浅蓝色</div>
                 <div class="legend-item" onclick="speakText('紫色')">5 = 紫色</div>
                 <div class="legend-item" onclick="speakText('绿色')">6 = 绿色</div>
-                <div class="legend-item" onclick="speakText('白色')">8 = 白色</div>
-                <div class="legend-item" onclick="speakText('橙色')">10 = 橙色</div>
+                <div class="legend-item" onclick="speakText('白色')">7 = 白色</div>
+                <div class="legend-item" onclick="speakText('橙色')">8 = 橙色</div>
             </div>
 
             <div class="palette-label">🎨 选择颜色</div>
@@ -413,21 +469,26 @@
                 <button id="startGameBtn">🎮 开始游戏</button>
             </div>
 
-            <!-- ✅ 动态进度条 -->
-            <div class="progress-bar-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+            <!-- ✅ 进度条 + 完成提示（一行） -->
+            <div class="progress-combined">
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
                 </div>
+                <div class="progress-completion" id="completionText"></div>
             </div>
 
-            <!-- 倒计时容器 -->
-            <div class="countdown-container" id="countdownContainer">给下面的格子按要求涂上颜色</div>
+            <!-- 倒计时容器（初始为空） -->
+            <div class="countdown-container" id="countdownContainer"></div>
 
             <!-- 画布 -->
             <div id="pixelCanvas"></div>
 
-            <!-- 最终作品图 -->
-            <img id="finalArtwork" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Starry_Night.jpg/1200px-Starry_Night.jpg" alt="梵高《星夜》原作">
+            <!-- ✅ 原图容器 -->
+            <div id="artworkContainer">
+                <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
+            </div>
         </div>
     </div>
 
@@ -443,24 +504,31 @@
 
     <!-- 音频元素 -->
     <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
-    <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2023/10/26/audio_c0a4d9b847.mp3" loop preload="auto" muted></audio>
+    <!-- ✅ 使用你指定的背景音乐文件 -->
+    <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
 
     <script>
-        // ✅ 优化后的 colorMap - 更贴近《星夜》油画质感
+        // ✅ 优化后的 colorMap - 数字 1~8 连续
         const colorMap = {
-            1: '#000000',    // 黑色 - 轮廓与暗部
-            2: '#0A1A3A',    // 深蓝 - 夜空主色（厚重感）
-            3: '#FFD700',    // 金黄 - 星星与月亮（油画金）
-            4: '#6B9AC4',    // 灰蓝 - 云层与涡流（柔和）
-            5: '#5D4B6D',    // 灰紫 - 山影与夜空过渡
-            6: '#3A5F3D',    // 暗橄榄绿 - 柏树与前景植被
-            8: '#F5F5F5',    // 米白 - 云层高光（比纯白柔和）
-            10: '#FFA500'    // 橙色 - 光晕与暖色点缀
+            1: '#000000',    // 黑色
+            2: '#0A1A3A',    // 深蓝
+            3: '#FFD700',    // 金黄
+            4: '#6B9AC4',    // 灰蓝
+            5: '#5D4B6D',    // 灰紫
+            6: '#3A5F3D',    // 暗橄榄绿
+            7: '#F5F5F5',    // 米白（原8）
+            8: '#FFA500'     // 橙色（原10）
         };
 
         const numberToColorName = {
-            1: '黑色', 2: '深蓝色', 3: '黄色', 4: '浅蓝色',
-            5: '紫色', 6: '绿色', 8: '白色', 10: '橙色'
+            1: '黑色',
+            2: '深蓝色',
+            3: '黄色',
+            4: '浅蓝色',
+            5: '紫色',
+            6: '绿色',
+            7: '白色',
+            8: '橙色'
         };
 
         let selectedColor = null;
@@ -468,26 +536,27 @@
         let remainingCells = 0;
         let isCountingDown = false;
         let isMusicPlaying = false;
-        let gameStarted = false; // ✅ 游戏是否已开始
+        let gameStarted = false;
 
+        // ✅ 修改后的 gridData（8→7, 10→8）
         const gridData = [
            [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
             [1,4,4,4,2,1,2,4,2,4,2,3,3,4,2,2,4,3,3,4,4,4,2,4,2,3,3,3,3],
-            [1,2,2,2,2,1,2,3,2,2,2,2,2,2,2,2,2,3,3,2,2,2,2,4,4,3,10,10,3],
-            [2,2,2,2,2,1,3,3,3,2,4,4,4,4,4,4,2,4,4,2,2,2,4,4,3,3,10,3,3],
-            [4,2,2,2,2,1,3,3,3,4,4,8,3,8,8,4,8,2,2,2,3,2,4,4,3,3,10,3,10],
-            [4,2,2,2,2,1,2,3,4,4,4,3,4,3,4,8,4,8,2,2,3,3,4,4,3,3,10,10,10],
-            [4,4,2,2,2,1,4,4,4,4,4,4,4,4,2,4,8,4,8,4,3,4,4,4,2,3,3,3,3],
-            [4,4,4,3,4,1,1,4,4,4,2,4,8,3,4,2,4,8,2,4,4,4,4,4,2,2,3,3,3],
-            [4,2,2,1,4,1,1,4,2,3,4,8,4,8,4,4,4,8,4,4,4,4,4,2,4,4,4,4,2],
-            [4,4,4,1,4,1,4,2,2,4,4,8,4,2,8,4,8,8,8,4,3,4,4,2,2,4,4,4,2],
-            [2,4,4,4,1,1,2,2,2,2,4,8,4,2,4,8,8,8,3,8,8,8,4,2,2,2,4,2,3],
-            [3,2,2,3,1,1,1,2,2,2,4,8,4,8,2,2,2,3,4,2,2,2,8,2,2,2,3,3,3],
-            [3,2,3,3,3,1,1,2,2,3,3,4,4,4,4,3,3,2,4,8,4,4,8,4,2,3,3,3,3],
-            [2,2,2,3,1,1,1,4,3,3,3,3,4,2,2,2,2,2,2,8,4,8,4,2,3,3,3,3,5],
-            [2,2,2,2,1,1,1,4,3,3,3,3,2,2,2,2,2,2,2,3,8,2,2,3,3,3,2,5,5],
+            [1,2,2,2,2,1,2,3,2,2,2,2,2,2,2,2,2,3,3,2,2,2,2,4,4,3,8,8,3],
+            [2,2,2,2,2,1,3,3,3,2,4,4,4,4,4,4,2,4,4,2,2,2,4,4,3,3,8,3,3],
+            [4,2,2,2,2,1,3,3,3,4,4,7,3,7,7,4,7,2,2,2,3,2,4,4,3,3,8,3,8],
+            [4,2,2,2,2,1,2,3,4,4,4,3,4,3,4,7,4,7,2,2,3,3,4,4,3,3,8,8,8],
+            [4,4,2,2,2,1,4,4,4,4,4,4,4,4,2,4,7,4,7,4,3,4,4,4,2,3,3,3,3],
+            [4,4,4,3,4,1,1,4,4,4,2,4,7,3,4,2,4,7,2,4,4,4,4,4,2,2,3,3,3],
+            [4,2,2,1,4,1,1,4,2,3,4,7,4,7,4,4,4,7,4,4,4,4,4,2,4,4,4,4,2],
+            [4,4,4,1,4,1,4,2,2,4,4,7,4,2,7,4,7,7,7,4,3,4,4,2,2,4,4,4,2],
+            [2,4,4,4,1,1,2,2,2,2,4,7,4,2,4,7,7,7,3,7,7,7,4,2,2,2,4,2,3],
+            [3,2,2,3,1,1,1,2,2,2,4,7,4,7,2,2,2,3,4,2,2,2,7,2,2,2,3,3,3],
+            [3,2,3,3,3,1,1,2,2,3,3,4,4,4,4,3,3,2,4,7,4,4,7,4,2,3,3,3,3],
+            [2,2,2,3,1,1,1,4,3,3,3,3,4,2,2,2,2,2,2,7,4,7,4,2,3,3,3,3,5],
+            [2,2,2,2,1,1,1,4,3,3,3,3,2,2,2,2,2,2,2,3,7,2,2,3,3,3,2,5,5],
             [3,3,2,2,1,1,1,2,2,3,3,2,2,2,3,2,3,3,3,3,3,3,3,3,2,2,5,5,5],
-            [3,3,3,2,1,1,1,2,1,8,8,2,2,3,3,3,3,4,3,3,3,3,3,2,5,5,5,5,5],
+            [3,3,3,2,1,1,1,2,1,7,7,2,2,3,3,3,3,4,3,3,3,3,3,2,5,5,5,5,5],
             [4,4,3,3,1,1,1,2,1,3,4,3,3,3,3,3,4,5,5,5,5,4,4,5,5,5,4,4,4],
             [2,2,2,3,1,1,1,1,1,1,2,2,5,3,3,3,4,5,5,5,1,5,5,5,5,5,4,4,4],
             [2,2,2,2,1,1,1,1,1,1,1,5,5,5,5,5,4,5,1,5,5,3,3,5,3,4,4,4,6],
@@ -519,7 +588,6 @@
                     }
                     
                     pixel.onclick = function() {
-                        // ✅ 游戏未开始时阻止操作
                         if (!gameStarted) {
                             alert("请先点击「开始游戏」按钮！");
                             return;
@@ -528,23 +596,14 @@
                         if (isEraserMode) {
                             this.style.backgroundColor = '#f8e0e0';
                             saveProgress();
-                            updateProgressBar(); // 更新进度条
+                            updateProgressBar();
                         } else if (selectedColor !== null) {
                             const cellValue = this.dataset.value;
                             if (!isNaN(cellValue) && parseInt(cellValue) in colorMap && colorMap[parseInt(cellValue)] === selectedColor) {
                                 this.style.backgroundColor = selectedColor;
                                 saveProgress();
-                                updateProgressBar(); // 更新进度条
+                                updateProgressBar();
                                 checkCompletion();
-
-                                // ✅ 倒计时中才递减
-                                if (isCountingDown && remainingCells > 0) {
-                                    remainingCells--;
-                                    updateCountdown(`你还剩${remainingCells}个格子`);
-                                    if (remainingCells === 0) {
-                                        updateCountdown("🎉 祝贺你！");
-                                    }
-                                }
                             } else {
                                 const selectedNumber = Object.keys(colorMap).find(key => colorMap[key] === selectedColor);
                                 const colorName = numberToColorName[selectedNumber] || '未知颜色';
@@ -595,27 +654,31 @@
 
         function showCompletion() {
             const pixelCanvas = document.getElementById('pixelCanvas');
+            const artworkContainer = document.getElementById('artworkContainer');
             const finalArtwork = document.getElementById('finalArtwork');
-            const countdownContainer = document.getElementById('countdownContainer');
             const progressFill = document.getElementById('progressFill');
+            const completionText = document.getElementById('completionText');
             
-            // ✅ 添加完成动画
             progressFill.classList.add('completed');
 
+            // ✅ 显示完成文字
+            completionText.textContent = '🌟 祝贺你完成杰作！';
+
             pixelCanvas.style.opacity = '0';
-            setTimeout(() => pixelCanvas.style.display = 'none', 1000);
-
-            finalArtwork.style.display = 'block';
-            finalArtwork.style.opacity = '0';
             setTimeout(() => {
-                finalArtwork.style.opacity = '1';
-                setTimeout(playApplause, 2000);
-            }, 100);
-
-            countdownContainer.textContent = '🌟 祝贺你完成杰作！';
+                pixelCanvas.style.display = 'none';
+                
+                artworkContainer.style.display = 'block';
+                finalArtwork.style.opacity = '0';
+                
+                setTimeout(() => {
+                    finalArtwork.style.opacity = '1';
+                    setTimeout(playApplause, 800);
+                }, 300);
+                
+            }, 500);
         }
 
-        // ✅ 核心：更新动态进度条
         function updateProgressBar() {
             let completedCells = 0;
             let totalFillableCells = 0;
@@ -639,24 +702,18 @@
             const progressFill = document.getElementById('progressFill');
             progressFill.style.width = `${percent}%`;
 
-            // ✅ 完成时添加庆祝样式
+            const completionText = document.getElementById('completionText');
             if (percent === 100) {
                 progressFill.classList.add('completed');
             } else {
                 progressFill.classList.remove('completed');
+                // ✅ 非完成状态清空文字
+                completionText.textContent = '';
             }
 
             const remaining = totalFillableCells - completedCells;
             console.log(`已完成: ${completedCells}, 总数: ${totalFillableCells}, 剩余: ${remaining}`);
 
-            // ✅ 倒计时启动
-            if (remaining <= 10 && remaining > 0 && !isCountingDown) {
-                isCountingDown = true;
-                remainingCells = remaining;
-                updateCountdown(`你还剩${remainingCells}个格子`);
-            }
-
-            // ✅ 完成时显示杰作
             if (completedCells === totalFillableCells) {
                 setTimeout(showCompletion, 500);
             }
@@ -674,7 +731,6 @@
         }
 
         // =============== 新增功能 ===============
-        // 保存/加载进度
         function saveProgress() {
             const states = [];
             for (let i = 0; i < gridData.length; i++) {
@@ -710,7 +766,7 @@
                         console.log("进度已恢复");
                         gameStarted = true;
                         document.getElementById('startGameContainer').style.display = 'none';
-                        updateProgressBar(); // ✅ 加载后更新进度条
+                        updateProgressBar();
                     }
                 } catch(e) {
                     console.log("恢复进度失败");
@@ -732,7 +788,6 @@
             return null;
         }
 
-        // 背景音乐控制（兼容 iOS / Safari）
         function toggleMusic() {
             const bgMusic = document.getElementById('bgMusic');
             if (isMusicPlaying) {
@@ -750,7 +805,6 @@
             }
         }
 
-        // 分享功能（生成截图）
         async function shareArtwork() {
             const canvasSection = document.querySelector('.canvas-section');
             const pixelCanvas = document.getElementById('pixelCanvas');
@@ -759,21 +813,17 @@
             const tempCanvas = document.createElement('canvas');
             const ctx = tempCanvas.getContext('2d');
 
-            // 设置画布尺寸
             tempCanvas.width = pixelCanvas.offsetWidth;
-            tempCanvas.height = pixelCanvas.offsetHeight + 80; // 留出空间给进度条和标题
+            tempCanvas.height = pixelCanvas.offsetHeight + 80;
 
-            // 背景
             ctx.fillStyle = '#e8f5e9';
             ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
-            // 绘制标题
             ctx.fillStyle = '#2c3e50';
             ctx.font = 'bold 18px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('我的《星夜》填色作品', tempCanvas.width / 2, 30);
 
-            // 绘制进度条背景
             const progressBarWidth = tempCanvas.width - 40;
             const progressBarHeight = 25;
             const progressBarX = 20;
@@ -784,7 +834,6 @@
             ctx.strokeStyle = '#ccc';
             ctx.strokeRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
 
-            // 计算当前进度
             let completedCells = 0;
             let totalFillableCells = 0;
             for (let i = 0; i < gridData.length; i++) {
@@ -804,7 +853,6 @@
             const percent = Math.round((completedCells / totalFillableCells) * 100);
             const fillWidth = (percent / 100) * progressBarWidth;
 
-            // 绘制进度条填充
             const gradient = ctx.createLinearGradient(progressBarX, progressBarY, progressBarX + progressBarWidth, progressBarY);
             if (percent === 100) {
                 gradient.addColorStop(0, '#FFD700');
@@ -816,7 +864,6 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(progressBarX, progressBarY, fillWidth, progressBarHeight);
 
-            // 绘制格子
             const cellWidth = (tempCanvas.width - 40) / 29;
             const cellHeight = (tempCanvas.height - 120) / 26;
             const gridX = 20;
@@ -832,7 +879,6 @@
                 }
             }
 
-            // 显示在弹窗中
             const container = document.getElementById('shareCanvasContainer');
             container.innerHTML = '';
             const img = document.createElement('img');
@@ -847,11 +893,19 @@
             createCanvas();
             createColorPalette();
             loadProgress();
-
-            // ✅ 初始化进度条
             updateProgressBar();
 
-            // 按钮事件
+            // ✅ 初始化清空
+            document.getElementById('countdownContainer').textContent = '';
+            document.getElementById('completionText').textContent = '';
+
+            // ✅ 图片加载失败提示
+            const finalImg = document.getElementById('finalArtwork');
+            finalImg.onerror = function() {
+                alert("❌ 原图加载失败！请确认 '梵高星夜.png' 文件存在且路径正确。");
+                console.error("图片加载失败，请检查文件名和路径");
+            };
+
             document.getElementById('eraserBtn').onclick = function() {
                 if (!gameStarted) {
                     alert("请先点击「开始游戏」按钮！");
@@ -875,12 +929,11 @@
                     document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
                     document.getElementById('pixelCanvas').style.display = 'grid';
                     document.getElementById('pixelCanvas').style.opacity = '1';
-                    document.getElementById('finalArtwork').style.display = 'none';
-                    document.getElementById('finalArtwork').style.opacity = '0';
-                    document.getElementById('startGameContainer').style.display = 'flex';
+                    document.getElementById('artworkContainer').style.display = 'none';
                     document.getElementById('progressFill').style.width = '0%';
                     document.getElementById('progressFill').classList.remove('completed');
-                    document.getElementById('countdownContainer').textContent = '给下面的格子按要求涂上颜色';
+                    document.getElementById('completionText').textContent = '';
+                    document.getElementById('countdownContainer').textContent = '';
                 }
             };
 
@@ -905,15 +958,24 @@
                 toggleMusic();
             };
 
-            // ✅ 绑定“开始游戏”按钮
             document.getElementById('startGameBtn').onclick = function() {
                 gameStarted = true;
                 document.getElementById('startGameContainer').style.display = 'none';
-                updateCountdown('🎨 创作中...');
                 alert("游戏开始！请根据数字提示选择对应颜色进行填色。");
+                
+                // ✅ 自动播放背景音乐（如果用户已交互）
+                const bgMusic = document.getElementById('bgMusic');
+                if (!isMusicPlaying) {
+                    bgMusic.muted = false;
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
+                    }).catch(e => {
+                        console.log("自动播放被阻止，等待用户手动点击");
+                    });
+                }
             };
 
-            // ✅ 首次点击激活音频上下文（兼容 Safari / iOS）
             document.body.addEventListener('click', function initAudio() {
                 const bgMusic = document.getElementById('bgMusic');
                 bgMusic.muted = true;
@@ -927,7 +989,6 @@
                 document.body.removeEventListener('click', initAudio);
             }, { once: true });
 
-            // 设置右侧面板高度 = 左侧面板高度（可选增强）
             setTimeout(() => {
                 const leftPanel = document.getElementById('leftPanel');
                 const rightPanel = document.getElementById('rightPanel');
@@ -936,7 +997,6 @@
                 }
             }, 100);
 
-            // 手机端点击区域优化
             if (/Mobi|Android/i.test(navigator.userAgent)) {
                 document.querySelectorAll('.pixel').forEach(p => {
                     p.style.minWidth = '8vw';
