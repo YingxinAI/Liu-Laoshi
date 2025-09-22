@@ -84,14 +84,6 @@
                 padding: 8px 12px;
                 font-size: 14px;
             }
-            .progress-bar {
-                height: 20px !important;
-                border-radius: 10px !important;
-            }
-            .progress-fill {
-                height: 20px !important;
-                border-radius: 10px !important;
-            }
         }
 
         #pixelCanvas {
@@ -188,19 +180,21 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        #eraserBtn {
-            background-color: #95a5a6;
-            color: white;
-        }
-        #eraserBtn:hover {
-            background-color: #7f8c8d;
-        }
-        #saveBtn, #shareBtn, #musicBtn {
+        #musicBtn {
             background-color: #3498db;
             color: white;
         }
-        #saveBtn:hover, #shareBtn:hover, #musicBtn:hover {
+        #musicBtn:hover {
             background-color: #2980b9;
+        }
+
+        /* ✅ 重新开始按钮样式 */
+        #restartBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        #restartBtn:hover {
+            background-color: #c0392b;
         }
 
         .color-palette {
@@ -214,22 +208,54 @@
             border: 1px solid #bbdefb;
             margin-bottom: 15px;
         }
+
+        /* ✅ 立体感颜色选择器 */
         .palette-color {
             width: 32px;
             height: 32px;
-            border: 2px solid transparent;
+            border: 2px solid #ddd;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.2s;
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.2),
+                0 2px 4px rgba(0,0,0,0.1);
         }
+
         .palette-color:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+            transform: scale(1.15) translateY(-2px);
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.2),
+                0 4px 8px rgba(0,0,0,0.2);
         }
+
         .palette-color.selected {
             border: 2px solid #333;
-            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.3),
+                0 0 0 3px rgba(255,255,255,0.5);
         }
+
+        /* ✅ 特别加强白色显示 */
+        .palette-color[style*="#F5F5F5"] {
+            border: 2px solid #999;
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.3),
+                0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .palette-color[style*="#F5F5F5"]:hover {
+            border: 2px solid #666;
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.3),
+                0 4px 8px rgba(0,0,0,0.3);
+        }
+
         .palette-label {
             margin: 10px 0 8px 0;
             font-size: 14px;
@@ -244,85 +270,8 @@
             flex-wrap: wrap;
         }
 
-        /* ✅ 进度条容器（一行） */        .progress-combined {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto 15px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            min-width: 200px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 25px;
-            background-color: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            border-radius: 15px;
-            transition: width 0.6s ease;
-            position: relative;
-        }
-
-        /* 完成时闪光动画 */        .progress-fill.completed {
-            animation: shine 1.5s ease-in-out;
-            background: linear-gradient(90deg, #FFD700, #FFA500);
-        }
-
-        @keyframes shine {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.3) 50%,
-                rgba(255,255,255,0) 100%
-            );
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        /* ✅ 百分比文字 */
-        .progress-percent {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #e65100;
-            min-width: 60px;
-            text-align: center;
-            padding: 5px 10px;
-            border-radius: 10px;
-            background-color: rgba(255,243,224,0.8);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* ✅ 原图容器 */        #artworkContainer {
+        /* ✅ 原图容器 */
+        #artworkContainer {
             width: 100%;
             max-height: 500px;
             overflow: auto;
@@ -340,7 +289,8 @@
             border: 3px solid #fff;
         }
 
-        /* 分享弹窗 */        .share-modal {
+        /* 分享弹窗 */
+        .share-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -368,13 +318,124 @@
             margin-top: 15px;
             background: #7f8c8d;
         }
+
+        /* ✅ 进度条样式 */
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 15px;
+            transition: width 0.6s ease;
+            position: relative;
+        }
+
+        /* 完成时闪光动画 */
+        .progress-fill.completed {
+            animation: shine 1.5s ease-in-out, pulseGlow 2s infinite;
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.3) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ✅ 百分比文字样式 */
+        .progress-percent {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e65100;
+            min-width: 60px;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 10px;
+            background-color: rgba(255,243,224,0.8);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* ✅ 进度条容器（深褐色背景） */
+        .progress-container {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        /* ✅ 完成时闪光背景 */
+        .completion-flash {
+            animation: flashCelebration 1.5s ease-in-out;
+        }
+
+        @keyframes flashCelebration {
+            0%, 100% { background-color: rgba(232, 245, 233, 0.95); }
+            25% { background-color: rgba(255, 255, 200, 0.95); }
+            50% { background-color: rgba(255, 230, 180, 0.95); }
+            75% { background-color: rgba(255, 255, 200, 0.95); }
+        }
+
+        /* ✅ 画布缩放震动 */
+        .completion-bounce {
+            animation: bounceCelebration 1s ease-in-out;
+        }
+
+        @keyframes bounceCelebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.02) rotate(-1deg); }
+            50% { transform: scale(1.05) rotate(0deg); }
+            75% { transform: scale(1.02) rotate(1deg); }
+        }
+
+        /* ✅ 烟花粒子 */
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
     <h1>🌌 梵高《星夜》在线数字填色游戏</h1>
 
     <div class="main-container">
-        <!-- 左侧：颜色说明 + 色盘 + 工具按钮 -->        <div class="legend-section" id="leftPanel">
+        <!-- 左侧：颜色说明 + 色盘 + 工具按钮 -->
+        <div class="legend-section" id="leftPanel">
             <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明</h3>
             <div class="legend">
                 <div class="legend-item" onclick="speakText('黑色')">1 = 黑色</div>
@@ -390,33 +451,27 @@
             <div class="palette-label">🎨 选择颜色</div>
             <div class="color-palette" id="colorPalette"></div>
 
+            <!-- ✅ 按钮组（只保留重新开始和音乐） -->
             <div class="button-group">
-                <button id="eraserBtn">🧽 橡皮擦</button>
-                <button id="saveBtn">💾 保存进度</button>
-                <button id="shareBtn">📤 分享杰作</button>
+                <button id="restartBtn">🔄 重新开始</button>
                 <button id="musicBtn">🎵 音乐开/关</button>
             </div>
         </div>
 
-        <!-- 右侧：涂色画布 -->        <div class="canvas-section" id="rightPanel">
-            <!-- ✅ 只保留进度条 + 百分比 -->            <div class="progress-combined">
-                <div class="progress-bar-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                </div>
-                <div class="progress-percent" id="progressPercent">0%</div>
-            </div>
+        <!-- 右侧：涂色画布 -->
+        <div class="canvas-section" id="rightPanel">
+            <!-- 画布 -->
+            <div id="pixelCanvas"></div>
 
-            <!-- 画布 -->            <div id="pixelCanvas"></div>
-
-            <!-- ✅ 原图容器 -->            <div id="artworkContainer">
-                <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
+            <!-- 原图容器（使用网络图片备用） -->
+            <div id="artworkContainer">
+                <img id="finalArtwork" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Starry_Night.jpg/1200px-Starry_Night.jpg" alt="梵高《星夜》原作">
             </div>
         </div>
     </div>
 
-    <!-- 分享弹窗 -->    <div class="share-modal" id="shareModal">
+    <!-- 分享弹窗 -->
+    <div class="share-modal" id="shareModal">
         <div class="share-content">
             <h3>🎨 你的《星夜》杰作</h3>
             <div id="shareCanvasContainer"></div>
@@ -425,14 +480,15 @@
         </div>
     </div>
 
-    <!-- 音频元素 -->    <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
-    <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
+    <!-- 音频元素（确保在最后） -->
+    <audio id="applauseSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b0e4a9d3b.mp3?filename=applause-2-148753.mp3" preload="auto"></audio>
+    <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2023/10/26/audio_c0a4d9b847.mp3" loop preload="auto" muted></audio>
 
     <script>
-        // ✅ 优化后的 colorMap - 数字 1~8 连续
+        // ✅ 优化后的 colorMap - 深蓝色变淡（#0A1A3A → #1E4D7C）
         const colorMap = {
             1: '#000000',    // 黑色
-            2: '#0A1A3A',    // 深蓝
+            2: '#1E4D7C',    // 淡化深蓝（原 #0A1A3A）
             3: '#FFD700',    // 金黄
             4: '#6B9AC4',    // 灰蓝
             5: '#5D4B6D',    // 灰紫
@@ -443,7 +499,13 @@
 
         const numberToColorName = {
             1: '黑色',
-            2: '深蓝色',            3: '黄色',            4: '浅蓝色',            5: '紫色',            6: '绿色',            7: '白色',            8: '橙色'
+            2: '深蓝色',
+            3: '黄色',
+            4: '浅蓝色',
+            5: '紫色',
+            6: '绿色',
+            7: '白色',
+            8: '橙色'
         };
 
         let selectedColor = null;
@@ -482,10 +544,78 @@
             [6,6,6,6,6,1,1,1,1,1,1,1,1,4,4,4,1,4,1,1,1,1,6,6,5,5,5,6,1]
         ];
 
+        // ✅ 烟花效果函数
+        function createFireworks(container) {
+            const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD32'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // 随机位置（在容器内）
+                    const rect = container.getBoundingClientRect();
+                    const x = Math.random() * rect.width;
+                    const y = Math.random() * rect.height;
+                    
+                    firework.style.left = x + 'px';
+                    firework.style.top = y + 'px';
+                    
+                    // 动画
+                    firework.style.animation = `
+                        fireworkExplode 1s ease-out forwards,
+                        fireworkFade 1s ease-out 1s forwards
+                    `;
+                    
+                    // 添加到容器
+                    container.appendChild(firework);
+                    
+                    // 1.5秒后移除
+                    setTimeout(() => {
+                        if (firework.parentNode) {
+                            firework.parentNode.removeChild(firework);
+                        }
+                    }, 2000);
+                }, i * 30); // 交错绽放
+            }
+        }
+
+        // ✅ 烟花动画关键帧（动态添加）
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes fireworkExplode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+        @keyframes fireworkFade {
+            0% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        `;
+        document.head.appendChild(style);
+
         // =============== 核心功能 ===============
         function createCanvas() {
             const canvas = document.getElementById('pixelCanvas');
+            if (!canvas) {
+                console.error("❌ #pixelCanvas 不存在！请检查HTML结构");
+                alert("页面加载错误！请刷新页面。");
+                return;
+            }
             canvas.innerHTML = '';
+            
+            // 生成所有格子
             for (let row = 0; row < gridData.length; row++) {
                 for (let col = 0; col < gridData[row].length; col++) {
                     const value = gridData[row][col];
@@ -496,7 +626,6 @@
                     pixel.textContent = value;
                     pixel.dataset.value = value;
 
-                    // 恢复保存的颜色
                     const savedColor = getSavedColor(row, col);
                     if (savedColor) {
                         pixel.style.backgroundColor = savedColor;
@@ -507,7 +636,6 @@
                             gameStarted = true;
                             alert("游戏已自动开始！请根据数字提示选择对应颜色进行填色。");
                             
-                            // 自动播放背景音乐
                             const bgMusic = document.getElementById('bgMusic');
                             if (!isMusicPlaying) {
                                 bgMusic.muted = false;
@@ -515,16 +643,12 @@
                                     isMusicPlaying = true;
                                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                                 }).catch(e => {
-                                    console.log("自动播放被阻止，等待用户手动点击");
+                                    console.log("自动播放被阻止");
                                 });
                             }
                         }
 
-                        if (isEraserMode) {
-                            this.style.backgroundColor = '#f8e0e0';
-                            saveProgress();
-                            updateProgressBar();
-                        } else if (selectedColor !== null) {
+                        if (selectedColor !== null) {
                             const cellValue = this.dataset.value;
                             if (!isNaN(cellValue) && parseInt(cellValue) in colorMap && colorMap[parseInt(cellValue)] === selectedColor) {
                                 this.style.backgroundColor = selectedColor;
@@ -537,16 +661,48 @@
                                 alert(`涂色错误！\n您选的是 ${colorName}，但这个格子是 ${cellValue}。\n请重新选择正确的颜色。`);
                             }
                         } else {
-                            alert("请先选择颜色或橡皮擦！");
+                            alert("请先选择颜色！");
                         }
                     };
                     canvas.appendChild(pixel);
                 }
             }
+
+            // ✅ 在最后一行下方添加进度条
+            const progressContainer = document.createElement('div');
+            progressContainer.style.cssText = `
+                grid-column: 1 / -1;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                padding: 10px;
+                background-color: #333;
+                border-radius: 10px;
+            `;
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            progressBar.innerHTML = `<div class="progress-fill" id="progressFill"></div>`;
+            
+            const progressPercent = document.createElement('div');
+            progressPercent.className = 'progress-percent';
+            progressPercent.id = 'progressPercent';
+            progressPercent.textContent = '0%';
+            
+            progressContainer.appendChild(progressBar);
+            progressContainer.appendChild(progressPercent);
+            canvas.appendChild(progressContainer);
         }
 
         function createColorPalette() {
             const palette = document.getElementById('colorPalette');
+            if (!palette) {
+                console.error("❌ #colorPalette 不存在！");
+                alert("页面加载错误！请刷新页面。");
+                return;
+            }
             palette.innerHTML = '';
             for (const [number, color] of Object.entries(colorMap)) {
                 const colorBox = document.createElement('div');
@@ -554,22 +710,11 @@
                 colorBox.style.backgroundColor = color;
                 colorBox.onclick = function() {
                     selectedColor = color;
-                    isEraserMode = false;
                     document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
                     this.classList.add('selected');
-                    document.getElementById('eraserBtn').style.opacity = '1';
                 };
                 palette.appendChild(colorBox);
             }
-        }
-
-        function playApplause() {
-            const audio = document.getElementById('applauseSound');
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-                console.log("掌声播放失败:", e);
-                alert("👏 恭喜完成！");
-            });
         }
 
         function showCompletion() {
@@ -578,23 +723,98 @@
             const finalArtwork = document.getElementById('finalArtwork');
             const progressFill = document.getElementById('progressFill');
             const progressPercent = document.getElementById('progressPercent');
+            const rightPanel = document.getElementById('rightPanel');
             
-            progressFill.classList.add('completed');
-            progressPercent.textContent = '100%';
+            // ✅ 手机震动
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
 
-            pixelCanvas.style.opacity = '0';
-            setTimeout(() => {
-                pixelCanvas.style.display = 'none';
-                
-                artworkContainer.style.display = 'block';
-                finalArtwork.style.opacity = '0';
-                
+            // ✅ 停止背景音乐（淡出效果）
+            const bgMusic = document.getElementById('bgMusic');
+            if (isMusicPlaying) {
+                let volume = 1;
+                const fadeOut = setInterval(() => {
+                    volume -= 0.1;
+                    bgMusic.volume = volume;
+                    if (volume <= 0) {
+                        clearInterval(fadeOut);
+                        bgMusic.pause();
+                        bgMusic.volume = 1;
+                        isMusicPlaying = false;
+                        document.getElementById('musicBtn').textContent = '🎵 音乐开/关';
+                    }
+                }, 50);
+            }
+
+            // ✅ 更新进度条
+            if (progressFill) progressFill.classList.add('completed');
+            if (progressPercent) progressPercent.textContent = '100%';
+
+            // ✅ 背景闪光
+            if (rightPanel) {
+                rightPanel.classList.add('completion-flash');
                 setTimeout(() => {
-                    finalArtwork.style.opacity = '1';
-                    setTimeout(playApplause, 800);
-                }, 300);
-                
-            }, 500);
+                    rightPanel.classList.remove('completion-flash');
+                }, 1500);
+            }
+
+            // ✅ 画布缩放震动
+            if (pixelCanvas) {
+                pixelCanvas.classList.add('completion-bounce');
+            }
+
+            // ✅ 动画：画布淡出 → 原图淡入
+            if (pixelCanvas) {
+                pixelCanvas.style.opacity = '0';
+                setTimeout(() => {
+                    pixelCanvas.style.display = 'none';
+                    if (pixelCanvas.classList) {
+                        pixelCanvas.classList.remove('completion-bounce');
+                    }
+                    
+                    if (artworkContainer) {
+                        artworkContainer.style.display = 'block';
+                    }
+                    if (finalArtwork) {
+                        finalArtwork.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            finalArtwork.style.opacity = '1';
+                            if (finalArtwork.classList) {
+                                finalArtwork.classList.add('completion-bounce');
+                            }
+                            
+                            // ✅ 播放掌声
+                            const applause = document.getElementById('applauseSound');
+                            if (applause) {
+                                applause.currentTime = 0;
+                                applause.volume = 0.8;
+                                applause.play().catch(e => {
+                                    console.log("掌声播放失败:", e);
+                                    alert("👏 恭喜完成！");
+                                });
+                            }
+                            
+                            // ✅ 烟花效果
+                            setTimeout(() => {
+                                if (artworkContainer) {
+                                    createFireworks(artworkContainer);
+                                }
+                            }, 300);
+                            
+                            // 移除缩放动画
+                            setTimeout(() => {
+                                if (finalArtwork && finalArtwork.classList) {
+                                    finalArtwork.classList.remove('completion-bounce');
+                                }
+                            }, 1000);
+                            
+                        }, 300);
+                    }
+                    
+                }, 500);
+            }
         }
 
         function updateProgressBar() {
@@ -618,15 +838,24 @@
 
             const percent = Math.round((completedCells / totalFillableCells) * 100);
             const progressFill = document.getElementById('progressFill');
-            progressFill.style.width = `${percent}%`;
             const progressPercent = document.getElementById('progressPercent');
-            progressPercent.textContent = `${percent}%`;
+            
+            if (progressFill) {
+                progressFill.style.width = `${percent}%`;
+            }
+            if (progressPercent) {
+                progressPercent.textContent = `${percent}%`;
+            }
 
             if (percent === 100) {
-                progressFill.classList.add('completed');
+                if (progressFill) {
+                    progressFill.classList.add('completed');
+                }
                 setTimeout(showCompletion, 500);
             } else {
-                progressFill.classList.remove('completed');
+                if (progressFill) {
+                    progressFill.classList.remove('completed');
+                }
             }
         }
 
@@ -720,6 +949,8 @@
             const pixelCanvas = document.getElementById('pixelCanvas');
             const finalArtwork = document.getElementById('finalArtwork');
 
+            if (!pixelCanvas) return;
+
             const tempCanvas = document.createElement('canvas');
             const ctx = tempCanvas.getContext('2d');
 
@@ -790,54 +1021,69 @@
             }
 
             const container = document.getElementById('shareCanvasContainer');
-            container.innerHTML = '';
-            const img = document.createElement('img');
-            img.src = tempCanvas.toDataURL('image/png');
-            container.appendChild(img);
+            if (container) {
+                container.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = tempCanvas.toDataURL('image/png');
+                container.appendChild(img);
+            }
 
             document.getElementById('shareModal').style.display = 'flex';
         }
 
         // =============== 初始化 ===============
-        window.onload = function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ DOM 加载完成");
+            
+            // ✅ 检查关键元素
+            const pixelCanvas = document.getElementById('pixelCanvas');
+            const colorPalette = document.getElementById('colorPalette');
+            
+            if (!pixelCanvas || !colorPalette) {
+                alert("❌ 页面加载错误！请刷新页面。");
+                console.error("缺少关键元素 #pixelCanvas 或 #colorPalette");
+                return;
+            }
+
             createCanvas();
             createColorPalette();
             loadProgress();
             updateProgressBar();
 
-            // ✅ 图片加载失败提示
-            const finalImg = document.getElementById('finalArtwork');
-            finalImg.onerror = function() {
-                alert("❌ 原图加载失败！请确认 '梵高星夜.png' 文件存在且路径正确。");
-                console.error("图片加载失败，请检查文件名和路径");
-            };
-
-            document.getElementById('eraserBtn').onclick = function() {
-                if (!gameStarted) {
-                    alert("请先点击画布格子开始游戏！");
-                    return;
+            // ✅ 重新开始按钮
+            document.getElementById('restartBtn').onclick = function() {
+                if (confirm("确定要重新开始吗？当前进度将被清空。")) {
+                    // 重置所有格子
+                    document.querySelectorAll('.pixel').forEach(pixel => {
+                        pixel.style.backgroundColor = '#f8e0e0';
+                    });
+                    
+                    // 重置进度条
+                    const progressFill = document.getElementById('progressFill');
+                    const progressPercent = document.getElementById('progressPercent');
+                    if (progressFill) progressFill.style.width = '0%';
+                    if (progressPercent) progressPercent.textContent = '0%';
+                    if (progressFill) progressFill.classList.remove('completed');
+                    
+                    // 重置状态
+                    gameStarted = true;
+                    selectedColor = null;
+                    document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
+                    
+                    // 隐藏原图
+                    const artworkContainer = document.getElementById('artworkContainer');
+                    const pixelCanvas = document.getElementById('pixelCanvas');
+                    if (artworkContainer) artworkContainer.style.display = 'none';
+                    if (pixelCanvas) {
+                        pixelCanvas.style.display = 'grid';
+                        pixelCanvas.style.opacity = '1';
+                    }
+                    
+                    // 清除保存的进度
+                    localStorage.removeItem('starNightProgress');
+                    
+                    alert("已重新开始！你可以重新填色。");
                 }
-                isEraserMode = true;
-                selectedColor = null;
-                document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
-                this.style.opacity = '0.6';
-            };
-            
-            document.getElementById('saveBtn').onclick = function() {
-                if (!gameStarted) {
-                    alert("请先点击画布格子开始游戏！");
-                    return;
-                }
-                saveProgress();
-                alert('进度已保存！下次打开可继续游戏。');
-            };
-
-            document.getElementById('shareBtn').onclick = function() {
-                if (!gameStarted) {
-                    alert("请先点击画布格子开始游戏！");
-                    return;
-                }
-                shareArtwork();
             };
 
             document.getElementById('musicBtn').onclick = function() {
@@ -846,14 +1092,16 @@
 
             document.body.addEventListener('click', function initAudio() {
                 const bgMusic = document.getElementById('bgMusic');
-                bgMusic.muted = true;
-                bgMusic.play().then(() => {
-                    console.log("音频上下文已激活");
-                    bgMusic.pause();
-                    bgMusic.muted = false;
-                }).catch(e => {
-                    console.log("等待用户手动点击播放按钮");
-                });
+                if (bgMusic) {
+                    bgMusic.muted = true;
+                    bgMusic.play().then(() => {
+                        console.log("音频上下文已激活");
+                        bgMusic.pause();
+                        bgMusic.muted = false;
+                    }).catch(e => {
+                        console.log("等待用户手动点击播放按钮");
+                    });
+                }
                 document.body.removeEventListener('click', initAudio);
             }, { once: true });
 
@@ -871,7 +1119,7 @@
                     p.style.minHeight = '6vw';
                 });
             }
-        };
+        });
     </script>
 </body>
 </html>
