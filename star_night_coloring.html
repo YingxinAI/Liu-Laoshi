@@ -380,9 +380,9 @@
             100% { transform: translateX(100%); }
         }
 
-        /* ✅ 百分比文字样式 */
+        /* ✅ 百分比文字样式（字号减小） */
         .progress-percent {
-            font-size: 1.3rem;
+            font-size: 1rem; /* ✅ 字号减小 */
             font-weight: bold;
             color: #e65100;
             min-width: 60px;
@@ -674,20 +674,20 @@
                 }
             }
 
-            // ✅ 添加一个空行（占位）
+            // ✅ 添加一个空行（占位，高度减小）
             const emptyRow = document.createElement('div');
             emptyRow.style.cssText = `
                 grid-column: 1 / -1;
-                height: 10px;
+                height: 5px;
                 background: transparent;
             `;
             canvas.appendChild(emptyRow);
 
-            // ✅ 在最后一行下方添加进度条
+            // ✅ 在最后一行下方添加进度条（间距减小）
             const progressContainer = document.createElement('div');
             progressContainer.style.cssText = `
                 grid-column: 1 / -1;
-                margin-top: 10px;
+                margin-top: 5px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1065,7 +1065,7 @@
             loadProgress();
             updateProgressBar();
 
-            // ✅ 重新开始按钮
+            // ✅ 重新开始按钮（包含音乐播放）
             document.getElementById('restartBtn').onclick = function() {
                 if (confirm("确定要重新开始吗？当前进度将被清空。")) {
                     // 重置所有格子
@@ -1096,6 +1096,18 @@
                     
                     // 清除保存的进度
                     localStorage.removeItem('starNightProgress');
+                    
+                    // ✅ 自动播放背景音乐
+                    const bgMusic = document.getElementById('bgMusic');
+                    if (!isMusicPlaying) {
+                        bgMusic.muted = false;
+                        bgMusic.play().then(() => {
+                            isMusicPlaying = true;
+                            document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
+                        }).catch(e => {
+                            console.log("自动播放被阻止，等待用户手动点击");
+                        });
+                    }
                     
                     alert("已重新开始！你可以重新填色。");
                 }
