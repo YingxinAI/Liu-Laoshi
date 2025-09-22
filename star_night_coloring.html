@@ -160,6 +160,8 @@
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid #ddd;
+            outline: none;
+            user-select: none;
         }
         .legend-item:hover {
             background-color: #e0e0e0;
@@ -175,6 +177,7 @@
             font-weight: bold;
             transition: all 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            outline: none;
         }
         button:hover {
             transform: translateY(-2px);
@@ -221,6 +224,8 @@
                 inset 1px 1px 2px rgba(255,255,255,0.8),
                 inset -1px -1px 2px rgba(0,0,0,0.2),
                 0 2px 4px rgba(0,0,0,0.1);
+            outline: none;
+            user-select: none;
         }
 
         .palette-color:hover {
@@ -463,9 +468,9 @@
             <!-- 画布 -->
             <div id="pixelCanvas"></div>
 
-            <!-- 原图容器（使用网络图片备用） -->
+            <!-- 原图容器 -->
             <div id="artworkContainer">
-                <img id="finalArtwork" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Starry_Night.jpg/1200px-Starry_Night.jpg" alt="梵高《星夜》原作">
+                <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
             </div>
         </div>
     </div>
@@ -480,9 +485,9 @@
         </div>
     </div>
 
-    <!-- 音频元素（确保在最后） -->
-    <audio id="applauseSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b0e4a9d3b.mp3?filename=applause-2-148753.mp3" preload="auto"></audio>
-    <audio id="bgMusic" src="https://cdn.pixabay.com/audio/2023/10/26/audio_c0a4d9b847.mp3" loop preload="auto" muted></audio>
+    <!-- 音频元素 -->
+    <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
+    <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
 
     <script>
         // ✅ 优化后的 colorMap - 深蓝色变淡（#0A1A3A → #1E4D7C）
@@ -609,7 +614,7 @@
         function createCanvas() {
             const canvas = document.getElementById('pixelCanvas');
             if (!canvas) {
-                console.error("❌ #pixelCanvas 不存在！请检查HTML结构");
+                console.error("❌ #pixelCanvas 不存在！");
                 alert("页面加载错误！请刷新页面。");
                 return;
             }
@@ -636,6 +641,7 @@
                             gameStarted = true;
                             alert("游戏已自动开始！请根据数字提示选择对应颜色进行填色。");
                             
+                            // 自动播放背景音乐
                             const bgMusic = document.getElementById('bgMusic');
                             if (!isMusicPlaying) {
                                 bgMusic.muted = false;
@@ -643,7 +649,7 @@
                                     isMusicPlaying = true;
                                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                                 }).catch(e => {
-                                    console.log("自动播放被阻止");
+                                    console.log("自动播放被阻止，等待用户手动点击");
                                 });
                             }
                         }
@@ -667,6 +673,15 @@
                     canvas.appendChild(pixel);
                 }
             }
+
+            // ✅ 添加一个空行（占位）
+            const emptyRow = document.createElement('div');
+            emptyRow.style.cssText = `
+                grid-column: 1 / -1;
+                height: 10px;
+                background: transparent;
+            `;
+            canvas.appendChild(emptyRow);
 
             // ✅ 在最后一行下方添加进度条
             const progressContainer = document.createElement('div');
