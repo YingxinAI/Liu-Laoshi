@@ -632,11 +632,11 @@
                     canvas.appendChild(pixel);
                 }
             }
-            // ✅ 添加一个空行（占位，高度改为 10px）
+            // ✅ 添加一个空行（占位，高度改为 5px）
             const spacerRow = document.createElement('div');
             spacerRow.style.cssText = `
                 grid-column: 1 / -1;
-                height: 10px; /* ✅ 关键修改：从 20px 改为 10px */
+                height: 5px; /* ✅ 关键修改：从 10px 改为 5px，间距再减半 */
                 background: transparent;
             `;
             canvas.appendChild(spacerRow);
