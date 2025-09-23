@@ -307,7 +307,7 @@
         }
         /* ✅ 进度条样式 */
         .progress-bar {
-            width: 100%;
+            width: 80%;
             height: 25px;
             background-color: #e0e0e0;
             border-radius: 15px;
@@ -356,7 +356,7 @@
         }
         /* ✅ 百分比文字样式（字号减小） */
         .progress-percent {
-            font-size: 0.9rem; /* ✅ 修改：从 1rem 改为 0.9rem，使其更小 */
+            font-size: 0.9rem;
             font-weight: bold;
             color: #e65100;
             min-width: 60px;
@@ -365,14 +365,22 @@
             border-radius: 10px;
             background-color: rgba(255,243,224,0.8);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            /* ✅ 新增：防止在窄容器中换行 */
             white-space: nowrap;
+            width: 20%;
         }
         /* ✅ 进度条容器（深褐色背景） */
         .progress-container {
             background-color: #333;
             border-radius: 10px;
             padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: nowrap;
+            grid-column: 1 / -1;
         }
         /* ✅ 完成时闪光背景 */
         .completion-flash {
@@ -430,7 +438,6 @@
             </div>
             <!-- ✅ 音量控制 (修改为一行) -->
             <div style="margin-top: 15px; text-align: center;">
-                <!-- 修改 label 为 inline-block，使其与滑块同行 -->
                 <label for="volumeSlider" style="font-size: 14px; font-weight: bold; display: inline-block; width: 40px; vertical-align: middle;">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100" style="width: calc(80% - 50px); vertical-align: middle; cursor: pointer; display: inline-block;">
             </div>
@@ -571,7 +578,6 @@
             const canvas = document.getElementById('pixelCanvas');
             if (!canvas) {
                 console.error("❌ #pixelCanvas 不存在！");
-                alert("页面加载错误！请刷新页面。");
                 return;
             }
             canvas.innerHTML = '';
@@ -592,8 +598,7 @@
                     pixel.onclick = function() {
                         if (!gameStarted) {
                             gameStarted = true;
-                            alert("游戏已自动开始！请根据数字提示选择对应颜色进行填色。");
-                            // 自动播放背景音乐
+                            // ✅ 移除 alert 弹窗，直接播放音乐
                             const bgMusic = document.getElementById('bgMusic');
                             if (!isMusicPlaying) {
                                 bgMusic.muted = false;
@@ -601,7 +606,8 @@
                                     isMusicPlaying = true;
                                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                                 }).catch(e => {
-                                    console.log("自动播放被阻止，等待用户手动点击");
+                                    // ✅ 捕获错误但不弹窗，静默处理
+                                    console.log("自动播放被阻止");
                                 });
                             }
                         }
@@ -615,61 +621,59 @@
                             } else {
                                 const selectedNumber = Object.keys(colorMap).find(key => colorMap[key] === selectedColor);
                                 const colorName = numberToColorName[selectedNumber] || '未知颜色';
-                                alert(`涂色错误！
-您选的是 ${colorName}，但这个格子是 ${cellValue}。
-请重新选择正确的颜色。`);
+                                // ✅ 将涂色错误的全局 alert 改为 console.log，避免打扰
+                                console.log(`涂色错误！您选的是 ${colorName}，但这个格子是 ${cellValue}。`);
                             }
                         } else {
-                            alert("请先选择颜色！");
+                            // ✅ 将“请先选择颜色”的全局 alert 改为 console.log
+                            console.log("请先选择颜色！");
                         }
                     };
                     canvas.appendChild(pixel);
                 }
             }
-            // ✅ 添加一个空行（占位，高度减小）
-            const emptyRow = document.createElement('div');
-            emptyRow.style.cssText = `
+            // ✅ 添加一个空行（占位，高度改为 10px）
+            const spacerRow = document.createElement('div');
+            spacerRow.style.cssText = `
                 grid-column: 1 / -1;
-                height: 5px;
+                height: 10px; /* ✅ 关键修改：从 20px 改为 10px */
                 background: transparent;
             `;
-            canvas.appendChild(emptyRow);
-            // ✅ 在最后一行下方添加进度条（间距减小 - 上移）
+            canvas.appendChild(spacerRow);
+            // ✅ 添加进度条容器
             const progressContainer = document.createElement('div');
-            progressContainer.style.cssText = `
-                grid-column: 1 / -1;
-                margin-top: 0px; // ✅ 修改：从 5px 改为 0px，使其更靠近上方格子
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px; // ✅ 关键：使用 gap 使进度条和百分比数字在同一行并排
-                padding: 10px;
-                background-color: #333;
-                border-radius: 10px;
-                /* ✅ 新增：确保容器宽度充足，防止子元素换行 */
-                width: 100%;
-                box-sizing: border-box;
-            `;
+            progressContainer.className = 'progress-container';
+            // ✅ 创建进度条元素
             const progressBar = document.createElement('div');
             progressBar.className = 'progress-bar';
-            progressBar.innerHTML = `<div class="progress-fill" id="progressFill"></div>`;
+            // ✅ 创建进度填充元素
+            const progressFill = document.createElement('div');
+            progressFill.className = 'progress-fill';
+            progressFill.id = 'progressFill';
+            progressBar.appendChild(progressFill);
+            // ✅ 创建百分比数字元素
             const progressPercent = document.createElement('div');
             progressPercent.className = 'progress-percent';
             progressPercent.id = 'progressPercent';
             progressPercent.textContent = '0%';
+            // ✅ 按顺序添加到容器：进度条在前，数字在后
             progressContainer.appendChild(progressBar);
-            progressContainer.appendChild(progressPercent); // ✅ 确保在同一个容器内，紧跟进度条
+            progressContainer.appendChild(progressPercent);
+            // ✅ 将整个进度容器添加到画布
             canvas.appendChild(progressContainer);
         }
         function createColorPalette() {
             const palette = document.getElementById('colorPalette');
             if (!palette) {
                 console.error("❌ #colorPalette 不存在！");
-                alert("页面加载错误！请刷新页面。");
                 return;
             }
             palette.innerHTML = '';
-            for (const [number, color] of Object.entries(colorMap)) {
+            // ✅ 定义一个乱序的键数组，用于打乱颜色显示顺序
+            const shuffledKeys = [3, 7, 2, 5, 8, 1, 4, 6]; // 例如：黄、白、深蓝、紫、橙、黑、浅蓝、绿
+            // ✅ 按乱序数组遍历 colorMap
+            for (const key of shuffledKeys) {
+                const color = colorMap[key];
                 const colorBox = document.createElement('div');
                 colorBox.className = 'palette-color';
                 colorBox.style.backgroundColor = color;
@@ -747,7 +751,6 @@
                                 applause.volume = 0.8;
                                 applause.play().catch(e => {
                                     console.log("掌声播放失败:", e);
-                                    alert("👏 恭喜完成！");
                                 });
                             }
                             // ✅ 烟花效果
@@ -811,7 +814,7 @@
                 utterance.rate = 1.0;
                 speechSynthesis.speak(utterance);
             } else {
-                alert("您的浏览器不支持语音播放功能。");
+                console.log("您的浏览器不支持语音播放功能。");
             }
         }
         // =============== 新增功能 ===============
@@ -880,7 +883,8 @@
                     isMusicPlaying = true;
                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                 }).catch(e => {
-                    alert('🎵 请先点击页面任意位置，再点此按钮播放音乐');
+                    // ✅ 移除弹窗，改为 console.log
+                    console.log('🎵 请先点击页面任意位置，再点此按钮播放音乐');
                 });
             }
         }
@@ -971,8 +975,7 @@
             const pixelCanvas = document.getElementById('pixelCanvas');
             const colorPalette = document.getElementById('colorPalette');
             if (!pixelCanvas || !colorPalette) {
-                alert("❌ 页面加载错误！请刷新页面。");
-                console.error("缺少关键元素 #pixelCanvas 或 #colorPalette");
+                console.error("❌ 页面加载错误！缺少关键元素");
                 return;
             }
             createCanvas();
@@ -981,44 +984,45 @@
             updateProgressBar();
             // ✅ 重新开始按钮（包含音乐播放）
             document.getElementById('restartBtn').onclick = function() {
-                if (confirm("确定要重新开始吗？当前进度将被清空。")) {
-                    // 重置所有格子
-                    document.querySelectorAll('.pixel').forEach(pixel => {
-                        pixel.style.backgroundColor = '#f8e0e0';
-                    });
-                    // 重置进度条
-                    const progressFill = document.getElementById('progressFill');
-                    const progressPercent = document.getElementById('progressPercent');
-                    if (progressFill) progressFill.style.width = '0%';
-                    if (progressPercent) progressPercent.textContent = '0%';
-                    if (progressFill) progressFill.classList.remove('completed');
-                    // 重置状态
-                    gameStarted = true;
-                    selectedColor = null;
-                    document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
-                    // 隐藏原图
-                    const artworkContainer = document.getElementById('artworkContainer');
-                    const pixelCanvas = document.getElementById('pixelCanvas');
-                    if (artworkContainer) artworkContainer.style.display = 'none';
-                    if (pixelCanvas) {
-                        pixelCanvas.style.display = 'grid';
-                        pixelCanvas.style.opacity = '1';
-                    }
-                    // 清除保存的进度
-                    localStorage.removeItem('starNightProgress');
-                    // ✅ 自动播放背景音乐
-                    const bgMusic = document.getElementById('bgMusic');
-                    if (!isMusicPlaying) {
-                        bgMusic.muted = false;
-                        bgMusic.play().then(() => {
-                            isMusicPlaying = true;
-                            document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
-                        }).catch(e => {
-                            console.log("自动播放被阻止，等待用户手动点击");
-                        });
-                    }
-                    alert("已重新开始！你可以重新填色。");
+                // ✅ 移除 confirm 弹窗，直接执行重置
+                // 重置所有格子
+                document.querySelectorAll('.pixel').forEach(pixel => {
+                    pixel.style.backgroundColor = '#f8e0e0';
+                });
+                // 重置进度条
+                const progressFill = document.getElementById('progressFill');
+                const progressPercent = document.getElementById('progressPercent');
+                if (progressFill) progressFill.style.width = '0%';
+                if (progressPercent) progressPercent.textContent = '0%';
+                if (progressFill) progressFill.classList.remove('completed');
+                // 重置状态
+                gameStarted = true;
+                selectedColor = null;
+                document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
+                // 隐藏原图
+                const artworkContainer = document.getElementById('artworkContainer');
+                const pixelCanvas = document.getElementById('pixelCanvas');
+                if (artworkContainer) artworkContainer.style.display = 'none';
+                if (pixelCanvas) {
+                    pixelCanvas.style.display = 'grid';
+                    pixelCanvas.style.opacity = '1';
                 }
+                // 清除保存的进度
+                localStorage.removeItem('starNightProgress');
+                // ✅ 自动播放背景音乐
+                const bgMusic = document.getElementById('bgMusic');
+                if (!isMusicPlaying) {
+                    bgMusic.muted = false;
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
+                    }).catch(e => {
+                        // ✅ 捕获错误但不弹窗
+                        console.log("自动播放被阻止");
+                    });
+                }
+                // ✅ 移除完成后的 alert 弹窗
+                console.log("已重新开始！你可以重新填色。");
             };
             document.getElementById('musicBtn').onclick = function() {
                 toggleMusic();
@@ -1034,6 +1038,7 @@
                     setVolume(this.value);
                 });
             }
+            // ✅ 页面首次点击时激活音频上下文，避免后续自动播放被阻止
             document.body.addEventListener('click', function initAudio() {
                 const bgMusic = document.getElementById('bgMusic');
                 if (bgMusic) {
@@ -1043,7 +1048,7 @@
                         bgMusic.pause();
                         bgMusic.muted = false;
                     }).catch(e => {
-                        console.log("等待用户手动点击播放按钮");
+                        console.log("音频激活失败:", e);
                     });
                 }
                 document.body.removeEventListener('click', initAudio);
