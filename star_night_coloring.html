@@ -72,7 +72,8 @@
             }
             #pixelCanvas {
                 grid-template-columns: repeat(29, 6vw) !important;
-                grid-template-rows: repeat(26, 4.5vw) !important;
+                /* ✅ 调整为手机适配的行高 */
+                grid-template-rows: repeat(26, 4.5vw) 1vw 4vw !important;
                 aspect-ratio: 29 / 26 !important;
                 padding: 4px;
             }
@@ -87,7 +88,8 @@
         #pixelCanvas {
             display: inline-grid;
             grid-template-columns: repeat(29, 28px);
-            grid-template-rows: repeat(26, 20px);
+            /* ✅ 关键修改：增加两行，一行作间距，一行放进度条 */
+            grid-template-rows: repeat(26, 20px) 5px 25px;
             gap: 1px;
             margin: 0 auto;
             background-color: #333;
@@ -380,6 +382,8 @@
             width: 100%;
             box-sizing: border-box;
             flex-wrap: nowrap;
+            /* ✅ 关键修改：通过 grid-row 放置在网格中 */
+            grid-row: 28;
             grid-column: 1 / -1;
         }
         /* ✅ 完成时闪光背景 */
@@ -416,7 +420,6 @@
 <body>
     <h1>🌌 梵高《星夜》在线数字填色游戏</h1>
     <div class="main-container">
-        <!-- 左侧：颜色说明 + 色盘 + 工具按钮 -->
         <div class="legend-section" id="leftPanel">
             <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明</h3>
             <div class="legend">
@@ -431,28 +434,22 @@
             </div>
             <div class="palette-label">🎨 选择颜色</div>
             <div class="color-palette" id="colorPalette"></div>
-            <!-- ✅ 按钮组（只保留重新开始和音乐） -->
             <div class="button-group">
                 <button id="restartBtn">🔄 重新开始</button>
                 <button id="musicBtn">🎵 音乐开/关</button>
             </div>
-            <!-- ✅ 音量控制 (修改为一行) -->
             <div style="margin-top: 15px; text-align: center;">
                 <label for="volumeSlider" style="font-size: 14px; font-weight: bold; display: inline-block; width: 40px; vertical-align: middle;">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100" style="width: calc(80% - 50px); vertical-align: middle; cursor: pointer; display: inline-block;">
             </div>
         </div>
-        <!-- 右侧：涂色画布 -->
         <div class="canvas-section" id="rightPanel">
-            <!-- 画布 -->
             <div id="pixelCanvas"></div>
-            <!-- 原图容器 -->
             <div id="artworkContainer">
                 <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
             </div>
         </div>
     </div>
-    <!-- 分享弹窗 -->
     <div class="share-modal" id="shareModal">
         <div class="share-content">
             <h3>🎨 你的《星夜》杰作</h3>
@@ -461,7 +458,6 @@
             <button class="close-btn" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
         </div>
     </div>
-    <!-- 音频元素 -->
     <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
     <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
     <script>
@@ -510,7 +506,7 @@
             [2,2,2,3,1,1,1,4,3,3,3,3,4,2,2,2,2,2,2,7,4,7,4,2,3,3,3,3,5],
             [2,2,2,2,1,1,1,4,3,3,3,3,2,2,2,2,2,2,2,3,7,2,2,3,3,3,2,5,5],
             [3,3,2,2,1,1,1,2,2,3,3,2,2,2,3,2,3,3,3,3,3,3,3,3,2,2,5,5,5],
-            [3,3,3,2,1,1,1,2,1,7,7,2,2,3,3,3,3,4,3,3,3,3,3,2,5,5,5,5,5],
+            [3,3,3,2,1,1,1,2,1,7,7,2,2,3,3,3,3,4,5,5,5,5,4,4,5,5,5,5,5],
             [4,4,3,3,1,1,1,2,1,3,4,3,3,3,3,3,4,5,5,5,5,4,4,5,5,5,4,4,4],
             [2,2,2,3,1,1,1,1,1,1,2,2,5,3,3,3,4,5,5,5,1,5,5,5,5,5,4,4,4],
             [2,2,2,2,1,1,1,1,1,1,1,5,5,5,5,5,4,5,1,5,5,3,3,5,3,4,4,4,6],
@@ -522,7 +518,7 @@
         ];
         // ✅ 烟花效果函数
         function createFireworks(container) {
-            const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD32'];
+            const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD2'];
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
                     const firework = document.createElement('div');
@@ -632,34 +628,21 @@
                     canvas.appendChild(pixel);
                 }
             }
-            // ✅ 添加一个空行（占位，高度改为 5px）
-            const spacerRow = document.createElement('div');
-            spacerRow.style.cssText = `
-                grid-column: 1 / -1;
-                height: 5px; /* ✅ 关键修改：从 10px 改为 5px，间距再减半 */
-                background: transparent;
-            `;
-            canvas.appendChild(spacerRow);
-            // ✅ 添加进度条容器
+            // ✅ 重新添加动态创建进度条的代码
             const progressContainer = document.createElement('div');
             progressContainer.className = 'progress-container';
-            // ✅ 创建进度条元素
             const progressBar = document.createElement('div');
             progressBar.className = 'progress-bar';
-            // ✅ 创建进度填充元素
             const progressFill = document.createElement('div');
             progressFill.className = 'progress-fill';
             progressFill.id = 'progressFill';
             progressBar.appendChild(progressFill);
-            // ✅ 创建百分比数字元素
             const progressPercent = document.createElement('div');
             progressPercent.className = 'progress-percent';
             progressPercent.id = 'progressPercent';
             progressPercent.textContent = '0%';
-            // ✅ 按顺序添加到容器：进度条在前，数字在后
             progressContainer.appendChild(progressBar);
             progressContainer.appendChild(progressPercent);
-            // ✅ 将整个进度容器添加到画布
             canvas.appendChild(progressContainer);
         }
         function createColorPalette() {
