@@ -63,7 +63,8 @@
             display: grid;
             grid-template-columns: repeat(29, 1fr);
             grid-template-rows: repeat(26, 1fr);
-            gap: 1px;
+            /* ✅ 调整: 将网格间距调整为 0.5px */
+            gap: 0.5px;
             margin: 0 auto;
             background-color: transparent;
             position: relative;
@@ -117,7 +118,6 @@
                 inset -1px -1px 2px rgba(0,0,0,0.3),
                 0 1px 3px rgba(0,0,0,0.15);
         }
-        /* ✅ 调整: 当游戏完成时，只让背景和数字透明，保留边框和阴影 */
         .pixel.revealed {
             background-color: transparent !important;
             color: transparent !important;
@@ -559,7 +559,6 @@
                     }
                 }, 50);
             }
-            // ✅ 调整: 当游戏完成时，立即让背景显示并隐藏数字
             pixelCanvas.classList.add('revealed-bg');
             document.querySelectorAll('.pixel').forEach(el => {
                 el.classList.add('revealed');
