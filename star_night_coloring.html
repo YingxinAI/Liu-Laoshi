@@ -5,19 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌌 梵高《星夜》在线填色游戏</title>
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         * {
             box-sizing: border-box;
         }
         body {
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            max-width: 1300px;
-            margin: 0 auto;
+            max-width: none;
             padding: 10px;
             background-color: #f9f9f9;
             background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
+            display: flex;
+            flex-direction: column;
         }
         h1 {
             color: #2c3e50;
@@ -28,83 +34,56 @@
         }
         .main-container {
             display: flex;
-            gap: 15px;
+            gap: 5px;
             margin-top: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            flex: 1;
+            align-items: stretch; 
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
         }
         .legend-section {
             flex: 0 0 300px;
             background-color: rgba(243, 229, 245, 0.95);
             padding: 15px;
+            border: 2px solid #000000;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            min-height: 400px;
-        }
-        .canvas-section {
-            flex: 1;
-            background-color: rgba(232, 245, 233, 0.95);
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 400px;
-        }
-        /* 手机适配 */
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-            }
-            .legend-section, .canvas-section {
-                flex: 1 1 auto;
-                min-height: auto;
-            }
-            h1 {
-                font-size: 1.3rem;
-            }
-            .pixel {
-                width: 6vw;
-                height: 4.5vw;
-                font-size: 2.5vw;
-            }
-            #pixelCanvas {
-                grid-template-columns: repeat(29, 6vw) !important;
-                /* ✅ 调整为手机适配的行高 */
-                grid-template-rows: repeat(26, 4.5vw) 1vw 4vw !important;
-                aspect-ratio: 29 / 26 !important;
-                padding: 4px;
-            }
-            .button-group {
-                flex-wrap: wrap;
-            }
-            button {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
+            min-height: auto;
         }
         #pixelCanvas {
-            display: inline-grid;
-            grid-template-columns: repeat(29, 28px);
-            /* ✅ 关键修改：增加两行，一行作间距，一行放进度条 */
-            grid-template-rows: repeat(26, 20px) 5px 25px;
+            flex: 1;
+            background-color: rgb(51, 51, 51);
+            border: 2px solid #000000;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 0px;
+            
+            display: grid;
+            grid-template-columns: repeat(29, 1fr);
+            grid-template-rows: repeat(26, 1fr);
             gap: 1px;
             margin: 0 auto;
-            background-color: #333;
-            padding: 8px;
-            border-radius: 8px;
+            background-color: transparent;
             position: relative;
-            transition: opacity 1s ease;
-            max-width: 100%;
-            overflow: auto;
-            aspect-ratio: 29 / 26;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            aspect-ratio: auto;
+            transition: background-image 2s ease;
         }
-        /* ✅ 立体感格子样式 */
+        #pixelCanvas:not(.revealed-bg) {
+            background-image: none;
+        }
+        #pixelCanvas.revealed-bg {
+            background-image: url('梵高星夜.png');
+            background-size: cover;
+            background-position: center;
+        }
         .pixel {
-            width: 28px;
-            height: 20px;
+            width: auto;
+            height: auto;
             background-color: #f8e0e0;
             display: flex;
             align-items: center;
@@ -114,15 +93,14 @@
             color: rgba(0, 0, 0, 0.7);
             cursor: pointer;
             user-select: none;
-            transition: all 0.2s ease;
+            transition: all 0.2s ease, background-color 1s ease, color 1s ease;
             position: relative;
             border-radius: 3px;
-            /* ✅ 立体感：内阴影 + 边框 */
             box-shadow: 
                 inset 1px 1px 2px rgba(255,255,255,0.8),
                 inset -1px -1px 2px rgba(0,0,0,0.2),
                 0 1px 2px rgba(0,0,0,0.1);
-            border: 1px solid #ddd;
+            border: 2px solid #0A1E2F;
         }
         .pixel:hover {
             transform: scale(1.05) translateY(-2px);
@@ -138,6 +116,11 @@
                 inset 1px 1px 2px rgba(255,255,255,0.6),
                 inset -1px -1px 2px rgba(0,0,0,0.3),
                 0 1px 3px rgba(0,0,0,0.15);
+        }
+        /* ✅ 调整: 当游戏完成时，只让背景和数字透明，保留边框和阴影 */
+        .pixel.revealed {
+            background-color: transparent !important;
+            color: transparent !important;
         }
         .legend {
             display: flex;
@@ -185,7 +168,6 @@
         #musicBtn:hover {
             background-color: #2980b9;
         }
-        /* ✅ 重新开始按钮样式 */
         #restartBtn {
             background-color: #e74c3c;
             color: white;
@@ -204,7 +186,6 @@
             border: 1px solid #bbdefb;
             margin-bottom: 15px;
         }
-        /* ✅ 立体感颜色选择器 */
         .palette-color {
             width: 32px;
             height: 32px;
@@ -233,7 +214,6 @@
                 inset -1px -1px 2px rgba(0,0,0,0.3),
                 0 0 0 3px rgba(255,255,255,0.5);
         }
-        /* ✅ 特别加强白色显示 */
         .palette-color[style*="#F5F5F5"] {
             border: 2px solid #999;
             box-shadow: 
@@ -261,70 +241,23 @@
             margin-top: 15px;
             flex-wrap: wrap;
         }
-        /* ✅ 原图容器 */
-        #artworkContainer {
-            width: 100%;
-            max-height: 500px;
-            overflow: auto;
-            padding: 10px 0;
-            display: none;
-        }
-        #finalArtwork {
-            width: 100%;
-            height: auto;
-            max-width: 100%;
-            display: block;
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            border: 3px solid #fff;
-        }
-        /* 分享弹窗 */
-        .share-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .share-content {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 90%;
-        }
-        .share-content img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .close-btn {
-            margin-top: 15px;
-            background: #7f8c8d;
-        }
-        /* ✅ 进度条样式 */
         .progress-bar {
             width: 80%;
             height: 25px;
             background-color: #e0e0e0;
-            border-radius: 15px;
+            border-radius: 5px;
             overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: none;
+            max-width: 150px;
         }
         .progress-fill {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            border-radius: 15px;
+            border-radius: 5px;
             transition: width 0.6s ease;
             position: relative;
         }
-        /* 完成时闪光动画 */
         .progress-fill.completed {
             animation: shine 1.5s ease-in-out, pulseGlow 2s infinite;
             background: linear-gradient(90deg, #FFD700, #FFA500);
@@ -356,25 +289,19 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-        /* ✅ 百分比文字样式（字号减小） */
         .progress-percent {
             font-size: 0.9rem;
             font-weight: bold;
             color: #e65100;
-            min-width: 60px;
-            text-align: center;
-            padding: 5px 10px;
-            border-radius: 10px;
-            background-color: rgba(255,243,224,0.8);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             white-space: nowrap;
-            width: 20%;
+            padding: 0;
+            background-color: transparent;
+            box-shadow: none;
+            border-radius: 0;
         }
-        /* ✅ 进度条容器（深褐色背景） */
         .progress-container {
-            background-color: #333;
-            border-radius: 10px;
-            padding: 10px;
+            margin-top: 15px;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -382,31 +309,7 @@
             width: 100%;
             box-sizing: border-box;
             flex-wrap: nowrap;
-            /* ✅ 关键修改：通过 grid-row 放置在网格中 */
-            grid-row: 28;
-            grid-column: 1 / -1;
         }
-        /* ✅ 完成时闪光背景 */
-        .completion-flash {
-            animation: flashCelebration 1.5s ease-in-out;
-        }
-        @keyframes flashCelebration {
-            0%, 100% { background-color: rgba(232, 245, 233, 0.95); }
-            25% { background-color: rgba(255, 255, 200, 0.95); }
-            50% { background-color: rgba(255, 230, 180, 0.95); }
-            75% { background-color: rgba(255, 255, 200, 0.95); }
-        }
-        /* ✅ 画布缩放震动 */
-        .completion-bounce {
-            animation: bounceCelebration 1s ease-in-out;
-        }
-        @keyframes bounceCelebration {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.02) rotate(-1deg); }
-            50% { transform: scale(1.05) rotate(0deg); }
-            75% { transform: scale(1.02) rotate(1deg); }
-        }
-        /* ✅ 烟花粒子 */
         .firework {
             position: absolute;
             width: 4px;
@@ -442,35 +345,27 @@
                 <label for="volumeSlider" style="font-size: 14px; font-weight: bold; display: inline-block; width: 40px; vertical-align: middle;">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100" style="width: calc(80% - 50px); vertical-align: middle; cursor: pointer; display: inline-block;">
             </div>
-        </div>
-        <div class="canvas-section" id="rightPanel">
-            <div id="pixelCanvas"></div>
-            <div id="artworkContainer">
-                <img id="finalArtwork" src="梵高星夜.png" alt="梵高《星夜》原作">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-percent" id="progressPercent">0%</div>
             </div>
         </div>
-    </div>
-    <div class="share-modal" id="shareModal">
-        <div class="share-content">
-            <h3>🎨 你的《星夜》杰作</h3>
-            <div id="shareCanvasContainer"></div>
-            <p>长按图片可保存到手机</p>
-            <button class="close-btn" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
-        </div>
+        <div id="pixelCanvas"></div>
     </div>
     <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
     <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
     <script>
-        // ✅ 优化后的 colorMap - 深蓝色变淡（#0A1A3A → #1E4D7C）
         const colorMap = {
-            1: '#000000',    // 黑色
-            2: '#1E4D7C',    // 淡化深蓝（原 #0A1A3A）
-            3: '#FFD700',    // 金黄
-            4: '#6B9AC4',    // 灰蓝
-            5: '#5D4B6D',    // 灰紫
-            6: '#3A5F3D',    // 暗橄榄绿
-            7: '#F5F5F5',    // 米白（原8）
-            8: '#FFA500'     // 橙色（原10）
+            1: '#000000',
+            2: '#1E4D7C',
+            3: '#FFD700',
+            4: '#6B9AC4',
+            5: '#5D4B6D',
+            6: '#3A5F3D',
+            7: '#F5F5F5',
+            8: '#FFA500'
         };
         const numberToColorName = {
             1: '黑色',
@@ -488,7 +383,6 @@
         let isCountingDown = false;
         let isMusicPlaying = false;
         let gameStarted = false;
-        // ✅ 修改后的 gridData（8→7, 10→8）
         const gridData = [
             [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
             [1,4,4,4,2,1,2,4,2,4,2,3,3,4,2,2,4,3,3,4,4,4,2,4,2,3,3,3,3],
@@ -506,7 +400,7 @@
             [2,2,2,3,1,1,1,4,3,3,3,3,4,2,2,2,2,2,2,7,4,7,4,2,3,3,3,3,5],
             [2,2,2,2,1,1,1,4,3,3,3,3,2,2,2,2,2,2,2,3,7,2,2,3,3,3,2,5,5],
             [3,3,2,2,1,1,1,2,2,3,3,2,2,2,3,2,3,3,3,3,3,3,3,3,2,2,5,5,5],
-            [3,3,3,2,1,1,1,2,1,7,7,2,2,3,3,3,3,4,5,5,5,5,4,4,5,5,5,5,5],
+            [3,3,3,2,1,1,1,2,1,7,7,2,2,3,3,3,3,4,3,3,3,3,3,2,5,5,5,5,5],
             [4,4,3,3,1,1,1,2,1,3,4,3,3,3,3,3,4,5,5,5,5,4,4,5,5,5,4,4,4],
             [2,2,2,3,1,1,1,1,1,1,2,2,5,3,3,3,4,5,5,5,1,5,5,5,5,5,4,4,4],
             [2,2,2,2,1,1,1,1,1,1,1,5,5,5,5,5,4,5,1,5,5,3,3,5,3,4,4,4,6],
@@ -516,37 +410,31 @@
             [6,6,6,6,1,1,1,1,1,1,1,1,1,4,4,4,4,4,1,1,3,1,4,4,1,6,6,1,1],
             [6,6,6,6,6,1,1,1,1,1,1,1,1,4,4,4,1,4,1,1,1,1,6,6,5,5,5,6,1]
         ];
-        // ✅ 烟花效果函数
         function createFireworks(container) {
-            const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD2'];
+            const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD32'];
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
                     const firework = document.createElement('div');
                     firework.className = 'firework';
                     firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    // 随机位置（在容器内）
                     const rect = container.getBoundingClientRect();
                     const x = Math.random() * rect.width;
                     const y = Math.random() * rect.height;
                     firework.style.left = x + 'px';
                     firework.style.top = y + 'px';
-                    // 动画
                     firework.style.animation = `
                         fireworkExplode 1s ease-out forwards,
                         fireworkFade 1s ease-out 1s forwards
                     `;
-                    // 添加到容器
                     container.appendChild(firework);
-                    // 1.5秒后移除
                     setTimeout(() => {
                         if (firework.parentNode) {
                             firework.parentNode.removeChild(firework);
                         }
                     }, 2000);
-                }, i * 30); // 交错绽放
+                }, i * 30);
             }
         }
-        // ✅ 烟花动画关键帧（动态添加）
         const style = document.createElement('style');
         style.textContent = `
         @keyframes fireworkExplode {
@@ -569,7 +457,6 @@
         }
         `;
         document.head.appendChild(style);
-        // =============== 核心功能 ===============
         function createCanvas() {
             const canvas = document.getElementById('pixelCanvas');
             if (!canvas) {
@@ -577,7 +464,6 @@
                 return;
             }
             canvas.innerHTML = '';
-            // 生成所有格子
             for (let row = 0; row < gridData.length; row++) {
                 for (let col = 0; col < gridData[row].length; col++) {
                     const value = gridData[row][col];
@@ -594,7 +480,6 @@
                     pixel.onclick = function() {
                         if (!gameStarted) {
                             gameStarted = true;
-                            // ✅ 移除 alert 弹窗，直接播放音乐
                             const bgMusic = document.getElementById('bgMusic');
                             if (!isMusicPlaying) {
                                 bgMusic.muted = false;
@@ -602,7 +487,6 @@
                                     isMusicPlaying = true;
                                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                                 }).catch(e => {
-                                    // ✅ 捕获错误但不弹窗，静默处理
                                     console.log("自动播放被阻止");
                                 });
                             }
@@ -613,37 +497,18 @@
                                 this.style.backgroundColor = selectedColor;
                                 saveProgress();
                                 updateProgressBar();
-                                checkCompletion();
                             } else {
                                 const selectedNumber = Object.keys(colorMap).find(key => colorMap[key] === selectedColor);
                                 const colorName = numberToColorName[selectedNumber] || '未知颜色';
-                                // ✅ 将涂色错误的全局 alert 改为 console.log，避免打扰
                                 console.log(`涂色错误！您选的是 ${colorName}，但这个格子是 ${cellValue}。`);
                             }
                         } else {
-                            // ✅ 将“请先选择颜色”的全局 alert 改为 console.log
                             console.log("请先选择颜色！");
                         }
                     };
                     canvas.appendChild(pixel);
                 }
             }
-            // ✅ 重新添加动态创建进度条的代码
-            const progressContainer = document.createElement('div');
-            progressContainer.className = 'progress-container';
-            const progressBar = document.createElement('div');
-            progressBar.className = 'progress-bar';
-            const progressFill = document.createElement('div');
-            progressFill.className = 'progress-fill';
-            progressFill.id = 'progressFill';
-            progressBar.appendChild(progressFill);
-            const progressPercent = document.createElement('div');
-            progressPercent.className = 'progress-percent';
-            progressPercent.id = 'progressPercent';
-            progressPercent.textContent = '0%';
-            progressContainer.appendChild(progressBar);
-            progressContainer.appendChild(progressPercent);
-            canvas.appendChild(progressContainer);
         }
         function createColorPalette() {
             const palette = document.getElementById('colorPalette');
@@ -652,9 +517,7 @@
                 return;
             }
             palette.innerHTML = '';
-            // ✅ 定义一个乱序的键数组，用于打乱颜色显示顺序
-            const shuffledKeys = [3, 7, 2, 5, 8, 1, 4, 6]; // 例如：黄、白、深蓝、紫、橙、黑、浅蓝、绿
-            // ✅ 按乱序数组遍历 colorMap
+            const shuffledKeys = [3, 7, 2, 5, 8, 1, 4, 6];
             for (const key of shuffledKeys) {
                 const color = colorMap[key];
                 const colorBox = document.createElement('div');
@@ -668,18 +531,19 @@
                 palette.appendChild(colorBox);
             }
         }
-        function showCompletion() {
+        function startSequentialReveal() {
             const pixelCanvas = document.getElementById('pixelCanvas');
-            const artworkContainer = document.getElementById('artworkContainer');
-            const finalArtwork = document.getElementById('finalArtwork');
-            const progressFill = document.getElementById('progressFill');
-            const progressPercent = document.getElementById('progressPercent');
-            const rightPanel = document.getElementById('rightPanel');
-            // ✅ 手机震动
+            const applause = document.getElementById('applauseSound');
             if (navigator.vibrate) {
                 navigator.vibrate([200, 100, 200, 100, 200]);
             }
-            // ✅ 停止背景音乐（淡出效果）
+            if (applause) {
+                applause.currentTime = 0;
+                applause.volume = 0.8;
+                applause.play().catch(e => {
+                    console.log("掌声播放失败:", e);
+                });
+            }
             const bgMusic = document.getElementById('bgMusic');
             if (isMusicPlaying) {
                 let volume = 1;
@@ -695,63 +559,12 @@
                     }
                 }, 50);
             }
-            // ✅ 更新进度条
-            if (progressFill) progressFill.classList.add('completed');
-            if (progressPercent) progressPercent.textContent = '100%';
-            // ✅ 背景闪光
-            if (rightPanel) {
-                rightPanel.classList.add('completion-flash');
-                setTimeout(() => {
-                    rightPanel.classList.remove('completion-flash');
-                }, 1500);
-            }
-            // ✅ 画布缩放震动
-            if (pixelCanvas) {
-                pixelCanvas.classList.add('completion-bounce');
-            }
-            // ✅ 动画：画布淡出 → 原图淡入
-            if (pixelCanvas) {
-                pixelCanvas.style.opacity = '0';
-                setTimeout(() => {
-                    pixelCanvas.style.display = 'none';
-                    if (pixelCanvas.classList) {
-                        pixelCanvas.classList.remove('completion-bounce');
-                    }
-                    if (artworkContainer) {
-                        artworkContainer.style.display = 'block';
-                    }
-                    if (finalArtwork) {
-                        finalArtwork.style.opacity = '0';
-                        setTimeout(() => {
-                            finalArtwork.style.opacity = '1';
-                            if (finalArtwork.classList) {
-                                finalArtwork.classList.add('completion-bounce');
-                            }
-                            // ✅ 播放掌声
-                            const applause = document.getElementById('applauseSound');
-                            if (applause) {
-                                applause.currentTime = 0;
-                                applause.volume = 0.8;
-                                applause.play().catch(e => {
-                                    console.log("掌声播放失败:", e);
-                                });
-                            }
-                            // ✅ 烟花效果
-                            setTimeout(() => {
-                                if (artworkContainer) {
-                                    createFireworks(artworkContainer);
-                                }
-                            }, 300);
-                            // 移除缩放动画
-                            setTimeout(() => {
-                                if (finalArtwork && finalArtwork.classList) {
-                                    finalArtwork.classList.remove('completion-bounce');
-                                }
-                            }, 1000);
-                        }, 300);
-                    }
-                }, 500);
-            }
+            // ✅ 调整: 当游戏完成时，立即让背景显示并隐藏数字
+            pixelCanvas.classList.add('revealed-bg');
+            document.querySelectorAll('.pixel').forEach(el => {
+                el.classList.add('revealed');
+            });
+            createFireworks(pixelCanvas);
         }
         function updateProgressBar() {
             let completedCells = 0;
@@ -783,7 +596,7 @@
                 if (progressFill) {
                     progressFill.classList.add('completed');
                 }
-                setTimeout(showCompletion, 500);
+                startSequentialReveal();
             } else {
                 if (progressFill) {
                     progressFill.classList.remove('completed');
@@ -800,7 +613,6 @@
                 console.log("您的浏览器不支持语音播放功能。");
             }
         }
-        // =============== 新增功能 ===============
         function saveProgress() {
             const states = [];
             for (let i = 0; i < gridData.length; i++) {
@@ -866,95 +678,18 @@
                     isMusicPlaying = true;
                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                 }).catch(e => {
-                    // ✅ 移除弹窗，改为 console.log
                     console.log('🎵 请先点击页面任意位置，再点此按钮播放音乐');
                 });
             }
         }
-        // ✅ 设置音量函数
         function setVolume(volume) {
             const bgMusic = document.getElementById('bgMusic');
             if (bgMusic) {
-                bgMusic.volume = volume / 100; // 将 0-100 转换为 0.0-1.0
+                bgMusic.volume = volume / 100;
             }
         }
-        async function shareArtwork() {
-            const canvasSection = document.querySelector('.canvas-section');
-            const pixelCanvas = document.getElementById('pixelCanvas');
-            const finalArtwork = document.getElementById('finalArtwork');
-            if (!pixelCanvas) return;
-            const tempCanvas = document.createElement('canvas');
-            const ctx = tempCanvas.getContext('2d');
-            tempCanvas.width = pixelCanvas.offsetWidth;
-            tempCanvas.height = pixelCanvas.offsetHeight + 80;
-            ctx.fillStyle = '#e8f5e9';
-            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 18px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('我的《星夜》填色作品', tempCanvas.width / 2, 30);
-            const progressBarWidth = tempCanvas.width - 40;
-            const progressBarHeight = 25;
-            const progressBarX = 20;
-            const progressBarY = 50;
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
-            ctx.strokeStyle = '#ccc';
-            ctx.strokeRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
-            let completedCells = 0;
-            let totalFillableCells = 0;
-            for (let i = 0; i < gridData.length; i++) {
-                for (let j = 0; j < gridData[i].length; j++) {
-                    const value = gridData[i][j];
-                    if (typeof value === 'number' && value in colorMap) {
-                        totalFillableCells++;
-                        const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${i * 29 + j + 1})`);
-                        if (pixel && pixel.style.backgroundColor !== '' && 
-                            pixel.style.backgroundColor !== 'rgb(248, 224, 224)' && 
-                            pixel.style.backgroundColor !== '#f8e0e0') {
-                            completedCells++;
-                        }
-                    }
-                }
-            }
-            const percent = Math.round((completedCells / totalFillableCells) * 100);
-            const fillWidth = (percent / 100) * progressBarWidth;
-            const gradient = ctx.createLinearGradient(progressBarX, progressBarY, progressBarX + progressBarWidth, progressBarY);
-            if (percent === 100) {
-                gradient.addColorStop(0, '#FFD700');
-                gradient.addColorStop(1, '#FFA500');
-            } else {
-                gradient.addColorStop(0, '#4CAF50');
-                gradient.addColorStop(1, '#8BC34A');
-            }
-            ctx.fillStyle = gradient;
-            ctx.fillRect(progressBarX, progressBarY, fillWidth, progressBarHeight);
-            const cellWidth = (tempCanvas.width - 40) / 29;
-            const cellHeight = (tempCanvas.height - 120) / 26;
-            const gridX = 20;
-            const gridY = 90;
-            for (let i = 0; i < gridData.length; i++) {
-                for (let j = 0; j < gridData[i].length; j++) {
-                    const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${i * 29 + j + 1})`);
-                    ctx.fillStyle = pixel && pixel.style.backgroundColor ? pixel.style.backgroundColor : '#f8e0e0';
-                    ctx.fillRect(gridX + j * cellWidth, gridY + i * cellHeight, cellWidth, cellHeight);
-                    ctx.strokeStyle = '#333';
-                    ctx.strokeRect(gridX + j * cellWidth, gridY + i * cellHeight, cellWidth, cellHeight);
-                }
-            }
-            const container = document.getElementById('shareCanvasContainer');
-            if (container) {
-                container.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = tempCanvas.toDataURL('image/png');
-                container.appendChild(img);
-            }
-            document.getElementById('shareModal').style.display = 'flex';
-        }
-        // =============== 初始化 ===============
         document.addEventListener('DOMContentLoaded', function() {
             console.log("✅ DOM 加载完成");
-            // ✅ 检查关键元素
             const pixelCanvas = document.getElementById('pixelCanvas');
             const colorPalette = document.getElementById('colorPalette');
             if (!pixelCanvas || !colorPalette) {
@@ -965,34 +700,26 @@
             createColorPalette();
             loadProgress();
             updateProgressBar();
-            // ✅ 重新开始按钮（包含音乐播放）
             document.getElementById('restartBtn').onclick = function() {
-                // ✅ 移除 confirm 弹窗，直接执行重置
-                // 重置所有格子
                 document.querySelectorAll('.pixel').forEach(pixel => {
                     pixel.style.backgroundColor = '#f8e0e0';
+                    pixel.classList.remove('revealed');
                 });
-                // 重置进度条
                 const progressFill = document.getElementById('progressFill');
                 const progressPercent = document.getElementById('progressPercent');
                 if (progressFill) progressFill.style.width = '0%';
                 if (progressPercent) progressPercent.textContent = '0%';
                 if (progressFill) progressFill.classList.remove('completed');
-                // 重置状态
                 gameStarted = true;
                 selectedColor = null;
                 document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
-                // 隐藏原图
-                const artworkContainer = document.getElementById('artworkContainer');
                 const pixelCanvas = document.getElementById('pixelCanvas');
-                if (artworkContainer) artworkContainer.style.display = 'none';
                 if (pixelCanvas) {
                     pixelCanvas.style.display = 'grid';
+                    pixelCanvas.classList.remove('revealed-bg');
                     pixelCanvas.style.opacity = '1';
                 }
-                // 清除保存的进度
                 localStorage.removeItem('starNightProgress');
-                // ✅ 自动播放背景音乐
                 const bgMusic = document.getElementById('bgMusic');
                 if (!isMusicPlaying) {
                     bgMusic.muted = false;
@@ -1000,28 +727,22 @@
                         isMusicPlaying = true;
                         document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
                     }).catch(e => {
-                        // ✅ 捕获错误但不弹窗
                         console.log("自动播放被阻止");
                     });
                 }
-                // ✅ 移除完成后的 alert 弹窗
                 console.log("已重新开始！你可以重新填色。");
             };
             document.getElementById('musicBtn').onclick = function() {
                 toggleMusic();
             };
-            // ✅ 初始化音量滑块
             const volumeSlider = document.getElementById('volumeSlider');
             if (volumeSlider) {
-                // 页面加载时设置当前音量
                 volumeSlider.value = 100;
                 setVolume(100);
-                // 绑定滑块变化事件
                 volumeSlider.addEventListener('input', function() {
                     setVolume(this.value);
                 });
             }
-            // ✅ 页面首次点击时激活音频上下文，避免后续自动播放被阻止
             document.body.addEventListener('click', function initAudio() {
                 const bgMusic = document.getElementById('bgMusic');
                 if (bgMusic) {
@@ -1036,19 +757,6 @@
                 }
                 document.body.removeEventListener('click', initAudio);
             }, { once: true });
-            setTimeout(() => {
-                const leftPanel = document.getElementById('leftPanel');
-                const rightPanel = document.getElementById('rightPanel');
-                if (leftPanel && rightPanel) {
-                    rightPanel.style.height = leftPanel.offsetHeight + 'px';
-                }
-            }, 100);
-            if (/Mobi|Android/i.test(navigator.userAgent)) {
-                document.querySelectorAll('.pixel').forEach(p => {
-                    p.style.minWidth = '8vw';
-                    p.style.minHeight = '6vw';
-                });
-            }
         });
     </script>
 </body>
