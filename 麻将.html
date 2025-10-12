@@ -33,31 +33,41 @@
     .trophy{font-size:60px;color:gold;margin-bottom:10px}
     .firework{position:absolute;top:20px;right:-100px;font-size:30px;animation:fireworks 5s linear forwards;z-index:1000;pointer-events:none}
     @keyframes fireworks{0%{right:-100px;opacity:0;transform:translateY(0) scale(1)}10%{opacity:1}50%{transform:translateY(-20px) scale(1.2)}100%{right:100%;transform:translateY(10px) scale(.8);opacity:0}}
+
+    /* 首页 */
     #start-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px}
-    #start-button{margin-top:30px;padding:14px 30px;font-size:20px;font-weight:bold;border:none;border-radius:10px;background:#2e7d32;color:#fff;cursor:pointer}
+    #start-button{margin-top:16px;padding:14px 30px;font-size:20px;font-weight:bold;border:none;border-radius:10px;background:#2e7d32;color:#fff;cursor:pointer}
     #start-button:hover{background:#1b5e20}
+    .home-stats{margin-top:12px;font-size:16px;color:#0b3558}
+    .home-stats span{font-weight:bold}
     .game-area{display:none;width:100%}
     .label-cn-en{display:flex;align-items:center;font-size:20px;font-weight:bold;text-align:left;margin:15px 0 10px}
     .label-en{font-size:16px;margin-left:10px}
-    .sortable-ghost{opacity:.4;background:#f0f0f0;border:2px dashed #ccc;box-shadow:none;transform:none;transition:none}
     ul.rules{list-style-type:disc;margin:0;padding-left:20px}
     .rule-cn{font-size:16px;margin:4px 0 0 0}
     .rule-en{font-size:14px;color:#0b3558;margin:2px 0 8px 0;font-style:italic}
+    .sortable-ghost{opacity:.4;background:#f0f0f0;border:2px dashed #ccc;box-shadow:none;transform:none;transition:none}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
 <div class="game-title">麻将学习游戏：摸打练习<br/>Mahjong Learning Game: Draw & Discard Practice</div>
 
+<!-- 首页（只显示 CTR / Plays） -->
 <div id="start-screen">
-  <img src="麻将.png" alt="麻将游戏插图" style="max-width:25%;margin-bottom:20px;transform:scale(0.8);">
   <h1 style="font-size:28px;color:orange;">欢迎来到麻将学习小游戏<br/><small style="font-size:20px;">Welcome to the Mahjong Learning Game</small></h1>
-  <p style="font-size:18px;">目标：组成 4 组有效组合 + 一对将牌<br/>Goal: Form 4 valid sets + a pair. Each time you can only flip one face-down tile and discard one.</p>
+  <p style="font-size:18px;">目标：组成 4 组有效组合 + 一对将牌<br/>Goal: Form 4 valid sets + a pair.</p>
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
+  <div id="homeStats" class="home-stats">
+    👥 开局次数 / Plays: <span id="playsNum">0</span>　
+    📈 CTR: <span id="ctrNum">0%</span>
+  </div>
 </div>
 
+<!-- 赢牌音效 -->
 <audio id="applauseAudio" src="applause.mp3" preload="auto"></audio>
 
+<!-- 游戏区域 -->
 <div class="game-area" id="gameArea">
   <div class="main-container">
     <div class="left-panel" id="leftPanel">
@@ -66,17 +76,16 @@
         <small>组成 4 组有效组合 + 一对将牌。每次只能翻一张隐藏牌，并打出一张无用牌。</small><br/>
         <small class="en">Form 4 valid sets + a pair. You can only flip one hidden tile and must discard one useless tile each round.</small><br/>
       </div>
-
       <div class="rule-title">
         <span class="cn">📝 规则说明：</span>
         <ul class="rules">
           <li><div class="rule-cn">每张牌最多出现 4 次。</div><div class="rule-en">Each tile can appear up to 4 copies.</div></li>
           <li><div class="rule-cn">摸一张 → 必须打一张 → 手牌 + 组合总数保持 14 张。</div><div class="rule-en">Draw one → discard one → hand + sets stays at 14 tiles.</div></li>
-          <li><div class="rule-cn">胜利时显示🏆与🎆并播放掌声。</div><div class="rule-en">On win, show 🏆 + 🎆 and play applause.</div></li>
           <li><div class="rule-cn">对子：数字对子 / 同名花（梅梅/兰兰/竹竹/菊菊）/ 同名季（春春/夏夏/秋秋/冬冬）。</div><div class="rule-en">Pair: identical numbers, identical Flowers, or identical Seasons.</div></li>
           <li><div class="rule-cn">刻子：三张相同。数字/花/季都可以。</div><div class="rule-en">Pong: three identical tiles (numbers/flowers/seasons).</div></li>
           <li><div class="rule-cn">顺子：<b>仅数字牌</b>可组成。<b>花/季不允许顺子</b>。</div><div class="rule-en">Chow: <b>numbers only</b>. <b>Flowers/Seasons cannot form chows</b>.</div></li>
-          <li><div class="rule-cn">听牌提示尊重已选组合，不打散已固定的对子/刻子。</div><div class="rule-en">Tenpai hint respects fixed sets; selected pairs/pongs are not broken.</div></li>
+          <li><div class="rule-cn">听牌提示只显示当前真正需要的牌（不会显示已不需要的旧结果）。</div><div class="rule-en">Tenpai hint only shows current needed tiles (stays in sync with your hand).</div></li>
+          <li><div class="rule-cn">胜利时显示🏆与🎆并播放掌声。</div><div class="rule-en">On win, show 🏆 + 🎆 and play applause.</div></li>
         </ul>
       </div>
     </div>
@@ -120,21 +129,38 @@
 </div>
 
 <script>
+  /* ===== CTR（整页点击率）+ Plays（开始次数） ===== */
+  const CTR_KEY = 'mahjong_ctr_stats_v2';
+  function loadCTR(){ try{return JSON.parse(localStorage.getItem(CTR_KEY)||'{"impressions":0,"conversions":0,"plays":0}');}catch{return {impressions:0,conversions:0,plays:0};}}
+  function saveCTR(s){ localStorage.setItem(CTR_KEY,JSON.stringify(s)); }
+  function renderCTR(){
+    const s=loadCTR();
+    const ctr = s.impressions? (s.conversions/s.impressions*100).toFixed(1)+'%' : '0%';
+    document.getElementById('playsNum').textContent=s.plays;
+    document.getElementById('ctrNum').textContent=ctr;
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const s=loadCTR(); s.impressions+=1; saveCTR(s); renderCTR();
+    sessionStorage.setItem('mahjong_clicked_once','0');
+  });
+  document.addEventListener('click',()=>{
+    if(sessionStorage.getItem('mahjong_clicked_once')==='1') return;
+    const s=loadCTR(); s.conversions+=1; saveCTR(s);
+    sessionStorage.setItem('mahjong_clicked_once','1'); renderCTR();
+  });
+  function bumpPlays(){ const s=loadCTR(); s.plays+=1; saveCTR(s); renderCTR(); }
+
+  /* ===== 游戏核心逻辑 ===== */
   const suits=['万','筒','条'];
   const suitEmojis={'万':'🀄','筒':'🐼','条':'🐲'};
   function getFlowerEmoji(n){return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''}
   function getSeasonEmoji(n){return n==='春'?'🌷':n==='夏'?'🌺':n==='秋'?'🍁':n==='冬'?'❄️':''}
 
-  function safeInitSortable(container,options){
-    if(window.Sortable && typeof window.Sortable==="function"){try{return new Sortable(container,options)}catch(e){console.warn("Sortable init error:",e)}}
-    else console.warn("SortableJS not found; drag disabled."); return null;
-  }
+  let hand=[],faceDownTiles=[],allTiles=[],validSetsData=[];
+  window.isGameOver=false; window.hasDiscarded=true; let handSortable=null;
 
   function playApplause(){const a=document.getElementById('applauseAudio'); if(!a)return; try{a.currentTime=0;a.play().catch(()=>{})}catch(e){}}
   function stopApplause(){const a=document.getElementById('applauseAudio'); if(!a)return; try{a.pause();a.currentTime=0}catch(e){}}
-
-  let hand=[],faceDownTiles=[],allTiles=[],validSetsData=[];
-  window.isGameOver=false; window.hasDiscarded=true; let handSortable=null;
 
   function createFullMahjongSet(){
     const set=[];
@@ -147,6 +173,14 @@
   }
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
+  function startGame(){
+    bumpPlays();                   // 记录开始次数
+    document.getElementById('start-screen').style.display='none';
+    document.getElementById('gameArea').style.display='block';
+    window.isGameOver=false; window.hasDiscarded=true;
+    generateHand(); enableGame();
+  }
+
   function generateHand(){
     allTiles=shuffle(createFullMahjongSet());
     hand=allTiles.slice(0,13);
@@ -158,6 +192,13 @@
     updateCombinationCount();
     document.getElementById('winMessage').style.display='none';
     checkWaitingTiles();
+  }
+
+  function safeInitSortable(container,options){
+    if(window.Sortable && typeof window.Sortable==="function"){
+      try{return new Sortable(container,options)}catch(e){console.warn("Sortable init error:",e)}
+    } else { console.warn("SortableJS not found; drag disabled."); }
+    return null;
   }
 
   function renderHand(){
@@ -185,8 +226,9 @@
       } return;
     }
     const d=document.createElement('div'); d.dataset.type='hidden';
-    if(!window.isGameOver && window.hasDiscarded){ d.onclick=()=>handleFlip(); d.classList.remove('inactive'); }
-    else { d.onclick=null; d.classList.add('inactive'); }
+    if(!window.isGameOver && window.hasDiscarded){
+      d.onclick=()=>handleFlip(); d.classList.remove('inactive');
+    } else { d.onclick=null; d.classList.add('inactive'); }
     d.className='tile face-down'; d.textContent='🀀'; c.appendChild(d);
   }
 
@@ -213,13 +255,6 @@
     });
   }
 
-  function startGame(){
-    document.getElementById('start-screen').style.display='none';
-    document.getElementById('gameArea').style.display='block';
-    window.isGameOver=false; window.hasDiscarded=true;
-    generateHand(); enableGame();
-  }
-
   function toggleSelection(el){ if(el.dataset.type==='hidden'||window.isGameOver) return; el.classList.toggle('selected'); }
 
   function getSelectedTilesData(){ return Array.from(document.querySelectorAll('#hand .tile.selected')).map(el=>({
@@ -227,6 +262,7 @@
 
   function getTileCounts(arr){ const m={}; arr.forEach(t=>{m[t.key]=(m[t.key]||0)+1}); return m; }
 
+  // 对子：数字相同 或 同名花/季
   function isPair(_,arr){
     if(arr.length!==2) return false;
     const [a,b]=arr;
@@ -235,6 +271,7 @@
     if(a.type==='season'&&b.type==='season'&&a.name===b.name) return true;
     return false;
   }
+  // 刻子：三张相同（数字/花/季）
   function isPong(_,arr){
     if(arr.length!==3) return false;
     if(arr[0].type==='normal' && arr.every(t=>t.type==='normal' && t.key===arr[0].key)) return true;
@@ -242,6 +279,7 @@
     if(arr[0].type==='season' && arr.every(t=>t.type==='season' && t.name===arr[0].name)) return true;
     return false;
   }
+  // 顺子：仅数字
   function isChow(arr){
     if(arr.length!==3) return false;
     const allNormal=arr.every(t=>t.type==='normal'); if(!allNormal) return false;
@@ -250,20 +288,16 @@
     return nums[0]+1===nums[1] && nums[1]+1===nums[2];
   }
 
-  /** 仅用于“胜利判断”的通用划分（允许自由重排） */
+  // —— 自由重排胜利判断（14张、4组+1对；花/季不能顺子、可对子/刻子） ——
   function canWin(freeHand, currentValidSetsData){
     const tiles=freeHand.concat(currentValidSetsData.flat());
     if(tiles.length!==14) return false;
 
-    // 枚举“将牌”
-    const pairCands=[];
-    const countBy=(arr,keyFn)=>arr.reduce((m,t)=>{const k=keyFn(t);m[k]=(m[k]||0)+1;return m;},{});
+    const pairCands=[]; const countBy=(arr,keyFn)=>arr.reduce((m,t)=>{const k=keyFn(t);m[k]=(m[k]||0)+1;return m;},{});
     const normals=tiles.filter(t=>t.type==='normal');
     const flowers=tiles.filter(t=>t.type==='flower');
     const seasons=tiles.filter(t=>t.type==='season');
-    const nC=countBy(normals,t=>`${t.number}${t.suit}`);
-    const fC=countBy(flowers,t=>t.name);
-    const sC=countBy(seasons,t=>t.name);
+    const nC=countBy(normals,t=>`${t.number}${t.suit}`), fC=countBy(flowers,t=>t.name), sC=countBy(seasons,t=>t.name);
     Object.keys(nC).forEach(k=>{if(nC[k]>=2) pairCands.push({kind:'normal',key:k})});
     Object.keys(fC).forEach(n=>{if(fC[n]>=2) pairCands.push({kind:'flower',key:n})});
     Object.keys(sC).forEach(n=>{if(sC[n]>=2) pairCands.push({kind:'season',key:n})});
@@ -311,7 +345,6 @@
       }
       return false;
     }
-
     for(const p of pairCands){
       const rest=removePairOnce(tiles,p); if(!rest||rest.length!==12) continue;
       if(canFormSets(rest,4)) return true;
@@ -319,12 +352,10 @@
     return false;
   }
 
-  /** —— 新增：听牌/模拟摸牌时“尊重已选组合”的判断 —— */
-  function canCompleteWithFixedSets(freeTiles/*手里可用的牌*/, validSets){
-    // 固定组合：统计已经完成的组、对子
+  // —— 听牌：尊重已固定组合（不打散已选对/刻/顺），仅显示当前真正需要的牌 ——
+  function canCompleteWithFixedSets(freeTiles, validSets){
     const fixedSets = validSets.filter(s=>s.length===3 && (isPong({},s) || isChow(s))).length;
     const fixedPairs = validSets.filter(s=>s.length===2 && isPair({},s)).length;
-
     const setsNeed = 4 - fixedSets;
     const pairsNeed = 1 - fixedPairs;
 
@@ -351,13 +382,10 @@
       if(needSets===0 && needPairs===0) return tiles.length===0;
       if(tiles.length < needSets*3 + needPairs*2) return false;
 
-      // 优先尝试凑对子
       if(needPairs>0){
-        // 枚举所有可做对的键
         const countMap={};
         tiles.forEach(t=>{
-          const k = t.type==='normal' ? `N|${t.suit}|${t.number}` :
-                    t.type==='flower' ? `F|${t.name}` : `S|${t.name}`;
+          const k=t.type==='normal'?`N|${t.suit}|${t.number}`:(t.type==='flower'?`F|${t.name}`:`S|${t.name}`);
           countMap[k]=(countMap[k]||0)+1;
         });
         for(const k in countMap){
@@ -372,12 +400,10 @@
           }
         }
       }
-      // 尝试刻子
       if(needSets>0){
         const countMap={};
         tiles.forEach(t=>{
-          const k = t.type==='normal' ? `N|${t.suit}|${t.number}` :
-                    t.type==='flower' ? `F|${t.name}` : `S|${t.name}`;
+          const k=t.type==='normal'?`N|${t.suit}|${t.number}`:(t.type==='flower'?`F|${t.name}`:`S|${t.name}`);
           countMap[k]=(countMap[k]||0)+1;
         });
         for(const k in countMap){
@@ -391,10 +417,8 @@
             if(rest && canMeetTargets(rest,needSets-1,needPairs)) return true;
           }
         }
-        // 数字顺子
         for(const s of suits){
           for(let n=1;n<=7;n++){
-            // 先粗检是否存在
             let a=false,b=false,c=false;
             for(const t of tiles){
               if(t.type==='normal' && t.suit===s){
@@ -427,12 +451,12 @@
     let ok=false;
     if(sel.length===2){
       if(isPair(groups,sel)){
-        if(hasPair){ showMessage("⚠️ 你已有一对，请先做三张组合","error"); return; }
-        moveSelectedToValidSet(sel); showMessage("恭喜！这是有效的将牌","normal"); ok=true;
-      }else showMessage("这不是有效对子","error");
+        if(hasPair){ showMessage("⚠️ 你已有一对，请先做三张组合","error"); }
+        else { moveSelectedToValidSet(sel); showMessage("恭喜！这是有效的将牌","normal"); ok=true; }
+      }else { showMessage("这不是有效对子","error"); }
     }else{
       if(isPong(groups,sel) || isChow(sel)){ moveSelectedToValidSet(sel); showMessage("恭喜！这是一个有效的三张组合","normal"); ok=true; }
-      else showMessage("这不是有效组合","error");
+      else { showMessage("这不是有效组合","error"); }
     }
     if(ok){ updateCombinationCount(); setTimeout(checkTileCount,100); checkVictory(); checkWaitingTiles(); }
   }
@@ -466,7 +490,6 @@
     renderHand(); checkTileCount(); updateCombinationCount(); renderNextHiddenTile(); checkWaitingTiles();
   }
 
-  // —— 听牌：严格尊重已选组合，不打散 —— 
   function getWinningTiles(){
     const combined = hand.concat(validSetsData.flat());
     if(combined.length!==13) return [];
@@ -477,17 +500,17 @@
 
     const waiting=[];
     for(const d of cands){
-      const tryHand = hand.concat([d]);             // 只用“手里的牌+摸到的牌”
-      if(canCompleteWithFixedSets(tryHand, validSetsData)) waiting.push(d); // 不打散 validSetsData
+      const tryHand = hand.concat([d]);
+      if(canCompleteWithFixedSets(tryHand, validSetsData)) waiting.push(d);
     }
 
-    // 过滤已出现 4 张
+    // 过滤“已出现 4 张”的牌（手里+已组合+弃牌）
     const visible={}; const add=k=>visible[k]=(visible[k]||0)+1;
     hand.forEach(t=>add(t.key)); validSetsData.flat().forEach(t=>add(t.key));
     Array.from(document.querySelectorAll('#discards .tile')).forEach(el=>{const k=el.dataset.tile||''; if(k) add(k);});
     const filtered=waiting.filter(t=>(visible[t.key]||0)<4);
 
-    // 排序 & 去重
+    // 去重+排序
     const suitOrd={'万':1,'筒':2,'条':3};
     const typeRank=t=>t.type==='normal'?1:(t.type==='flower'?2:3);
     filtered.sort((a,b)=>{
@@ -595,10 +618,12 @@
     m.className=''; m.classList.add(`message-${type}`); m.innerHTML = msg;
   }
 
+  // 兜底绑定（如果 inline onclick 被 CSP 屏蔽）
   document.addEventListener('DOMContentLoaded',()=>{
     const btn=document.getElementById('start-button');
     if(btn){ btn.addEventListener('click',()=>{const g=document.getElementById('gameArea'); if(g && g.style.display!=='block') startGame();}); }
   });
+
 </script>
 </body>
 </html>
