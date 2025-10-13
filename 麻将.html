@@ -23,7 +23,6 @@
       font-size: clamp(24px, 5vw, 32px);
       font-weight: bold;
       text-align: center;
-      /* 添加半透明立体感效果 */
       background: rgba(0, 153, 204, 0.95);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
                   inset 0 -2px 5px rgba(0, 0, 0, 0.2),
@@ -57,6 +56,7 @@
       padding: 15px;
       box-sizing: border-box;
       gap: 15px;
+      align-items: stretch;
     }
     .left-panel {
       width: 25%;
@@ -68,7 +68,6 @@
       background-color: #d0ebff;
       border-radius: 10px;
       overflow-y: auto;
-      max-height: calc(100vh - 120px);
     }
     .right-panel {
       width: 75%;
@@ -76,9 +75,9 @@
       box-sizing: border-box;
       text-align: center;
       background-color: white;
-      border-left: 1px solid #ccc;
-      overflow-x: hidden;
       border-radius: 10px;
+      display: flex;
+      flex-direction: column;
     }
     .tiles {
       display: flex;
@@ -195,38 +194,45 @@
     .btn-restart {
       background-color: #43a047;
     }
+
+    /* ===== 消息区域：防跳动 + 听牌多行支持 ===== */
     #message {
-      margin-top: 8px;
-      margin-bottom: 8px;
+      margin: 8px 0;
       font-size: clamp(18px, 4vw, 24px);
-      min-height: 50px;
+      height: 60px;
+      line-height: 1.3;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       overflow: hidden;
+      white-space: nowrap;
     }
-    .message-discard-prompt {
-        color: red;
-    }
-    .message-discard-confirm {
-        color: #8A2BE2;
-    }
-    .message-error {
-        color: red;
-    }
-    .message-normal {
-        color: green;
-    }
+
+    /* 听牌提示：允许多行 */
     .message-waiting {
-        color: #FF8C00;
-        font-weight: bold;
-        animation: pulse 1.5s infinite alternate;
+      color: #FF8C00;
+      font-weight: bold;
+      animation: pulse 1.5s infinite alternate;
+      white-space: normal !important;
+      height: auto !important;
+      min-height: 60px;
+      align-items: flex-start;
+      padding-top: 8px;
     }
     @keyframes pulse {
-        from { transform: scale(1); opacity: 1; }
-        to { transform: scale(1.05); opacity: 0.9; }
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(1.05); opacity: 0.9; }
     }
+
+    /* 其他消息保持单行 */
+    .message-discard-prompt,
+    .message-discard-confirm,
+    .message-error,
+    .message-normal {
+      white-space: nowrap;
+    }
+
     #combination-count {
       font-size: clamp(16px, 4vw, 20px);
       margin: 8px 0;
@@ -350,11 +356,12 @@
       transition: none;
     }
 
-    /* ===== iPad 专属优化 (768px ~ 1024px) ===== */
-    @media (min-width: 768px) and (max-width: 1024px) {
+    /* ===== iPad & 小平板优化 (768px ~ 1200px) ===== */
+    @media (min-width: 768px) and (max-width: 1200px) {
       .main-container {
         flex-direction: column;
         padding: 10px;
+        align-items: stretch;
       }
       .left-panel, .right-panel {
         width: 100%;
@@ -366,7 +373,6 @@
         padding: 15px;
       }
 
-      /* 👇 关键：手牌允许换行，隐藏滚动 */
       .hand .tiles,
       .hidden-tiles .tiles {
         flex-wrap: wrap;
@@ -375,7 +381,6 @@
         gap: 4px;
       }
 
-      /* 微调牌尺寸 */
       .tile {
         width: 50px;
         height: 65px;
@@ -385,7 +390,6 @@
         font-size: 18px;
       }
 
-      /* 隐藏滚动条 */
       .hand .tiles::-webkit-scrollbar {
         display: none;
       }
@@ -424,7 +428,7 @@
       }
       #message {
         font-size: 18px;
-        min-height: 45px;
+        height: 55px;
       }
       #combination-count {
         font-size: 16px;
@@ -448,7 +452,7 @@
       }
       #message {
         font-size: 16px;
-        min-height: 40px;
+        height: 50px;
       }
       button {
         padding: 6px 12px;
@@ -553,312 +557,419 @@
 </div>
 
 <script>
-  /* ===== CTR（整页点击率）+ Plays（开始次数） ===== */
-  const CTR_KEY = 'mahjong_ctr_stats_v2';
-  function loadCTR(){ try{return JSON.parse(localStorage.getItem(CTR_KEY)||'{"impressions":0,"conversions":0,"plays":0}');}catch{return {impressions:0,conversions:0,plays:0};}}
-  function saveCTR(s){ localStorage.setItem(CTR_KEY,JSON.stringify(s)); }
-  function renderCTR(){
-    const s=loadCTR();
-    const ctr = s.impressions? (s.conversions/s.impressions*100).toFixed(1)+'%' : '0%';
-    document.getElementById('playsNum').textContent=s.plays;
-    document.getElementById('ctrNum').textContent=ctr;
+  /* ===== 本地统计（本浏览器累计） ===== */
+  const STATS_KEY = 'mahjong_local_stats_v1';
+
+  function loadStats() {
+    try {
+      return JSON.parse(localStorage.getItem(STATS_KEY) || '{"impressions":0,"clicks":0,"plays":0}');
+    } catch (e) {
+      return { impressions: 0, clicks: 0, plays: 0 };
+    }
   }
-  document.addEventListener('DOMContentLoaded',()=>{
-    const s=loadCTR(); s.impressions+=1; saveCTR(s); renderCTR();
-    sessionStorage.setItem('mahjong_clicked_once','0');
+
+  function saveStats(stats) {
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  }
+
+  function renderStats() {
+    const s = loadStats();
+    const ctr = s.impressions > 0 ? (s.clicks / s.impressions * 100).toFixed(1) + '%' : '0%';
+    document.getElementById('playsNum').textContent = s.plays;
+    document.getElementById('ctrNum').textContent = ctr;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const stats = loadStats();
+    stats.impressions += 1;
+    saveStats(stats);
+    renderStats();
   });
-  document.addEventListener('click',()=>{
-    if(sessionStorage.getItem('mahjong_clicked_once')==='1') return;
-    const s=loadCTR(); s.conversions+=1; saveCTR(s);
-    sessionStorage.setItem('mahjong_clicked_once','1'); renderCTR();
+
+  document.addEventListener('click', () => {
+    const stats = loadStats();
+    stats.clicks += 1;
+    saveStats(stats);
+    renderStats();
   });
-  function bumpPlays(){ const s=loadCTR(); s.plays+=1; saveCTR(s); renderCTR(); }
+
+  function bumpPlays() {
+    const stats = loadStats();
+    stats.plays += 1;
+    saveStats(stats);
+    renderStats();
+  }
 
   /* ===== 游戏核心逻辑 ===== */
-  const suits=['万','筒','条'];
-  const suitEmojis={'万':'🀄','筒':'🐼','条':'🐲'};
+  const suits = ['万','筒','条'];
+  const suitEmojis = {'万':'🀄','筒':'🐼','条':'🐲'};
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
   
-  function getFlowerEmoji(n){return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''}
-  function getSeasonEmoji(n){return n==='春'?'🌷':n==='夏'?'🌺':n==='秋'?'🍁':n==='冬'?'❄️':''}
+  function getFlowerEmoji(n) { return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''; }
+  function getSeasonEmoji(n) { return n==='春'?'🌷':n==='夏'?'🌺':n==='秋'?'🍁':n==='冬'?'❄️':''; }
 
-  let hand=[],faceDownTiles=[],allTiles=[],validSetsData=[];
-  window.isGameOver=false; window.hasDiscarded=true; let handSortable=null;
+  let hand = [], faceDownTiles = [], allTiles = [], validSetsData = [];
+  window.isGameOver = false; window.hasDiscarded = true; let handSortable = null;
 
-  function playApplause(){const a=document.getElementById('applauseAudio'); if(!a)return; try{a.currentTime=0;a.play().catch(()=>{})}catch(e){}}
-  function stopApplause(){const a=document.getElementById('applauseAudio'); if(!a)return; try{a.pause();a.currentTime=0}catch(e){}}
+  function playApplause() {
+    const a = document.getElementById('applauseAudio');
+    if (!a) return;
+    try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
+  }
+  function stopApplause() {
+    const a = document.getElementById('applauseAudio');
+    if (!a) return;
+    try { a.pause(); a.currentTime = 0; } catch (e) {}
+  }
 
-  function createFullMahjongSet(){
-    const set=[];
-    for(let i=0;i<4;i++){
-      suits.forEach(s=>{for(let n=1;n<=9;n++) set.push({type:'normal',suit:s,number:n,key:`${n}${s}`})});
-      ['梅','兰','竹','菊'].forEach(name=>set.push({type:'flower',name,emoji:getFlowerEmoji(name),key:name}));
-      ['春','夏','秋','冬'].forEach(name=>set.push({type:'season',name,emoji:getSeasonEmoji(name),key:name}));
+  function createFullMahjongSet() {
+    const set = [];
+    for (let i = 0; i < 4; i++) {
+      suits.forEach(s => { for (let n = 1; n <= 9; n++) set.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
+      ['梅','兰','竹','菊'].forEach(name => set.push({type:'flower', name, emoji:getFlowerEmoji(name), key:name}));
+      ['春','夏','秋','冬'].forEach(name => set.push({type:'season', name, emoji:getSeasonEmoji(name), key:name}));
     }
     return set;
   }
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
 
-  function startGame(){
+  function startGame() {
     bumpPlays();
-    document.getElementById('start-screen').style.display='none';
-    document.getElementById('gameArea').style.display='block';
-    window.isGameOver=false; window.hasDiscarded=true;
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('gameArea').style.display = 'block';
+    window.isGameOver = false; window.hasDiscarded = true;
     generateHand(); enableGame();
   }
 
-  function generateHand(){
-    allTiles=shuffle(createFullMahjongSet());
-    hand=allTiles.slice(0,13);
-    faceDownTiles=allTiles.slice(13);
-    validSetsData=[];
+  function generateHand() {
+    allTiles = shuffle(createFullMahjongSet());
+    hand = allTiles.slice(0, 13);
+    faceDownTiles = allTiles.slice(13);
+    validSetsData = [];
     renderHand(); renderNextHiddenTile(); renderValidSets();
-    document.getElementById('discards').innerHTML='';
+    document.getElementById('discards').innerHTML = '';
     showMessage("请翻开一张隐藏牌或检查组合！<br/>Please flip a face-down tile or check for combinations!","normal");
     updateCombinationCount();
-    document.getElementById('winMessage').style.display='none';
+    document.getElementById('winMessage').style.display = 'none';
     checkWaitingTiles();
   }
 
-  function safeInitSortable(container,options){
-    if(window.Sortable && typeof window.Sortable==="function"){
-      try{return new Sortable(container,options)}catch(e){console.warn("Sortable init error:",e)}
+  function safeInitSortable(container, options) {
+    if (window.Sortable && typeof window.Sortable === "function") {
+      try { return new Sortable(container, options); } catch (e) { console.warn("Sortable init error:", e); }
     } else { console.warn("SortableJS not found; drag disabled."); }
     return null;
   }
 
-  function renderHand(){
-    const c=document.getElementById('hand'); c.innerHTML='';
-    for(let i=0;i<14;i++){
-      const d=document.createElement('div');
-      d.className='tile'; 
-      d.style.visibility=i<hand.length?'visible':'hidden';
-      if(i<hand.length){
-        const t=hand[i];
-        d.dataset.tile=t.key; d.dataset.tileType=t.type; d.dataset.tileSuit=t.suit||''; d.dataset.tileNumber=t.number||''; d.dataset.tileName=t.name||''; d.dataset.tileEmoji=t.emoji||'';
-        if(!window.isGameOver){ d.onclick=(e)=>{ if(e.detail===0) return; toggleSelection(d)}; d.classList.remove('inactive'); }
-        else { d.onclick=null; d.classList.add('inactive'); }
-        if(t.type==='normal'){ 
-          d.className=`tile ${t.suit==='万'?'wan':t.suit==='筒'?'tong':'tiao'}`; 
-          d.textContent=`${chineseNumbers[t.number-1]}${suitEmojis[t.suit]}`;
+  function renderHand() {
+    const c = document.getElementById('hand'); c.innerHTML = '';
+    for (let i = 0; i < 14; i++) {
+      const d = document.createElement('div');
+      d.className = 'tile'; 
+      d.style.visibility = i < hand.length ? 'visible' : 'hidden';
+      if (i < hand.length) {
+        const t = hand[i];
+        d.dataset.tile = t.key; 
+        d.dataset.tileType = t.type; 
+        d.dataset.tileSuit = t.suit || ''; 
+        d.dataset.tileNumber = t.number || ''; 
+        d.dataset.tileName = t.name || ''; 
+        d.dataset.tileEmoji = t.emoji || '';
+        if (!window.isGameOver) { 
+          d.onclick = (e) => { if (e.detail === 0) return; toggleSelection(d); }; 
+          d.classList.remove('inactive'); 
+        } else { 
+          d.onclick = null; 
+          d.classList.add('inactive'); 
         }
-        else if(t.type==='flower'){ d.className='tile flower-card'; d.textContent=t.emoji; }
-        else { d.className='tile season-card'; d.textContent=t.emoji; }
+        if (t.type === 'normal') { 
+          d.className = `tile ${t.suit === '万' ? 'wan' : t.suit === '筒' ? 'tong' : 'tiao'}`; 
+          d.textContent = `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}`;
+        } else if (t.type === 'flower') { 
+          d.className = 'tile flower-card'; 
+          d.textContent = t.emoji; 
+        } else { 
+          d.className = 'tile season-card'; 
+          d.textContent = t.emoji; 
+        }
       }
       c.appendChild(d);
     }
-    if(handSortable && handSortable.destroy) handSortable.destroy();
-    handSortable=safeInitSortable(c,{animation:150,group:'handTiles',filter:'.inactive',
-      onEnd:(evt)=>{const [m]=hand.splice(evt.oldIndex,1); hand.splice(evt.newIndex,0,m); renderHand(); checkWaitingTiles();}});
-  }
-
-  function renderNextHiddenTile(){
-    const c=document.getElementById('hiddenTiles'); c.innerHTML='';
-    if(faceDownTiles.length===0){
-      if(document.getElementById('winMessage').style.display==='none' && !window.isGameOver){
-        showMessage("没有更多隐藏牌可以翻出<br/>No more face-down tiles to flip","error"); checkVictory();
-      } return;
-    }
-    const d=document.createElement('div'); d.dataset.type='hidden';
-    if(!window.isGameOver && window.hasDiscarded){
-      d.onclick=()=>handleFlip(); d.classList.remove('inactive');
-    } else { d.onclick=null; d.classList.add('inactive'); }
-    d.className='tile face-down'; d.textContent='🀀'; c.appendChild(d);
-  }
-
-  function renderValidSets(){
-    const c=document.getElementById('validSets'); c.innerHTML='';
-    const sorted=[...validSetsData].sort((A,B)=>{
-      const aP=A.length===2,bP=B.length===2; if(aP&&!bP) return 1; if(!aP&&bP) return -1;
-      const a=A[0],b=B[0]; const typeOrder={'normal':1,'flower':2,'season':3};
-      if(typeOrder[a.type]!==typeOrder[b.type]) return typeOrder[a.type]-typeOrder[b.type];
-      if(a.type==='normal'&&b.type==='normal'){ const suitOrder={'万':1,'筒':2,'条':3}; if(suitOrder[a.suit]!==suitOrder[b.suit]) return suitOrder[a.suit]-suitOrder[b.suit]; return a.number-b.number; }
-      return (a.name||'').localeCompare(b.name||'');
+    if (handSortable && handSortable.destroy) handSortable.destroy();
+    handSortable = safeInitSortable(c, {
+      animation: 150,
+      group: 'handTiles',
+      filter: '.inactive',
+      onEnd: (evt) => {
+        const [m] = hand.splice(evt.oldIndex, 1);
+        hand.splice(evt.newIndex, 0, m);
+        renderHand();
+        checkWaitingTiles();
+      }
     });
-    sorted.forEach(set=>{
-      const g=document.createElement('div'); g.className='valid-set-group';
-      const tiles=[...set].sort((a,b)=>{ if(a.type==='normal'&&b.type==='normal'&&a.suit===b.suit){return a.number-b.number;} return 0; });
-      tiles.forEach(t=>{
-        const d=document.createElement('div'); d.dataset.tile=t.key; d.dataset.type=t.type; d.classList.add('inactive'); d.onclick=null;
-        if(t.type==='normal'){ 
-          d.className=`tile ${t.suit==='万'?'wan':t.suit==='筒'?'tong':'tiao'}`; 
-          d.textContent=`${chineseNumbers[t.number-1]}${suitEmojis[t.suit]}`;
+  }
+
+  function renderNextHiddenTile() {
+    const c = document.getElementById('hiddenTiles'); c.innerHTML = '';
+    if (faceDownTiles.length === 0) {
+      if (document.getElementById('winMessage').style.display === 'none' && !window.isGameOver) {
+        showMessage("没有更多隐藏牌可以翻出<br/>No more face-down tiles to flip","error"); 
+        checkVictory();
+      } 
+      return;
+    }
+    const d = document.createElement('div'); 
+    d.dataset.type = 'hidden';
+    if (!window.isGameOver && window.hasDiscarded) {
+      d.onclick = () => handleFlip(); 
+      d.classList.remove('inactive');
+    } else { 
+      d.onclick = null; 
+      d.classList.add('inactive'); 
+    }
+    d.className = 'tile face-down'; 
+    d.textContent = '🀀'; 
+    c.appendChild(d);
+  }
+
+  function renderValidSets() {
+    const c = document.getElementById('validSets'); c.innerHTML = '';
+    const sorted = [...validSetsData].sort((A, B) => {
+      const aP = A.length === 2, bP = B.length === 2; 
+      if (aP && !bP) return 1; 
+      if (!aP && bP) return -1;
+      const a = A[0], b = B[0]; 
+      const typeOrder = {'normal':1, 'flower':2, 'season':3};
+      if (typeOrder[a.type] !== typeOrder[b.type]) return typeOrder[a.type] - typeOrder[b.type];
+      if (a.type === 'normal' && b.type === 'normal') { 
+        const suitOrder = {'万':1, '筒':2, '条':3}; 
+        if (suitOrder[a.suit] !== suitOrder[b.suit]) return suitOrder[a.suit] - suitOrder[b.suit]; 
+        return a.number - b.number; 
+      }
+      return (a.name || '').localeCompare(b.name || '');
+    });
+    sorted.forEach(set => {
+      const g = document.createElement('div'); g.className = 'valid-set-group';
+      const tiles = [...set].sort((a, b) => { 
+        if (a.type === 'normal' && b.type === 'normal' && a.suit === b.suit) { return a.number - b.number; } 
+        return 0; 
+      });
+      tiles.forEach(t => {
+        const d = document.createElement('div'); 
+        d.dataset.tile = t.key; 
+        d.dataset.type = t.type; 
+        d.classList.add('inactive'); 
+        d.onclick = null;
+        if (t.type === 'normal') { 
+          d.className = `tile ${t.suit === '万' ? 'wan' : t.suit === '筒' ? 'tong' : 'tiao'}`; 
+          d.textContent = `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}`;
+        } else if (t.type === 'flower') { 
+          d.className = 'tile flower-card'; 
+          d.textContent = t.emoji; 
+        } else { 
+          d.className = 'tile season-card'; 
+          d.textContent = t.emoji; 
         }
-        else if(t.type==='flower'){ d.className='tile flower-card'; d.textContent=t.emoji; }
-        else { d.className='tile season-card'; d.textContent=t.emoji; }
         g.appendChild(d);
       });
       c.appendChild(g);
     });
   }
 
-  function toggleSelection(el){ if(el.dataset.type==='hidden'||window.isGameOver) return; el.classList.toggle('selected'); }
+  function toggleSelection(el) { 
+    if (el.dataset.type === 'hidden' || window.isGameOver) return; 
+    el.classList.toggle('selected'); 
+  }
 
-  function getSelectedTilesData(){ return Array.from(document.querySelectorAll('#hand .tile.selected')).map(el=>({
-    type:el.dataset.tileType,key:el.dataset.tile,suit:el.dataset.tileSuit,number:parseInt(el.dataset.tileNumber),name:el.dataset.tileName,emoji:el.dataset.tileEmoji})) }
+  function getSelectedTilesData() { 
+    return Array.from(document.querySelectorAll('#hand .tile.selected')).map(el => ({
+      type: el.dataset.tileType,
+      key: el.dataset.tile,
+      suit: el.dataset.tileSuit,
+      number: parseInt(el.dataset.tileNumber),
+      name: el.dataset.tileName,
+      emoji: el.dataset.tileEmoji
+    })); 
+  }
 
-  function getTileCounts(arr){ const m={}; arr.forEach(t=>{m[t.key]=(m[t.key]||0)+1}); return m; }
+  function getTileCounts(arr) { 
+    const m = {}; 
+    arr.forEach(t => { m[t.key] = (m[t.key] || 0) + 1; }); 
+    return m; 
+  }
 
-  function isPair(_,arr){
-    if(arr.length!==2) return false;
-    const [a,b]=arr;
-    if(a.type==='normal'&&b.type==='normal'&&a.key===b.key) return true;
-    if(a.type==='flower'&&b.type==='flower'&&a.name===b.name) return true;
-    if(a.type==='season'&&b.type==='season'&&a.name===b.name) return true;
+  function isPair(_, arr) {
+    if (arr.length !== 2) return false;
+    const [a, b] = arr;
+    if (a.type === 'normal' && b.type === 'normal' && a.key === b.key) return true;
+    if (a.type === 'flower' && b.type === 'flower' && a.name === b.name) return true;
+    if (a.type === 'season' && b.type === 'season' && a.name === b.name) return true;
     return false;
   }
-  function isPong(_,arr){
-    if(arr.length!==3) return false;
-    if(arr[0].type==='normal' && arr.every(t=>t.type==='normal' && t.key===arr[0].key)) return true;
-    if(arr[0].type==='flower' && arr.every(t=>t.type==='flower' && t.name===arr[0].name)) return true;
-    if(arr[0].type==='season' && arr.every(t=>t.type==='season' && t.name===arr[0].name)) return true;
+  function isPong(_, arr) {
+    if (arr.length !== 3) return false;
+    if (arr[0].type === 'normal' && arr.every(t => t.type === 'normal' && t.key === arr[0].key)) return true;
+    if (arr[0].type === 'flower' && arr.every(t => t.type === 'flower' && t.name === arr[0].name)) return true;
+    if (arr[0].type === 'season' && arr.every(t => t.type === 'season' && t.name === arr[0].name)) return true;
     return false;
   }
-  function isChow(arr){
-    if(arr.length!==3) return false;
-    const allNormal=arr.every(t=>t.type==='normal'); if(!allNormal) return false;
-    const suit=arr[0].suit; if(!arr.every(t=>t.suit===suit)) return false;
-    const nums=arr.map(t=>t.number).sort((a,b)=>a-b);
-    return nums[0]+1===nums[1] && nums[1]+1===nums[2];
+  function isChow(arr) {
+    if (arr.length !== 3) return false;
+    const allNormal = arr.every(t => t.type === 'normal'); 
+    if (!allNormal) return false;
+    const suit = arr[0].suit; 
+    if (!arr.every(t => t.suit === suit)) return false;
+    const nums = arr.map(t => t.number).sort((a, b) => a - b);
+    return nums[0] + 1 === nums[1] && nums[1] + 1 === nums[2];
   }
 
-  function canWin(freeHand, currentValidSetsData){
-    const tiles=freeHand.concat(currentValidSetsData.flat());
-    if(tiles.length!==14) return false;
+  function canWin(freeHand, currentValidSetsData) {
+    const tiles = freeHand.concat(currentValidSetsData.flat());
+    if (tiles.length !== 14) return false;
 
-    const pairCands=[]; const countBy=(arr,keyFn)=>arr.reduce((m,t)=>{const k=keyFn(t);m[k]=(m[k]||0)+1;return m;},{});
-    const normals=tiles.filter(t=>t.type==='normal');
-    const flowers=tiles.filter(t=>t.type==='flower');
-    const seasons=tiles.filter(t=>t.type==='season');
-    const nC=countBy(normals,t=>`${t.number}${t.suit}`), fC=countBy(flowers,t=>t.name), sC=countBy(seasons,t=>t.name);
-    Object.keys(nC).forEach(k=>{if(nC[k]>=2) pairCands.push({kind:'normal',key:k})});
-    Object.keys(fC).forEach(n=>{if(fC[n]>=2) pairCands.push({kind:'flower',key:n})});
-    Object.keys(sC).forEach(n=>{if(sC[n]>=2) pairCands.push({kind:'season',key:n})});
+    const pairCands = []; 
+    const countBy = (arr, keyFn) => arr.reduce((m, t) => { const k = keyFn(t); m[k] = (m[k] || 0) + 1; return m; }, {});
+    const normals = tiles.filter(t => t.type === 'normal');
+    const flowers = tiles.filter(t => t.type === 'flower');
+    const seasons = tiles.filter(t => t.type === 'season');
+    const nC = countBy(normals, t => `${t.number}${t.suit}`), 
+          fC = countBy(flowers, t => t.name), 
+          sC = countBy(seasons, t => t.name);
+    Object.keys(nC).forEach(k => { if (nC[k] >= 2) pairCands.push({kind: 'normal', key: k}); });
+    Object.keys(fC).forEach(n => { if (fC[n] >= 2) pairCands.push({kind: 'flower', key: n}); });
+    Object.keys(sC).forEach(n => { if (sC[n] >= 2) pairCands.push({kind: 'season', key: n}); });
 
-    function removePairOnce(arr,p){
-      const out=[...arr]; let removed=0;
-      for(let i=out.length-1;i>=0 && removed<2;i--){
-        const t=out[i];
-        if(p.kind==='normal' && t.type==='normal' && `${t.number}${t.suit}`===p.key){out.splice(i,1);removed++;}
-        else if(p.kind==='flower' && t.type==='flower' && t.name===p.key){out.splice(i,1);removed++;}
-        else if(p.kind==='season' && t.type==='season' && t.name===p.key){out.splice(i,1);removed++;}
+    function removePairOnce(arr, p) {
+      const out = [...arr]; let removed = 0;
+      for (let i = out.length - 1; i >= 0 && removed < 2; i--) {
+        const t = out[i];
+        if (p.kind === 'normal' && t.type === 'normal' && `${t.number}${t.suit}` === p.key) { out.splice(i, 1); removed++; }
+        else if (p.kind === 'flower' && t.type === 'flower' && t.name === p.key) { out.splice(i, 1); removed++; }
+        else if (p.kind === 'season' && t.type === 'season' && t.name === p.key) { out.splice(i, 1); removed++; }
       }
-      return removed===2?out:null;
+      return removed === 2 ? out : null;
     }
-    function canFormSets(arr,need){
-      if(need===0) return arr.length===0;
-      if(arr.length<need*3) return false;
+    function canFormSets(arr, need) {
+      if (need === 0) return arr.length === 0;
+      if (arr.length < need * 3) return false;
 
-      for(let i=0;i<arr.length;i++){
-        const a=arr[i]; const idxs=[];
-        for(let j=0;j<arr.length && idxs.length<3;j++){
-          const b=arr[j];
-          if(a.type==='normal' && b.type==='normal' && a.key===b.key) idxs.push(j);
-          else if(a.type==='flower' && b.type==='flower' && a.name===b.name) idxs.push(j);
-          else if(a.type==='season' && b.type==='season' && a.name===b.name) idxs.push(j);
+      for (let i = 0; i < arr.length; i++) {
+        const a = arr[i]; const idxs = [];
+        for (let j = 0; j < arr.length && idxs.length < 3; j++) {
+          const b = arr[j];
+          if (a.type === 'normal' && b.type === 'normal' && a.key === b.key) idxs.push(j);
+          else if (a.type === 'flower' && b.type === 'flower' && a.name === b.name) idxs.push(j);
+          else if (a.type === 'season' && b.type === 'season' && a.name === b.name) idxs.push(j);
         }
-        if(idxs.length>=3){
-          const next=arr.filter((_,idx)=>!idxs.slice(0,3).includes(idx));
-          if(canFormSets(next,need-1)) return true;
+        if (idxs.length >= 3) {
+          const next = arr.filter((_, idx) => !idxs.slice(0, 3).includes(idx));
+          if (canFormSets(next, need - 1)) return true;
         }
       }
-      const normals=arr.filter(t=>t.type==='normal').sort((x,y)=>x.suit===y.suit?x.number-y.number:x.suit.localeCompare(y.suit));
-      for(let i=0;i<normals.length;i++){
-        const t1=normals[i];
-        const i2=normals.findIndex((t,idx)=>idx>i && t.suit===t1.suit && t.number===t1.number+1);
-        const i3=normals.findIndex((t,idx)=>idx>i2 && t.suit===t1.suit && t.number===t1.number+2);
-        if(i2!==-1 && i3!==-1){
-          const t2=normals[i2],t3=normals[i3];
-          const needArr=[t1,t2,t3]; const rest=[];
-          for(const x of arr){const k=needArr.findIndex(n=>n===x); if(k!==-1) needArr.splice(k,1); else rest.push(x);}
-          if(needArr.length===0 && canFormSets(rest,need-1)) return true;
+      const normals = arr.filter(t => t.type === 'normal').sort((x, y) => x.suit === y.suit ? x.number - y.number : x.suit.localeCompare(y.suit));
+      for (let i = 0; i < normals.length; i++) {
+        const t1 = normals[i];
+        const i2 = normals.findIndex((t, idx) => idx > i && t.suit === t1.suit && t.number === t1.number + 1);
+        const i3 = normals.findIndex((t, idx) => idx > i2 && t.suit === t1.suit && t.number === t1.number + 2);
+        if (i2 !== -1 && i3 !== -1) {
+          const t2 = normals[i2], t3 = normals[i3];
+          const needArr = [t1, t2, t3]; const rest = [];
+          for (const x of arr) { const k = needArr.findIndex(n => n === x); if (k !== -1) needArr.splice(k, 1); else rest.push(x); }
+          if (needArr.length === 0 && canFormSets(rest, need - 1)) return true;
         }
       }
       return false;
     }
-    for(const p of pairCands){
-      const rest=removePairOnce(tiles,p); if(!rest||rest.length!==12) continue;
-      if(canFormSets(rest,4)) return true;
+    for (const p of pairCands) {
+      const rest = removePairOnce(tiles, p); 
+      if (!rest || rest.length !== 12) continue;
+      if (canFormSets(rest, 4)) return true;
     }
     return false;
   }
 
-  function canCompleteWithFixedSets(freeTiles, validSets){
-    const fixedSets = validSets.filter(s=>s.length===3 && (isPong({},s) || isChow(s))).length;
-    const fixedPairs = validSets.filter(s=>s.length===2 && isPair({},s)).length;
+  function canCompleteWithFixedSets(freeTiles, validSets) {
+    const fixedSets = validSets.filter(s => s.length === 3 && (isPong({}, s) || isChow(s))).length;
+    const fixedPairs = validSets.filter(s => s.length === 2 && isPair({}, s)).length;
     const setsNeed = 4 - fixedSets;
     const pairsNeed = 1 - fixedPairs;
 
-    function removeNTiles(tiles,matchFn,n){
-      const out=[]; let removed=0;
-      for(const t of tiles){
-        if(removed<n && matchFn(t)){ removed++; continue; }
+    function removeNTiles(tiles, matchFn, n) {
+      const out = []; let removed = 0;
+      for (const t of tiles) {
+        if (removed < n && matchFn(t)) { removed++; continue; }
         out.push(t);
       }
-      return removed===n ? out : null;
+      return removed === n ? out : null;
     }
-    function removeChow(tiles,suit,startN){
-      let a=false,b=false,c=false; const out=[];
-      for(const t of tiles){
-        if(!a && t.type==='normal' && t.suit===suit && t.number===startN){a=true; continue;}
-        if(!b && t.type==='normal' && t.suit===suit && t.number===startN+1){b=true; continue;}
-        if(!c && t.type==='normal' && t.suit===suit && t.number===startN+2){c=true; continue;}
+    function removeChow(tiles, suit, startN) {
+      let a = false, b = false, c = false; const out = [];
+      for (const t of tiles) {
+        if (!a && t.type === 'normal' && t.suit === suit && t.number === startN) { a = true; continue; }
+        if (!b && t.type === 'normal' && t.suit === suit && t.number === startN + 1) { b = true; continue; }
+        if (!c && t.type === 'normal' && t.suit === suit && t.number === startN + 2) { c = true; continue; }
         out.push(t);
       }
-      return (a&&b&&c)?out:null;
+      return (a && b && c) ? out : null;
     }
 
-    function canMeetTargets(tiles,needSets,needPairs){
-      if(needSets===0 && needPairs===0) return tiles.length===0;
-      if(tiles.length < needSets*3 + needPairs*2) return false;
+    function canMeetTargets(tiles, needSets, needPairs) {
+      if (needSets === 0 && needPairs === 0) return tiles.length === 0;
+      if (tiles.length < needSets * 3 + needPairs * 2) return false;
 
-      if(needPairs>0){
-        const countMap={};
-        tiles.forEach(t=>{
-          const k=t.type==='normal'?`N|${t.suit}|${t.number}`:(t.type==='flower'?`F|${t.name}`:`S|${t.name}`);
-          countMap[k]=(countMap[k]||0)+1;
+      if (needPairs > 0) {
+        const countMap = {};
+        tiles.forEach(t => {
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          countMap[k] = (countMap[k] || 0) + 1;
         });
-        for(const k in countMap){
-          if(countMap[k]>=2){
-            const parts=k.split('|');
-            const rest = removeNTiles(tiles, tt=>{
-              if(parts[0]==='N') return tt.type==='normal' && tt.suit===parts[1] && tt.number===parseInt(parts[2]);
-              if(parts[0]==='F') return tt.type==='flower' && tt.name===parts[1];
-              return tt.type==='season' && tt.name===parts[1];
-            },2);
-            if(rest && canMeetTargets(rest,needSets,needPairs-1)) return true;
+        for (const k in countMap) {
+          if (countMap[k] >= 2) {
+            const parts = k.split('|');
+            const rest = removeNTiles(tiles, tt => {
+              if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
+              if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
+              return tt.type === 'season' && tt.name === parts[1];
+            }, 2);
+            if (rest && canMeetTargets(rest, needSets, needPairs - 1)) return true;
           }
         }
       }
-      if(needSets>0){
-        const countMap={};
-        tiles.forEach(t=>{
-          const k=t.type==='normal'?`N|${t.suit}|${t.number}`:(t.type==='flower'?`F|${t.name}`:`S|${t.name}`);
-          countMap[k]=(countMap[k]||0)+1;
+      if (needSets > 0) {
+        const countMap = {};
+        tiles.forEach(t => {
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          countMap[k] = (countMap[k] || 0) + 1;
         });
-        for(const k in countMap){
-          if(countMap[k]>=3){
-            const parts=k.split('|');
-            const rest = removeNTiles(tiles, tt=>{
-              if(parts[0]==='N') return tt.type==='normal' && tt.suit===parts[1] && tt.number===parseInt(parts[2]);
-              if(parts[0]==='F') return tt.type==='flower' && tt.name===parts[1];
-              return tt.type==='season' && tt.name===parts[1];
-            },3);
-            if(rest && canMeetTargets(rest,needSets-1,needPairs)) return true;
+        for (const k in countMap) {
+          if (countMap[k] >= 3) {
+            const parts = k.split('|');
+            const rest = removeNTiles(tiles, tt => {
+              if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
+              if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
+              return tt.type === 'season' && tt.name === parts[1];
+            }, 3);
+            if (rest && canMeetTargets(rest, needSets - 1, needPairs)) return true;
           }
         }
-        for(const s of suits){
-          for(let n=1;n<=7;n++){
-            let a=false,b=false,c=false;
-            for(const t of tiles){
-              if(t.type==='normal' && t.suit===s){
-                if(t.number===n) a=true; else if(t.number===n+1) b=true; else if(t.number===n+2) c=true;
+        for (const s of suits) {
+          for (let n = 1; n <= 7; n++) {
+            let a = false, b = false, c = false;
+            for (const t of tiles) {
+              if (t.type === 'normal' && t.suit === s) {
+                if (t.number === n) a = true; else if (t.number === n + 1) b = true; else if (t.number === n + 2) c = true;
               }
-              if(a&&b&&c) break;
+              if (a && b && c) break;
             }
-            if(a&&b&&c){
-              const rest=removeChow(tiles,s,n);
-              if(rest && canMeetTargets(rest,needSets-1,needPairs)) return true;
+            if (a && b && c) {
+              const rest = removeChow(tiles, s, n);
+              if (rest && canMeetTargets(rest, needSets - 1, needPairs)) return true;
             }
           }
         }
@@ -869,184 +980,264 @@
     return canMeetTargets(freeTiles, setsNeed, pairsNeed);
   }
 
-  function checkSelection(){
-    if(window.isGameOver) return;
-    const sel=getSelectedTilesData();
-    if(sel.some(t=>!t || t.type==='hidden')){ showMessage("不能包含隐藏牌<br/>Cannot include face-down tiles","error"); return; }
-    if(![2,3].includes(sel.length)){ showMessage("请选择 2 张（对子）或 3 张（刻/顺）验证<br/>Select 2 (pair) or 3 (pong/chow)","error"); return; }
-
-    const groups=getTileCounts(sel);
-    const hasPair=validSetsData.some(s=>s.length===2);
-
-    let ok=false;
-    if(sel.length===2){
-      if(isPair(groups,sel)){
-        if(hasPair){ showMessage("⚠️ 你已有一对，请先做三张组合","error"); }
-        else { moveSelectedToValidSet(sel); showMessage("恭喜！这是有效的将牌","normal"); ok=true; }
-      }else { showMessage("这不是有效对子","error"); }
-    }else{
-      if(isPong(groups,sel) || isChow(sel)){ moveSelectedToValidSet(sel); showMessage("恭喜！这是一个有效的三张组合","normal"); ok=true; }
-      else { showMessage("这不是有效组合","error"); }
+  function checkSelection() {
+    if (window.isGameOver) return;
+    const sel = getSelectedTilesData();
+    if (sel.some(t => !t || t.type === 'hidden')) { 
+      showMessage("不能包含隐藏牌<br/>Cannot include face-down tiles", "error"); 
+      return; 
     }
-    if(ok){ updateCombinationCount(); setTimeout(checkTileCount,100); checkVictory(); checkWaitingTiles(); }
+    if (![2, 3].includes(sel.length)) { 
+      showMessage("请选择 2 张（对子）或 3 张（刻/顺）验证<br/>Select 2 (pair) or 3 (pong/chow)", "error"); 
+      return; 
+    }
+
+    const groups = getTileCounts(sel);
+    const hasPair = validSetsData.some(s => s.length === 2);
+
+    let ok = false;
+    if (sel.length === 2) {
+      if (isPair(groups, sel)) {
+        if (hasPair) { 
+          showMessage("⚠️ 你已有一对，请先做三张组合", "error"); 
+        } else { 
+          moveSelectedToValidSet(sel); 
+          showMessage("恭喜！这是有效的将牌", "normal"); 
+          ok = true; 
+        }
+      } else { 
+        showMessage("这不是有效对子", "error"); 
+      }
+    } else {
+      if (isPong(groups, sel) || isChow(sel)) { 
+        moveSelectedToValidSet(sel); 
+        showMessage("恭喜！这是一个有效的三张组合", "normal"); 
+        ok = true; 
+      } else { 
+        showMessage("这不是有效组合", "error"); 
+      }
+    }
+    if (ok) { 
+      updateCombinationCount(); 
+      setTimeout(checkTileCount, 100); 
+      checkVictory(); 
+      checkWaitingTiles(); 
+    }
   }
 
-  function moveSelectedToValidSet(sel){
+  function moveSelectedToValidSet(sel) {
     validSetsData.push(sel);
-    const rm={}; sel.forEach(t=>{rm[t.key]=(rm[t.key]||0)+1});
+    const rm = {}; 
+    sel.forEach(t => { rm[t.key] = (rm[t.key] || 0) + 1; });
     hand = hand.filter(t => rm[t.key] ? (rm[t.key]--, false) : true);
-    renderHand(); renderValidSets();
+    renderHand(); 
+    renderValidSets();
   }
 
-  function handleFlip(){
-    if(window.isGameOver) return;
-    if(!window.hasDiscarded){ showMessage("⚠️ 请先打出一张无用牌<br/>Please discard first","discardPrompt"); return; }
-    if(faceDownTiles.length===0){ showMessage("没有更多隐藏牌","error"); if(document.getElementById('winMessage').style.display==='none'&&!window.isGameOver) checkVictory(); return; }
-    const t=faceDownTiles.shift(); hand.push(t); renderHand(); window.hasDiscarded=false;
-    showMessage("请选择一张要打出的牌<br/>Please select a tile to discard","discardPrompt");
-    renderNextHiddenTile(); setTimeout(checkTileCount,100);
+  function handleFlip() {
+    if (window.isGameOver) return;
+    if (!window.hasDiscarded) { 
+      showMessage("⚠️ 请先打出一张无用牌<br/>Please discard first", "discardPrompt"); 
+      return; 
+    }
+    if (faceDownTiles.length === 0) { 
+      showMessage("没有更多隐藏牌", "error"); 
+      if (document.getElementById('winMessage').style.display === 'none' && !window.isGameOver) checkVictory(); 
+      return; 
+    }
+    const t = faceDownTiles.shift(); 
+    hand.push(t); 
+    renderHand(); 
+    window.hasDiscarded = false;
+    showMessage("请选择一张要打出的牌<br/>Please select a tile to discard", "discardPrompt");
+    renderNextHiddenTile(); 
+    setTimeout(checkTileCount, 100);
   }
 
-  function discardSelectedTile(){
-    if(window.isGameOver) return;
-    if(window.hasDiscarded){ showMessage("⚠️ 你已打出一张，请先摸牌","discardConfirm"); return; }
-    const sel=Array.from(document.querySelectorAll('#hand .tile.selected'));
-    if(sel.length!==1){ showMessage("⚠️ 只能选择一张要打出的牌","error"); return; }
-    const el=sel[0], key=el.dataset.tile; const idx=hand.findIndex(t=>t.key===key); if(idx>-1) hand.splice(idx,1);
-    el.classList.remove('selected'); el.classList.add('inactive'); el.onclick=null;
+  function discardSelectedTile() {
+    if (window.isGameOver) return;
+    if (window.hasDiscarded) { 
+      showMessage("⚠️ 你已打出一张，请先摸牌", "discardConfirm"); 
+      return; 
+    }
+    const sel = Array.from(document.querySelectorAll('#hand .tile.selected'));
+    if (sel.length !== 1) { 
+      showMessage("⚠️ 只能选择一张要打出的牌", "error"); 
+      return; 
+    }
+    const el = sel[0], key = el.dataset.tile; 
+    const idx = hand.findIndex(t => t.key === key); 
+    if (idx > -1) hand.splice(idx, 1);
+    el.classList.remove('selected'); 
+    el.classList.add('inactive'); 
+    el.onclick = null;
     document.getElementById('discards').appendChild(el);
-    window.hasDiscarded=true;
-    showMessage("已打出，请翻隐藏牌或检查组合","normal");
-    renderHand(); checkTileCount(); updateCombinationCount(); renderNextHiddenTile(); checkWaitingTiles();
+    window.hasDiscarded = true;
+    showMessage("已打出，请翻隐藏牌或检查组合", "normal");
+    renderHand(); 
+    checkTileCount(); 
+    updateCombinationCount(); 
+    renderNextHiddenTile(); 
+    checkWaitingTiles();
   }
 
-  function getWinningTiles(){
+  function getWinningTiles() {
     const combined = hand.concat(validSetsData.flat());
-    if(combined.length!==13) return [];
-    const cands=[];
-    suits.forEach(s=>{for(let n=1;n<=9;n++) cands.push({type:'normal',suit:s,number:n,key:`${n}${s}`})});
-    ['梅','兰','竹','菊'].forEach(n=>cands.push({type:'flower',name:n,emoji:getFlowerEmoji(n),key:n}));
-    ['春','夏','秋','冬'].forEach(n=>cands.push({type:'season',name:n,emoji:getSeasonEmoji(n),key:n}));
+    if (combined.length !== 13) return [];
+    const cands = [];
+    suits.forEach(s => { for (let n = 1; n <= 9; n++) cands.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
+    ['梅','兰','竹','菊'].forEach(n => cands.push({type:'flower', name:n, emoji:getFlowerEmoji(n), key:n}));
+    ['春','夏','秋','冬'].forEach(n => cands.push({type:'season', name:n, emoji:getSeasonEmoji(n), key:n}));
 
-    const waiting=[];
-    for(const d of cands){
+    const waiting = [];
+    for (const d of cands) {
       const tryHand = hand.concat([d]);
-      if(canCompleteWithFixedSets(tryHand, validSetsData)) waiting.push(d);
+      if (canCompleteWithFixedSets(tryHand, validSetsData)) waiting.push(d);
     }
 
-    const visible={}; const add=k=>visible[k]=(visible[k]||0)+1;
-    hand.forEach(t=>add(t.key)); validSetsData.flat().forEach(t=>add(t.key));
-    Array.from(document.querySelectorAll('#discards .tile')).forEach(el=>{const k=el.dataset.tile||''; if(k) add(k);});
-    const filtered=waiting.filter(t=>(visible[t.key]||0)<4);
+    const visible = {}; 
+    const add = k => visible[k] = (visible[k] || 0) + 1;
+    hand.forEach(t => add(t.key)); 
+    validSetsData.flat().forEach(t => add(t.key));
+    Array.from(document.querySelectorAll('#discards .tile')).forEach(el => { const k = el.dataset.tile || ''; if (k) add(k); });
+    const filtered = waiting.filter(t => (visible[t.key] || 0) < 4);
 
-    const suitOrd={'万':1,'筒':2,'条':3};
-    const typeRank=t=>t.type==='normal'?1:(t.type==='flower'?2:3);
-    filtered.sort((a,b)=>{
-      const ra=typeRank(a), rb=typeRank(b); if(ra!==rb) return ra-rb;
-      if(a.type==='normal'&&b.type==='normal'){ if(a.suit!==b.suit) return suitOrd[a.suit]-suitOrd[b.suit]; return a.number-b.number; }
-      if(a.type==='flower'&&b.type==='flower') return (a.name>b.name)-(a.name<b.name);
-      if(a.type==='season'&&b.type==='season') return (a.name>b.name)-(a.name<b.name);
+    const suitOrd = {'万':1, '筒':2, '条':3};
+    const typeRank = t => t.type === 'normal' ? 1 : (t.type === 'flower' ? 2 : 3);
+    filtered.sort((a, b) => {
+      const ra = typeRank(a), rb = typeRank(b); 
+      if (ra !== rb) return ra - rb;
+      if (a.type === 'normal' && b.type === 'normal') { 
+        if (a.suit !== b.suit) return suitOrd[a.suit] - suitOrd[b.suit]; 
+        return a.number - b.number; 
+      }
+      if (a.type === 'flower' && b.type === 'flower') return (a.name > b.name) - (a.name < b.name);
+      if (a.type === 'season' && b.type === 'season') return (a.name > b.name) - (a.name < b.name);
       return 0;
     });
-    const seen=new Set(), out=[]; for(const t of filtered){ if(!seen.has(t.key)){seen.add(t.key); out.push(t);} }
+    const seen = new Set(), out = []; 
+    for (const t of filtered) { 
+      if (!seen.has(t.key)) { seen.add(t.key); out.push(t); } 
+    }
     return out;
   }
 
-  function formatWaitingList(waitingTiles){
-    const labels = waitingTiles.map(t => t.type==='normal' ? `${chineseNumbers[t.number-1]}${suitEmojis[t.suit]}` : (t.emoji || t.key));
-    if(labels.length===0) return '';
-    if(labels.length===1) return `“${labels[0]}”`;
-    if(labels.length===2) return `“${labels[0]}” 或 “${labels[1]}”`;
-    return labels.slice(0,-1).map(x=>`“${x}”`).join('、') + ` 或 “${labels.at(-1)}”`;
+  function formatWaitingList(waitingTiles) {
+    const labels = waitingTiles.map(t => t.type === 'normal' ? `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}` : (t.emoji || t.key));
+    if (labels.length === 0) return '';
+    if (labels.length === 1) return `“${labels[0]}”`;
+    if (labels.length === 2) return `“${labels[0]}” 或 “${labels[1]}”`;
+    return labels.slice(0, -1).map(x => `“${x}”`).join('、') + ` 或 “${labels.at(-1)}”`;
   }
 
-  function checkWaitingTiles(){
+  function checkWaitingTiles() {
     const combined = hand.concat(validSetsData.flat());
-    if(combined.length===13){
-      const w=getWinningTiles();
-      if(w.length>0){
+    if (combined.length === 13) {
+      const w = getWinningTiles();
+      if (w.length > 0) {
         const displayCN = formatWaitingList(w);
-        const displayEN = displayCN.replace(/ 或 /g,' or ');
-        showMessage(`👂 你听牌了！等待 ${displayCN}<br/>👂 You are waiting! Waiting for: ${displayEN}`,"waiting");
-      }else if(window.hasDiscarded){
-        showMessage("请翻开一张隐藏牌或检查组合！<br/>Please flip a face-down tile or check for combinations!","normal");
+        const displayEN = displayCN.replace(/ 或 /g, ' or ');
+        showMessage(`👂 你听牌了！等待 ${displayCN}<br/>👂 You are waiting! Waiting for: ${displayEN}`, "waiting");
+      } else if (window.hasDiscarded) {
+        showMessage("请翻开一张隐藏牌或检查组合！<br/>Please flip a face-down tile or check for combinations!", "normal");
       }
-    }else if(combined.length===14){
-      showMessage("请选择一张要打出的牌<br/>Please select a tile to discard","discardPrompt");
+    } else if (combined.length === 14) {
+      showMessage("请选择一张要打出的牌<br/>Please select a tile to discard", "discardPrompt");
     }
   }
 
-  function updateCombinationCount(){
-    const setsCount = validSetsData.filter(set=> set.length===3 && (isPong({},set) || isChow(set)) ).length;
-    const pairCount = validSetsData.filter(set=> set.length===2 && isPair({},set) ).length;
+  function updateCombinationCount() {
+    const setsCount = validSetsData.filter(set => set.length === 3 && (isPong({}, set) || isChow(set))).length;
+    const pairCount = validSetsData.filter(set => set.length === 2 && isPair({}, set)).length;
     document.getElementById('combination-count').textContent =
       `🔢 已组数：${setsCount} 组 + ${pairCount} 对 / Count of Sets: ${setsCount} sets + ${pairCount} pair`;
   }
 
-  function checkTileCount(){
-    const handCount=document.querySelectorAll('#hand .tile').length;
-    const validCount=validSetsData.flat().length;
-    const discardsCount=document.querySelectorAll('#discards .tile').length;
-    const remaining=faceDownTiles.length;
-    const hiddenShown=document.querySelectorAll('#hiddenTiles .tile').length;
-    const total=handCount+validCount+discardsCount+remaining+hiddenShown;
-    if(total!==allTiles.length) console.warn(`⚠️ 牌数异常：${total} != ${allTiles.length}`);
-    const combined=handCount+validCount;
-    if(window.hasDiscarded && combined!==13) console.warn(`⚠️ 已打牌应13张，当前${combined}`);
-    if(!window.hasDiscarded && combined!==14) console.warn(`⚠️ 已摸牌应14张，当前${combined}`);
+  function checkTileCount() {
+    const handCount = document.querySelectorAll('#hand .tile').length;
+    const validCount = validSetsData.flat().length;
+    const discardsCount = document.querySelectorAll('#discards .tile').length;
+    const remaining = faceDownTiles.length;
+    const hiddenShown = document.querySelectorAll('#hiddenTiles .tile').length;
+    const total = handCount + validCount + discardsCount + remaining + hiddenShown;
+    if (total !== allTiles.length) console.warn(`⚠️ 牌数异常：${total} != ${allTiles.length}`);
+    const combined = handCount + validCount;
+    if (window.hasDiscarded && combined !== 13) console.warn(`⚠️ 已打牌应13张，当前${combined}`);
+    if (!window.hasDiscarded && combined !== 14) console.warn(`⚠️ 已摸牌应14张，当前${combined}`);
   }
 
-  function checkVictory(){
+  function checkVictory() {
     updateCombinationCount();
-    const m=document.getElementById('combination-count').textContent.match(/：(\d+)\s*组 \+ (\d+)\s*对/);
-    if(m){
-      const sets=parseInt(m[1]), pairs=parseInt(m[2]);
-      if(sets>=4 && pairs>=1 && validSetsData.flat().length===14){
-        window.isGameOver=true; document.getElementById('winMessage').style.display='flex';
-        disableGame(true); showFireworks(); playApplause();
-      }else if(faceDownTiles.length===0 && document.querySelectorAll('#hiddenTiles .tile').length===0 && !window.isGameOver){
-        window.isGameOver=true; showMessage("牌堆已空，未能胡牌。游戏结束。","error"); disableGame(true); stopApplause();
+    const m = document.getElementById('combination-count').textContent.match(/：(\d+)\s*组 \+ (\d+)\s*对/);
+    if (m) {
+      const sets = parseInt(m[1]), pairs = parseInt(m[2]);
+      if (sets >= 4 && pairs >= 1 && validSetsData.flat().length === 14) {
+        window.isGameOver = true; 
+        document.getElementById('winMessage').style.display = 'flex';
+        disableGame(true); 
+        showFireworks(); 
+        playApplause();
+      } else if (faceDownTiles.length === 0 && document.querySelectorAll('#hiddenTiles .tile').length === 0 && !window.isGameOver) {
+        window.isGameOver = true; 
+        showMessage("牌堆已空，未能胡牌。游戏结束。", "error"); 
+        disableGame(true); 
+        stopApplause();
       }
     }
   }
 
-  function showFireworks(){const p=document.getElementById('rightPanel'); const fw=document.createElement('div'); fw.className='firework'; fw.textContent='🎆'; p.appendChild(fw); setTimeout(()=>fw.remove(),5000);}
+  function showFireworks() {
+    const p = document.getElementById('rightPanel'); 
+    const fw = document.createElement('div'); 
+    fw.className = 'firework'; 
+    fw.textContent = '🎆'; 
+    p.appendChild(fw); 
+    setTimeout(() => fw.remove(), 5000);
+  }
 
-  function restartGame(){
+  function restartGame() {
     stopApplause();
-    document.getElementById('hand').innerHTML='';
-    document.getElementById('validSets').innerHTML='';
-    document.getElementById('discards').innerHTML='';
-    document.getElementById('hiddenTiles').innerHTML='';
-    document.getElementById('winMessage').style.display='none';
-    document.getElementById('combination-count').textContent='🔢 已组数：0 组 + 0 对 / Count of Sets: 0 sets + 0 pairs';
-    hand=[]; faceDownTiles=[]; allTiles=[]; validSetsData=[];
-    window.hasDiscarded=true; window.isGameOver=false;
-    if(handSortable && handSortable.destroy){handSortable.destroy(); handSortable=null;}
-    generateHand(); enableGame();
+    document.getElementById('hand').innerHTML = '';
+    document.getElementById('validSets').innerHTML = '';
+    document.getElementById('discards').innerHTML = '';
+    document.getElementById('hiddenTiles').innerHTML = '';
+    document.getElementById('winMessage').style.display = 'none';
+    document.getElementById('combination-count').textContent = '🔢 已组数：0 组 + 0 对 / Count of Sets: 0 sets + 0 pairs';
+    hand = []; 
+    faceDownTiles = []; 
+    allTiles = []; 
+    validSetsData = [];
+    window.hasDiscarded = true; 
+    window.isGameOver = false;
+    if (handSortable && handSortable.destroy) { handSortable.destroy(); handSortable = null; }
+    generateHand(); 
+    enableGame();
   }
 
-  function disableGame(allowRestart=false){
-    document.getElementById('btnCheck').disabled=true;
-    document.getElementById('btnDiscard').disabled=true;
-    document.querySelectorAll('#hand .tile,#hiddenTiles .tile').forEach(t=>{t.onclick=null;t.classList.add('inactive')});
-    if(handSortable && handSortable.option) handSortable.option("disabled",true);
-    document.getElementById('btnRestart').disabled=!allowRestart;
+  function disableGame(allowRestart = false) {
+    document.getElementById('btnCheck').disabled = true;
+    document.getElementById('btnDiscard').disabled = true;
+    document.querySelectorAll('#hand .tile, #hiddenTiles .tile').forEach(t => { t.onclick = null; t.classList.add('inactive'); });
+    if (handSortable && handSortable.option) handSortable.option("disabled", true);
+    document.getElementById('btnRestart').disabled = !allowRestart;
   }
-  function enableGame(){
-    document.getElementById('btnCheck').disabled=false;
-    document.getElementById('btnDiscard').disabled=false;
-    document.getElementById('btnRestart').disabled=false;
-    renderHand(); renderNextHiddenTile();
-    if(handSortable && handSortable.option) handSortable.option("disabled",false);
-  }
-
-  function showMessage(msg,type="normal"){
-    const m=document.getElementById('message');
-    m.className=''; m.classList.add(`message-${type}`); m.innerHTML = msg;
+  function enableGame() {
+    document.getElementById('btnCheck').disabled = false;
+    document.getElementById('btnDiscard').disabled = false;
+    document.getElementById('btnRestart').disabled = false;
+    renderHand(); 
+    renderNextHiddenTile();
+    if (handSortable && handSortable.option) handSortable.option("disabled", false);
   }
 
-  // 👇 新增：监听窗口 resize 事件，解决 iPad 横竖屏切换“丢牌”问题
+  function showMessage(msg, type = "normal") {
+    const m = document.getElementById('message');
+    m.className = ''; 
+    m.classList.add(`message-${type}`); 
+    m.innerHTML = msg;
+  }
+
+  // 👇 监听窗口 resize，解决横竖屏切换显示问题
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -1058,9 +1249,14 @@
     }, 150);
   });
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    const btn=document.getElementById('start-button');
-    if(btn){ btn.addEventListener('click',()=>{const g=document.getElementById('gameArea'); if(g && g.style.display!=='block') startGame();}); }
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('start-button');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const g = document.getElementById('gameArea');
+        if (g && g.style.display !== 'block') startGame();
+      });
+    }
   });
 </script>
 </body>
