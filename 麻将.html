@@ -1,4 +1,5 @@
- <!DOCTYPE html>
+```html
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -42,7 +43,6 @@
       background-color: #d0ebff;
       border-radius: 10px;
       overflow-y: auto;
-      max-height: calc(100vh - 100px);
     }
     .right-panel {
       width: 75%;
@@ -57,7 +57,7 @@
       display: flex;
       justify-content: flex-start;
       margin: 10px 0;
-      gap: 5px; /* 减小牌之间的间距 */
+      gap: 5px; /* 减小牌间距 */
       min-height: 80px;
       flex-wrap: wrap;
     }
@@ -67,14 +67,15 @@
       flex-wrap: nowrap;
       overflow-x: auto;
       scroll-behavior: smooth;
-      gap: 5px; /* 减小隐藏牌和手牌的间距 */
+      gap: 5px;
+      justify-content: center; /* 让手牌居中显示 */
     }
     .selected-set .tiles,
     .discard-pile .tiles {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 5px; /* 减小已选组合和弃牌堆的间距 */
+      gap: 5px;
     }
     /* 用于包裹每组有效组合的容器 */
     .valid-set-group {
@@ -84,10 +85,10 @@
         margin-bottom: 10px;
     }
     .tile {
-      width: 60px; /* 减小牌的宽度 */
-      height: 75px; /* 减小牌的高度 */
+      width: 60px;
+      height: 75px;
       border-radius: 12px;
-      font-size: 18px; /* 减小字体大小 */
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
       user-select: none;
@@ -108,17 +109,17 @@
     .flower-card {
       background-color: #e6b800;
       color: white;
-      font-size: 24px; /* 减小花牌/季节牌字体 */
+      font-size: 24px;
     }
     .season-card {
       background-color: #a64ca6;
       color: white;
-      font-size: 24px; /* 减小花牌/季节牌字体 */
+      font-size: 24px;
     }
     .face-down {
       background-color: #888;
       color: white;
-      font-size: 24px; /* 减小背面牌字体 */
+      font-size: 24px;
     }
     .selected {
       outline: 3px solid green;
@@ -198,16 +199,23 @@
       color: #333;
     }
     .win-message {
-      font-size: 28px;
+      font-size: 32px;
+      font-weight: bold;
       margin-top: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      line-height: 1.4;
     }
     .trophy {
       font-size: 60px;
       color: gold;
       margin-bottom: 10px;
+      animation: shine 1.5s infinite alternate;
+    }
+    @keyframes shine {
+      from { text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.6); }
+      to { text-shadow: 0 0 20px rgba(255,215,0,1), 0 0 30px rgba(255,215,0,0.8); }
     }
     .firework {
       position: absolute;
@@ -277,8 +285,9 @@
       align-items: center;
       font-size: 20px;
       font-weight: bold;
-      text-align: left;
+      text-align: center;
       margin: 15px 0 10px;
+      justify-content: center;
     }
     .label-en {
       font-size: 16px;
@@ -358,7 +367,7 @@
         font-size: 18px;
       }
       .win-message {
-        font-size: 24px;
+        font-size: 28px;
       }
       .trophy {
         font-size: 50px;
@@ -399,16 +408,12 @@
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-<div class="game-title">欢迎来到刘老师的麻将学习小游戏<br/>Welcome to Mr.Liu's Mahjong Learning Game</div>
+<div class="game-title">欢迎来到麻将学习小游戏<br/>Welcome to the Mahjong Learning Game</div>
 
-<!-- 首页（只显示 CTR / Plays） -->
+<!-- 首页 -->
 <div id="start-screen">
   <!-- 图片位置上移，间距减小，尺寸增大 -->
   <img src="麻将.png" alt="麻将游戏插图" style="max-width: 45%; margin-top: -15px; margin-bottom: 5px;">
-  <p style="font-size: 18px;">
-    目标：组成 4 组有效组合 + 一对将牌<br/>
-    Goal: Form 4 valid sets + a pair.
-  </p>
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
   <div id="homeStats" class="home-stats">
     👥 开局次数 / Plays: <span id="playsNum">0</span>　
@@ -445,7 +450,12 @@
     <div class="right-panel" id="rightPanel">
       <div class="win-message" id="winMessage" style="display:none;">
         <div class="trophy">🏆</div>
-        <div id="winText">🎉 你赢了！恭喜！<br/>You won! Congratulations!</div>
+        <div id="winText" style="color: #FF6B6B; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); animation: bounce 0.6s ease-in-out;">
+          🎉 你赢了！恭喜！
+        </div>
+        <div id="winTextEn" style="color: #4ECDC4; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); animation: bounce 0.6s ease-in-out 0.3s both;">
+          🎉 You won! Congratulations!
+        </div>
       </div>
 
       <div class="hidden-tiles">
@@ -994,6 +1004,4 @@
 </script>
 </body>
 </html>
- 
-
-
+```
