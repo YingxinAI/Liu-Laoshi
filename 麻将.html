@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -57,7 +58,7 @@
       display: flex;
       justify-content: flex-start;
       margin: 10px 0;
-      gap: 10px;
+      gap: 5px; /* 减小牌之间的间距 */
       min-height: 80px;
       flex-wrap: wrap;
     }
@@ -67,14 +68,14 @@
       flex-wrap: nowrap;
       overflow-x: auto;
       scroll-behavior: smooth;
-      gap: 10px;
+      gap: 5px; /* 减小隐藏牌和手牌的间距 */
     }
     .selected-set .tiles,
     .discard-pile .tiles {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
+      gap: 5px; /* 减小已选组合和弃牌堆的间距 */
     }
     /* 用于包裹每组有效组合的容器 */
     .valid-set-group {
@@ -84,10 +85,10 @@
         margin-bottom: 10px;
     }
     .tile {
-      width: 65px;
-      height: 80px;
+      width: 60px; /* 减小牌的宽度 */
+      height: 75px; /* 减小牌的高度 */
       border-radius: 12px;
-      font-size: 20px;
+      font-size: 18px; /* 减小字体大小 */
       font-weight: bold;
       cursor: pointer;
       user-select: none;
@@ -108,17 +109,17 @@
     .flower-card {
       background-color: #e6b800;
       color: white;
-      font-size: 26px;
+      font-size: 24px; /* 减小花牌/季节牌字体 */
     }
     .season-card {
       background-color: #a64ca6;
       color: white;
-      font-size: 26px;
+      font-size: 24px; /* 减小花牌/季节牌字体 */
     }
     .face-down {
       background-color: #888;
       color: white;
-      font-size: 26px;
+      font-size: 24px; /* 减小背面牌字体 */
     }
     .selected {
       outline: 3px solid green;
@@ -387,12 +388,12 @@
         font-size: 16px;
       }
       .tile {
-        width: 60px;
-        height: 75px;
-        font-size: 18px;
+        width: 55px;
+        height: 70px;
+        font-size: 16px;
       }
       .flower-card, .season-card, .face-down {
-        font-size: 22px;
+        font-size: 20px;
       }
     }
   </style>
@@ -558,19 +559,25 @@
 
   function renderHand(){
     const c=document.getElementById('hand'); c.innerHTML='';
-    hand.forEach(t=>{
+    // 预留14个位置
+    for(let i=0;i<14;i++){
       const d=document.createElement('div');
-      d.dataset.tile=t.key; d.dataset.tileType=t.type; d.dataset.tileSuit=t.suit||''; d.dataset.tileNumber=t.number||''; d.dataset.tileName=t.name||''; d.dataset.tileEmoji=t.emoji||'';
-      if(!window.isGameOver){ d.onclick=(e)=>{ if(e.detail===0) return; toggleSelection(d)}; d.classList.remove('inactive'); }
-      else { d.onclick=null; d.classList.add('inactive'); }
-      if(t.type==='normal'){ 
-        d.className=`tile ${t.suit==='万'?'wan':t.suit==='筒'?'tong':'tiao'}`; 
-        d.textContent=`${chineseNumbers[t.number-1]}${suitEmojis[t.suit]}`;
+      d.className='tile'; 
+      d.style.visibility=i<hand.length?'visible':'hidden';
+      if(i<hand.length){
+        const t=hand[i];
+        d.dataset.tile=t.key; d.dataset.tileType=t.type; d.dataset.tileSuit=t.suit||''; d.dataset.tileNumber=t.number||''; d.dataset.tileName=t.name||''; d.dataset.tileEmoji=t.emoji||'';
+        if(!window.isGameOver){ d.onclick=(e)=>{ if(e.detail===0) return; toggleSelection(d)}; d.classList.remove('inactive'); }
+        else { d.onclick=null; d.classList.add('inactive'); }
+        if(t.type==='normal'){ 
+          d.className=`tile ${t.suit==='万'?'wan':t.suit==='筒'?'tong':'tiao'}`; 
+          d.textContent=`${chineseNumbers[t.number-1]}${suitEmojis[t.suit]}`;
+        }
+        else if(t.type==='flower'){ d.className='tile flower-card'; d.textContent=t.emoji; }
+        else { d.className='tile season-card'; d.textContent=t.emoji; }
       }
-      else if(t.type==='flower'){ d.className='tile flower-card'; d.textContent=t.emoji; }
-      else { d.className='tile season-card'; d.textContent=t.emoji; }
       c.appendChild(d);
-    });
+    }
     if(handSortable && handSortable.destroy) handSortable.destroy();
     handSortable=safeInitSortable(c,{animation:150,group:'handTiles',filter:'.inactive',
       onEnd:(evt)=>{const [m]=hand.splice(evt.oldIndex,1); hand.splice(evt.newIndex,0,m); renderHand(); checkWaitingTiles();}});
@@ -988,3 +995,4 @@
 </script>
 </body>
 </html>
+```
