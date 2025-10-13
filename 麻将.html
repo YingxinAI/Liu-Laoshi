@@ -232,23 +232,24 @@
       align-items: center;
       line-height: 1.4;
     }
+
+    /* ===== 胜利时的 🏆 和 🎉 动画 ===== */
     .trophy {
       font-size: clamp(40px, 6vw, 60px);
       color: gold;
       margin-bottom: 8px;
-      animation: shine 1.5s infinite alternate;
-    }
-    @keyframes shine {
-      from { text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.6); }
-      to { text-shadow: 0 0 20px rgba(255,215,0,1), 0 0 30px rgba(255,215,0,0.8); }
+      display: inline-block;
+      animation: confettiPop 1.2s ease-in-out infinite;
+      transform-origin: center;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
     }
 
-    /* ===== 胜利时的 🎉 动画 ===== */
     .confetti-emoji {
       display: inline-block;
       animation: confettiPop 1.2s ease-in-out infinite;
       transform-origin: center;
     }
+
     @keyframes confettiPop {
       0%, 100% {
         transform: scale(1) rotate(0deg);
