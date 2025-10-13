@@ -84,7 +84,7 @@
       display: flex;
       justify-content: flex-start;
       margin: 10px 0;
-      gap: 5px; /* 减小牌间距以适应更多设备 */
+      gap: 5px;
       min-height: 80px;
       flex-wrap: wrap;
     }
@@ -96,7 +96,6 @@
       scroll-behavior: smooth;
       gap: 5px;
       justify-content: center;
-      /* 为iPad等设备优化，确保14张牌都能显示 */
       scrollbar-width: thin;
       scrollbar-color: #888 #f0f0f0;
     }
@@ -118,7 +117,6 @@
       justify-content: center;
       gap: 5px;
     }
-    /* 用于包裹每组有效组合的容器 */
     .valid-set-group {
         display: flex;
         gap: 5px;
@@ -126,10 +124,10 @@
         margin-bottom: 8px;
     }
     .tile {
-      width: 55px; /* 减小牌的宽度以适应更多设备 */
-      height: 70px; /* 减小牌的高度 */
+      width: 55px;
+      height: 70px;
       border-radius: 10px;
-      font-size: 16px; /* 减小字体大小 */
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       user-select: none;
@@ -197,7 +195,6 @@
     .btn-restart {
       background-color: #43a047;
     }
-    /* 调整message的位置，使其在手牌和标签之间 */
     #message {
       margin-top: 8px;
       margin-bottom: 8px;
@@ -209,22 +206,18 @@
       text-align: center;
       overflow: hidden;
     }
-    /* 新增的消息样式 */
     .message-discard-prompt {
         color: red;
     }
     .message-discard-confirm {
         color: #8A2BE2;
     }
-    /* 错误消息 */
     .message-error {
         color: red;
     }
-    /* 默认消息 */
     .message-normal {
         color: green;
     }
-    /* 听牌提示消息 */
     .message-waiting {
         color: #FF8C00;
         font-weight: bold;
@@ -285,7 +278,6 @@
         opacity: 0;
       }
     }
-    /* 首页 */
     #start-screen {
       display: flex;
       flex-direction: column;
@@ -357,9 +349,9 @@
       transform: none;
       transition: none;
     }
-    
-    /* 响应式设计 */
-    @media (max-width: 1024px) and (min-width: 768px) {
+
+    /* ===== iPad 专属优化 (768px ~ 1024px) ===== */
+    @media (min-width: 768px) and (max-width: 1024px) {
       .main-container {
         flex-direction: column;
         padding: 10px;
@@ -373,8 +365,36 @@
         font-size: 28px;
         padding: 15px;
       }
+
+      /* 👇 关键：手牌允许换行，隐藏滚动 */
+      .hand .tiles,
+      .hidden-tiles .tiles {
+        flex-wrap: wrap;
+        overflow-x: hidden;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      /* 微调牌尺寸 */
+      .tile {
+        width: 50px;
+        height: 65px;
+        font-size: 15px;
+      }
+      .flower-card, .season-card, .face-down {
+        font-size: 18px;
+      }
+
+      /* 隐藏滚动条 */
+      .hand .tiles::-webkit-scrollbar {
+        display: none;
+      }
+      .hand .tiles {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     }
-    
+
     @media (max-width: 767px) {
       .main-container {
         flex-direction: column;
@@ -416,7 +436,7 @@
         font-size: 45px;
       }
     }
-    
+
     @media (max-width: 480px) {
       .game-title {
         font-size: 20px;
@@ -455,7 +475,6 @@
 
 <!-- 首页 -->
 <div id="start-screen">
-  <!-- 图片位置上移，间距减小，尺寸增大，并增加上下边距 -->
   <img src="麻将.png" alt="麻将游戏插图" style="max-width: 45%; margin: 5px 0 15px;">
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
   <div id="homeStats" class="home-stats">
@@ -558,7 +577,6 @@
   /* ===== 游戏核心逻辑 ===== */
   const suits=['万','筒','条'];
   const suitEmojis={'万':'🀄','筒':'🐼','条':'🐲'};
-  // 中文数字映射
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
   
   function getFlowerEmoji(n){return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''}
@@ -582,7 +600,7 @@
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
   function startGame(){
-    bumpPlays();                   // 记录开始次数
+    bumpPlays();
     document.getElementById('start-screen').style.display='none';
     document.getElementById('gameArea').style.display='block';
     window.isGameOver=false; window.hasDiscarded=true;
@@ -611,7 +629,6 @@
 
   function renderHand(){
     const c=document.getElementById('hand'); c.innerHTML='';
-    // 预留14个位置
     for(let i=0;i<14;i++){
       const d=document.createElement('div');
       d.className='tile'; 
@@ -682,7 +699,6 @@
 
   function getTileCounts(arr){ const m={}; arr.forEach(t=>{m[t.key]=(m[t.key]||0)+1}); return m; }
 
-  // 对子：数字相同 或 同名花/季
   function isPair(_,arr){
     if(arr.length!==2) return false;
     const [a,b]=arr;
@@ -691,7 +707,6 @@
     if(a.type==='season'&&b.type==='season'&&a.name===b.name) return true;
     return false;
   }
-  // 刻子：三张相同（数字/花/季）
   function isPong(_,arr){
     if(arr.length!==3) return false;
     if(arr[0].type==='normal' && arr.every(t=>t.type==='normal' && t.key===arr[0].key)) return true;
@@ -699,7 +714,6 @@
     if(arr[0].type==='season' && arr.every(t=>t.type==='season' && t.name===arr[0].name)) return true;
     return false;
   }
-  // 顺子：仅数字
   function isChow(arr){
     if(arr.length!==3) return false;
     const allNormal=arr.every(t=>t.type==='normal'); if(!allNormal) return false;
@@ -708,7 +722,6 @@
     return nums[0]+1===nums[1] && nums[1]+1===nums[2];
   }
 
-  // —— 自由重排胜利判断（14张、4组+1对；花/季不能顺子、可对子/刻子） ——
   function canWin(freeHand, currentValidSetsData){
     const tiles=freeHand.concat(currentValidSetsData.flat());
     if(tiles.length!==14) return false;
@@ -736,7 +749,6 @@
       if(need===0) return arr.length===0;
       if(arr.length<need*3) return false;
 
-      // 刻子
       for(let i=0;i<arr.length;i++){
         const a=arr[i]; const idxs=[];
         for(let j=0;j<arr.length && idxs.length<3;j++){
@@ -750,7 +762,6 @@
           if(canFormSets(next,need-1)) return true;
         }
       }
-      // 数字顺子
       const normals=arr.filter(t=>t.type==='normal').sort((x,y)=>x.suit===y.suit?x.number-y.number:x.suit.localeCompare(y.suit));
       for(let i=0;i<normals.length;i++){
         const t1=normals[i];
@@ -772,7 +783,6 @@
     return false;
   }
 
-  // —— 听牌：尊重已固定组合（不打散已选对/刻/顺），仅显示当前真正需要的牌 ——
   function canCompleteWithFixedSets(freeTiles, validSets){
     const fixedSets = validSets.filter(s=>s.length===3 && (isPong({},s) || isChow(s))).length;
     const fixedPairs = validSets.filter(s=>s.length===2 && isPair({},s)).length;
@@ -924,13 +934,11 @@
       if(canCompleteWithFixedSets(tryHand, validSetsData)) waiting.push(d);
     }
 
-    // 过滤“已出现 4 张”的牌（手里+已组合+弃牌）
     const visible={}; const add=k=>visible[k]=(visible[k]||0)+1;
     hand.forEach(t=>add(t.key)); validSetsData.flat().forEach(t=>add(t.key));
     Array.from(document.querySelectorAll('#discards .tile')).forEach(el=>{const k=el.dataset.tile||''; if(k) add(k);});
     const filtered=waiting.filter(t=>(visible[t.key]||0)<4);
 
-    // 去重+排序
     const suitOrd={'万':1,'筒':2,'条':3};
     const typeRank=t=>t.type==='normal'?1:(t.type==='flower'?2:3);
     filtered.sort((a,b)=>{
@@ -1038,12 +1046,10 @@
     m.className=''; m.classList.add(`message-${type}`); m.innerHTML = msg;
   }
 
-  // 兜底绑定（如果 inline onclick 被 CSP 屏蔽）
   document.addEventListener('DOMContentLoaded',()=>{
     const btn=document.getElementById('start-button');
     if(btn){ btn.addEventListener('click',()=>{const g=document.getElementById('gameArea'); if(g && g.style.display!=='block') startGame();}); }
   });
-
 </script>
 </body>
 </html>
