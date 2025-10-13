@@ -242,6 +242,32 @@
       from { text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.6); }
       to { text-shadow: 0 0 20px rgba(255,215,0,1), 0 0 30px rgba(255,215,0,0.8); }
     }
+
+    /* ===== 胜利时的 🎉 动画 ===== */
+    .confetti-emoji {
+      display: inline-block;
+      animation: confettiPop 1.2s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes confettiPop {
+      0%, 100% {
+        transform: scale(1) rotate(0deg);
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+      }
+      25% {
+        transform: scale(1.2) rotate(-10deg);
+        text-shadow: 0 0 20px gold, 0 0 30px orange;
+      }
+      50% {
+        transform: scale(1.3) rotate(10deg);
+        text-shadow: 0 0 25px gold, 0 0 35px orangered;
+      }
+      75% {
+        transform: scale(1.2) rotate(0deg);
+        text-shadow: 0 0 20px gold, 0 0 30px orange;
+      }
+    }
+
     .firework {
       position: absolute;
       top: 20px;
@@ -504,10 +530,10 @@
       <div class="win-message" id="winMessage" style="display:none;">
         <div class="trophy">🏆</div>
         <div id="winText" style="color: #FF6B6B; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); animation: bounce 0.6s ease-in-out;">
-          🎉 你赢了！恭喜！
+          <span class="confetti-emoji">🎉</span> 你赢了！恭喜！
         </div>
         <div id="winTextEn" style="color: #4ECDC4; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); animation: bounce 0.6s ease-in-out 0.3s both;">
-          🎉 You won! Congratulations!
+          <span class="confetti-emoji">🎉</span> You won! Congratulations!
         </div>
       </div>
 
