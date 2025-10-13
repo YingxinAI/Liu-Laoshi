@@ -76,6 +76,7 @@
       background-color: white;
       border-left: 1px solid #ccc;
       overflow-x: hidden;
+      border-radius: 10px; /* 添加圆角，与左侧面板一致 */
     }
     .tiles {
       display: flex;
@@ -279,7 +280,7 @@
       padding: 20px;
     }
     #start-button {
-      margin-top: 16px;
+      margin-top: 30px;
       padding: 14px 30px;
       font-size: 20px;
       font-weight: bold;
@@ -436,8 +437,8 @@
 
 <!-- 首页 -->
 <div id="start-screen">
-  <!-- 图片位置上移，间距减小，尺寸增大 -->
-  <img src="麻将.png" alt="麻将游戏插图" style="max-width: 45%; margin-top: -15px; margin-bottom: 5px;">
+  <!-- 图片位置上移，间距减小，尺寸增大，并增加上下边距 -->
+  <img src="麻将.png" alt="麻将游戏插图" style="max-width: 45%; margin: 40px 0 20px;">
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
   <div id="homeStats" class="home-stats">
     👥 开局次数 / Plays: <span id="playsNum">0</span>　
