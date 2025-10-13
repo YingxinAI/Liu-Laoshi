@@ -22,6 +22,31 @@
       font-size: clamp(24px, 5vw, 32px);
       font-weight: bold;
       text-align: center;
+      /* 添加半透明立体感效果 */
+      background: rgba(0, 153, 204, 0.95);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
+                  inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+                  inset 0 2px 5px rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      margin: 20px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .game-title::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.15) 100%);
+      pointer-events: none;
+      border-radius: 15px;
     }
     .main-container {
       display: flex;
@@ -407,7 +432,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-<div class="game-title">欢迎来到麻将学习小游戏<br/>Welcome to the Mahjong Learning Game</div>
+<div class="game-title">🎲 欢迎来到麻将学习小游戏 🀄<br/>🎮 Welcome to the Mahjong Learning Game 🎴</div>
 
 <!-- 首页 -->
 <div id="start-screen">
@@ -1003,4 +1028,3 @@
 </script>
 </body>
 </html>
-
