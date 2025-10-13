@@ -1046,6 +1046,18 @@
     m.className=''; m.classList.add(`message-${type}`); m.innerHTML = msg;
   }
 
+  // 👇 新增：监听窗口 resize 事件，解决 iPad 横竖屏切换“丢牌”问题
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (document.getElementById('gameArea').style.display === 'block' && !window.isGameOver) {
+        renderHand();
+        renderNextHiddenTile();
+      }
+    }, 150);
+  });
+
   document.addEventListener('DOMContentLoaded',()=>{
     const btn=document.getElementById('start-button');
     if(btn){ btn.addEventListener('click',()=>{const g=document.getElementById('gameArea'); if(g && g.style.display!=='block') startGame();}); }
