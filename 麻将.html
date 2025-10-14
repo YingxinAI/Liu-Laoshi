@@ -303,16 +303,16 @@
       max-width: 45%;
       margin: 15px auto 20px;
       display: block;
-      border: 3px solid #FFD700; /* 金色边框 */
-      border-radius: 10px;       /* 圆角 */
+      border: 3px solid #FFD700;
+      border-radius: 10px;
       box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.25),    /* 主阴影（底部） */
-        inset 0 -2px 8px rgba(0, 0, 0, 0.1), /* 内阴影（顶部高光） */
-        inset 0 2px 4px rgba(255, 255, 255, 0.3); /* 内阴影（底部暗部） */
+        0 10px 25px rgba(0, 0, 0, 0.25),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     #mahjong-img:hover {
-      transform: scale(1.03); /* 悬停微放大 */
+      transform: scale(1.03);
       box-shadow: 
         0 12px 30px rgba(0, 0, 0, 0.3),
         inset 0 -2px 8px rgba(0, 0, 0, 0.1),
@@ -499,9 +499,7 @@
 <div class="game-title">🎲 欢迎来到刘老师的麻将学习小游戏 🀄<br/>🎮 Welcome to Ms. Liu's Mahjong Learning Game 🎴</div>
 <!-- 首页 -->
 <div id="start-screen">
-  <!-- 👇 关键：使用 ID 选择器 -->
   <img id="mahjong-img" src="麻将.png" alt="麻将游戏插图">
-  <!-- 👇 保留 onclick，移除冗余 JS 监听 -->
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
   <div id="homeStats" class="home-stats">
     👥 开局次数 / Plays: <span id="playsNum">0</span>　
@@ -607,7 +605,7 @@
     renderStats();
   }
 
-  /* ===== 游戏核心逻辑 ===== */
+  /* ===== 游戏核心逻辑（保持不变） ===== */
   const suits = ['万','筒','条'];
   const suitEmojis = {'万':'🀄','筒':'🐼','条':'🐲'};
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -1255,8 +1253,6 @@
       }
     }, 150);
   });
-
-  // ✅ 移除了冲突的 DOMContentLoaded 监听器，保留 onclick
 </script>
 </body>
 </html>
