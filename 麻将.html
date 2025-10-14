@@ -4,7 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>麻将学习游戏：摸打练习 / Mahjong Learning Game</title>
+  
+  <!-- 👇 Firebase SDK (模块化 CDN) -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getDatabase, ref, onValue, transaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaqCqbwahLlET42zE9q_oPn0H24zZo1eM",
+      authDomain: "mahjong-stats-1c6e7.firebaseapp.com",
+      projectId: "mahjong-stats-1c6e7",
+      storageBucket: "mahjong-stats-1c6e7.firebasestorage.app",
+      messagingSenderId: "59827203353",
+      appId: "1:59827203353:web:640a3a4094c348607ae988"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Global function to update plays count
+    window.bumpGlobalPlays = function() {
+      const playsRef = ref(db, 'stats/plays');
+      transaction(playsRef, (current) => (current || 0) + 1);
+    };
+
+    // Render global stats on page load
+    window.renderGlobalStats = function() {
+      const playsRef = ref(db, 'stats/plays');
+      onValue(playsRef, (snapshot) => {
+        const plays = snapshot.val() || 0;
+        document.getElementById('playsNum').textContent = plays;
+      });
+
+      // Local CTR (impressions/clicks)
+      const impressions = parseInt(localStorage.getItem('mahjong_impressions') || '0');
+      const clicks = parseInt(localStorage.getItem('mahjong_clicks') || '0');
+      const ctr = impressions > 0 ? (clicks / impressions * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('ctrNum').textContent = ctr;
+    };
+  </script>
+  
   <style>
+    /* ========== 您原有的完整 CSS ========== */
     body {
       font-family: "微软雅黑", sans-serif;
       background-color: #e6f7ff;
@@ -303,16 +347,16 @@
       max-width: 45%;
       margin: 15px auto 20px;
       display: block;
-      border: 3px solid #FFD700; /* 金色边框 */
-      border-radius: 10px;       /* 圆角 */
+      border: 3px solid #FFD700;
+      border-radius: 10px;
       box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.25),    /* 主阴影（底部） */
-        inset 0 -2px 8px rgba(0, 0, 0, 0.1), /* 内阴影（顶部高光） */
-        inset 0 2px 4px rgba(255, 255, 255, 0.3); /* 内阴影（底部暗部） */
+        0 10px 25px rgba(0, 0, 0, 0.25),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     #mahjong-img:hover {
-      transform: scale(1.03); /* 悬停微放大 */
+      transform: scale(1.03);
       box-shadow: 
         0 12px 30px rgba(0, 0, 0, 0.3),
         inset 0 -2px 8px rgba(0, 0, 0, 0.1),
@@ -497,19 +541,20 @@
 </head>
 <body>
 <div class="game-title">🎲 欢迎来到刘老师的麻将学习小游戏 🀄<br/>🎮 Welcome to Ms. Liu's Mahjong Learning Game 🎴</div>
+
 <!-- 首页 -->
 <div id="start-screen">
-  <!-- 👇 关键：使用 ID 选择器 -->
   <img id="mahjong-img" src="麻将.png" alt="麻将游戏插图">
-  <!-- 👇 保留 onclick，移除冗余 JS 监听 -->
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
   <div id="homeStats" class="home-stats">
     👥 开局次数 / Plays: <span id="playsNum">0</span>　
     📈 CTR: <span id="ctrNum">0%</span>
   </div>
 </div>
+
 <!-- 赢牌音效 -->
 <audio id="applauseAudio" src="applause.mp3" preload="auto"></audio>
+
 <!-- 游戏区域 -->
 <div class="game-area" id="gameArea">
   <div class="main-container">
@@ -532,6 +577,7 @@
         </ul>
       </div>
     </div>
+
     <div class="right-panel" id="rightPanel">
       <div class="win-message" id="winMessage" style="display:none;">
         <div class="trophy">🏆</div>
@@ -542,25 +588,31 @@
           <span class="confetti-emoji">🎉</span> You won! Congratulations! <span class="confetti-emoji">🎉</span> 
         </div>
       </div>
+
       <div class="hidden-tiles">
         <div class="label-cn-en"><span class="label-cn"> Joker 隐藏牌（点击翻出）：</span><span class="label-en">Face-Down Tiles (Click to Flip):</span></div>
         <div class="tiles" id="hiddenTiles"></div>
       </div>
+
       <div class="hand">
         <div class="label-cn-en"><span class="label-cn">🂠 你的手牌（最多13张）：</span><span class="label-en">Your Hand (Max 13 tiles):</span></div>
         <div id="message"></div>
         <div class="tiles" id="hand"></div>
       </div>
+
       <div class="button-row">
         <button class="btn-check" id="btnCheck" onclick="checkSelection()">✅ 检查选中 / Check Selection</button>
         <button class="btn-discard" id="btnDiscard" onclick="discardSelectedTile()">🗑 打出 / Discard</button>
         <button class="btn-restart" id="btnRestart" onclick="restartGame()">🔄 重新开始 / Restart</button>
       </div>
+
       <div id="combination-count">🔢 已组数：0 组 + 0 对 / Count of Sets: 0 sets + 0 pairs</div>
+
       <div class="selected-set">
         <div class="label-cn-en"><span class="cn">🏆 已选有效组合：</span><span class="en">Valid Sets:</span></div>
         <div class="tiles" id="validSets"></div>
       </div>
+
       <div class="discard-pile">
         <div class="label-cn-en"><span class="cn">🧾 已打出的牌：</span><span class="en">Discarded Tiles:</span></div>
         <div class="tiles" id="discards"></div>
@@ -570,44 +622,34 @@
 </div>
 
 <script>
-  /* ===== 本地统计（本浏览器累计） ===== */
-  const STATS_KEY = 'mahjong_local_stats_v1';
-  function loadStats() {
-    try {
-      return JSON.parse(localStorage.getItem(STATS_KEY) || '{"impressions":0,"clicks":0,"plays":0}');
-    } catch (e) {
-      return { impressions: 0, clicks: 0, plays: 0 };
-    }
-  }
-  function saveStats(stats) {
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-  }
-  function renderStats() {
-    const s = loadStats();
-    const ctr = s.impressions > 0 ? (s.clicks / s.impressions * 100).toFixed(1) + '%' : '0%';
-    document.getElementById('playsNum').textContent = s.plays;
-    document.getElementById('ctrNum').textContent = ctr;
-  }
+  /* ===== 页面加载：初始化统计 ===== */
   document.addEventListener('DOMContentLoaded', () => {
-    const stats = loadStats();
-    stats.impressions += 1;
-    saveStats(stats);
-    renderStats();
+    // 增加本地曝光次数（用于 CTR）
+    const impressions = parseInt(localStorage.getItem('mahjong_impressions') || '0');
+    localStorage.setItem('mahjong_impressions', impressions + 1);
+    
+    // 渲染全局统计（Firebase + 本地 CTR）
+    if (window.renderGlobalStats) {
+      window.renderGlobalStats();
+    } else {
+      // 降级：仅本地统计
+      const stats = JSON.parse(localStorage.getItem('mahjong_local_stats_v1') || '{"plays":0,"clicks":0}');
+      document.getElementById('playsNum').textContent = stats.plays;
+      const ctr = impressions > 0 ? (stats.clicks / impressions * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('ctrNum').textContent = ctr;
+    }
   });
-  document.addEventListener('click', () => {
-    const stats = loadStats();
-    stats.clicks += 1;
-    saveStats(stats);
-    renderStats();
-  });
-  function bumpPlays() {
-    const stats = loadStats();
-    stats.plays += 1;
-    saveStats(stats);
-    renderStats();
-  }
 
-  /* ===== 游戏核心逻辑 ===== */
+  /* ===== 任意点击：增加点击次数（用于 CTR） ===== */
+  document.addEventListener('click', () => {
+    const clicks = parseInt(localStorage.getItem('mahjong_clicks') || '0');
+    localStorage.setItem('mahjong_clicks', clicks + 1);
+    if (window.renderGlobalStats) {
+      window.renderGlobalStats(); // 更新 CTR
+    }
+  });
+
+  /* ===== 游戏核心逻辑（保持不变） ===== */
   const suits = ['万','筒','条'];
   const suitEmojis = {'万':'🀄','筒':'🐼','条':'🐲'};
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -647,12 +689,24 @@
   }
 
   function startGame() {
-    bumpPlays();
+    // 调用 Firebase 全局统计
+    if (window.bumpGlobalPlays) {
+      window.bumpGlobalPlays();
+    } else {
+      // 降级：本地统计
+      const stats = JSON.parse(localStorage.getItem('mahjong_local_stats_v1') || '{"plays":0,"clicks":0}');
+      stats.plays += 1;
+      localStorage.setItem('mahjong_local_stats_v1', JSON.stringify(stats));
+    }
+    
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('gameArea').style.display = 'block';
     window.isGameOver = false; window.hasDiscarded = true;
     generateHand(); enableGame();
   }
+
+  // ... 您原有的所有游戏函数（generateHand, renderHand, checkSelection 等）保持不变 ...
+  // 为节省篇幅，此处省略重复逻辑，实际使用时请保留您的完整游戏代码
 
   function generateHand() {
     allTiles = shuffle(createFullMahjongSet());
@@ -1255,8 +1309,6 @@
       }
     }, 150);
   });
-
-  // ✅ 移除了冲突的 DOMContentLoaded 监听器，保留 onclick
 </script>
 </body>
 </html>
