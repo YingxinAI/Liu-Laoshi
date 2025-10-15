@@ -12,7 +12,8 @@
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             max-width: 1300px;
             margin: 0 auto;
-            padding: 10px;
+            /* 调整 body 填充，确保留有余地 */
+            padding: 10px; 
             background-color: #f9f9f9;
             /* 页面背景（无关游戏） */
             background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
@@ -29,10 +30,6 @@
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
             font-weight: bold; 
         }
-        /* H3 副标题改为非粗体 */
-        .legend-section h3 {
-            font-weight: normal;
-        }
         .main-container {
             display: flex;
             gap: 15px;
@@ -41,8 +38,8 @@
             flex-wrap: wrap; 
         }
         .legend-section {
-            flex: 0 0 300px;
-            /* ✅ 左边背景色修改为纯净的淡蓝色 (e0f7fa) */
+            /* 桌面/iPad 横屏默认宽度 */
+            flex: 0 0 300px; 
             background-color: rgba(224, 247, 250, 0.95);
             padding: 15px;
             border-radius: 15px;
@@ -52,7 +49,6 @@
         .canvas-section {
             /* 确保填色区占用剩余空间 */
             flex: 1; 
-            /* 右边背景色 (保持淡蓝) */
             background-color: rgba(224, 247, 250, 0.95); 
             padding: 15px;
             border-radius: 15px;
@@ -62,46 +58,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 确保填色区在空间不足时可以缩小，但不至于太小 */
+            /* 桌面/iPad 最小宽度 */
             min-width: 500px;
         }
-        /* 手机适配 (保持响应式大小) */
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-            }
-            .legend-section, .canvas-section {
-                flex: 1 1 auto;
-                min-height: auto;
-                min-width: auto;
-            }
-            h1 {
-                font-size: 1.3rem;
-            }
-            /* 保持上一版的移动端尺寸，确保无滚动条 */
-            .pixel {
-                width: 4vw;
-                height: 3.6vw;
-                font-size: 2vw; 
-            }
-            #pixelCanvas {
-                grid-template-columns: repeat(29, 4vw) !important;
-                grid-template-rows: repeat(25, 3.6vw) !important; 
-                aspect-ratio: 580 / 450 !important;
-            }
-            .button-group {
-                flex-wrap: wrap;
-            }
-            button {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-        }
-        /* PC端网格尺寸 */
+        /* PC端网格尺寸 (默认/大屏幕) */
         #pixelCanvas {
             display: inline-grid;
             grid-template-columns: repeat(29, 30px); /* 29列 x 30px */
-            grid-template-rows: repeat(25, 27px); /* 25行 x 27px */
+            grid-template-rows: repeat(25, 27px); /* 25行 x 27px (30:27 比例) */
             gap: 1px;
             margin: 0 auto;
             background-color: #333;
@@ -113,6 +77,95 @@
             aspect-ratio: 870 / 675; 
             transition: background-image 2s ease;
         }
+        .pixel {
+            width: 30px; 
+            height: 27px; 
+            background-color: #f8e0e0; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px; 
+            font-weight: normal; 
+            color: rgba(0, 0, 0, 0.7);
+            cursor: pointer;
+            user-select: none;
+            /* 确保 color 和 background-color 的过渡速度相同，实现同时消失 */
+            transition: all 0.2s ease, background-color 1s ease, color 1s ease;
+            position: relative;
+            border-radius: 3px;
+            /* 立体感：内阴影 + 边框 */
+            box-shadow: 
+                inset 1px 1px 2px rgba(255,255,255,0.8),
+                inset -1px -1px 2px rgba(0,0,0,0.2),
+                0 1px 2px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        /* iPad 横屏/小桌面适配 (769px 到 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .legend-section {
+                /* 侧边栏宽度稍减 */
+                flex: 0 0 250px; 
+            }
+            .canvas-section {
+                min-width: 450px; 
+            }
+            #pixelCanvas {
+                /* 格子尺寸缩小到 25px x 22.5px，以适应 1024px 屏幕的并排布局 */
+                grid-template-columns: repeat(29, 25px); 
+                grid-template-rows: repeat(25, 22.5px); 
+                aspect-ratio: 725 / 562.5; 
+            }
+            .pixel {
+                width: 25px;
+                height: 22.5px;
+                font-size: 14px;
+            }
+        }
+
+        /* 手机/竖屏平板适配 (最大 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px; /* 进一步减少 body 填充 */
+            }
+            .main-container {
+                flex-direction: column; /* 布局改为单列 */
+            }
+            .legend-section, .canvas-section {
+                flex: 1 1 auto;
+                min-height: auto;
+                min-width: auto; /* 移除最小宽度限制 */
+                width: 100%;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            /* 关键修改：重新计算 vw 单位以确保 29 列适应屏幕宽度 (约 95vw) */
+            .pixel {
+                /* 95vw / 29 约 3.2vw */
+                width: 3.2vw;
+                /* 保持 30:27 比例，高约 2.9vw */
+                height: 2.9vw;
+                font-size: 2vw; 
+            }
+            #pixelCanvas {
+                /* 使用新的 vw 尺寸，确保无滚动条 */
+                grid-template-columns: repeat(29, 3.2vw) !important;
+                grid-template-rows: repeat(25, 2.9vw) !important; 
+                aspect-ratio: 928 / 725 !important;
+                padding: 4px !important; /* 减少画板内边距 */
+                gap: 0.5px !important; /* 减少格子间距 */
+            }
+            .button-group {
+                flex-wrap: wrap;
+            }
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+        
         /* 🎨 隐藏画板背景，完成时再加载 */
         #pixelCanvas:not(.revealed-bg) {
             background-image: none;
@@ -128,30 +181,7 @@
             background-color: transparent !important; /* 移除格子颜色，显示背景图 */
             color: transparent !important; /* 隐藏数字 */
         }
-        .pixel {
-            width: 30px; 
-            height: 27px; 
-            /* ✅ 保持未着色格子为浅粉色 */
-            background-color: #f8e0e0; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px; 
-            /* 格子数字改为非粗体 */
-            font-weight: normal; 
-            color: rgba(0, 0, 0, 0.7);
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s ease, background-color 1s ease, color 1s ease;
-            position: relative;
-            border-radius: 3px;
-            /* 立体感：内阴影 + 边框 */
-            box-shadow: 
-                inset 1px 1px 2px rgba(255,255,255,0.8),
-                inset -1px -1px 2px rgba(0,0,0,0.2),
-                0 1px 2px rgba(0,0,0,0.1);
-            border: none;
-        }
+        
         .pixel:hover {
             transform: scale(1.05) translateY(-2px);
             box-shadow: 
@@ -284,8 +314,8 @@
             margin: 10px 0 8px 0;
             font-size: 14px;
             text-align: center;
-            /* 颜色选择器标签改为非粗体 */
-            font-weight: normal;
+            /* 颜色选择器标签设置为粗体 */
+            font-weight: bold;
         }
         .button-group {
             display: flex;
@@ -297,7 +327,7 @@
         /* 进度条样式 */
         .progress-bar {
             width: 80%;
-            height: 25px;
+            height: 18px; 
             background-color: #e0e0e0;
             border-radius: 5px;
             overflow: hidden;
@@ -346,8 +376,7 @@
         }
         /* 百分比文字样式 */
         .progress-percent {
-            font-size: 0.9rem;
-            /* 进度百分比改为非粗体 */
+            font-size: 0.8rem; 
             font-weight: normal; 
             color: #e65100;
             white-space: nowrap;
@@ -380,15 +409,15 @@
     </style>
 </head>
 <body>
-    <h1>🌌 格子下的秘密 (The Secret Beneath the Grid)</h1>
+    <h1>🌌 **格子下的秘密** (The Secret Beneath the Grid)</h1>
     <div class="main-container">
         <div class="legend-section" id="leftPanel">
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ 游戏说明 (Instructions)</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ **游戏说明 (Instructions)**</h3>
             <p style="font-size: 14px; margin-bottom: 15px; padding: 5px; border: 1px dashed #d35400; border-radius: 5px; color: #333;">
                 请将右边的格子按要求涂色。 (Please color the squares on the right according to the requirements.)
             </p>
             
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明 (Color Legend)</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 **颜色说明 (Color Legend)**</h3>
             <div class="legend">
                 <div class="legend-item" onclick="speakText('黑色')">1 = 黑色 (hēi sè)</div>
                 <div class="legend-item" onclick="speakText('深蓝色')">2 = 深蓝色 (shēn lán sè)</div>
@@ -399,7 +428,7 @@
                 <div class="legend-item" onclick="speakText('白色')">7 = 白色 (bái sè)</div>
                 <div class="legend-item" onclick="speakText('橙色')">8 = 橙色 (chéng sè)</div>
             </div>
-            <div class="palette-label">🎨 选择颜色</div>
+            <div class="palette-label">🎨 **选择颜色**</div>
             <div class="color-palette" id="colorPalette"></div>
             <div class="button-group">
                 <button id="restartBtn">🔄 重新开始</button>
@@ -451,6 +480,11 @@
         let selectedColor = null;
         let isMusicPlaying = false;
         let gameStarted = false;
+        
+        // 全局变量用于控制音乐渐弱
+        let isMusicFading = false;
+        let fadeOutInterval = null; 
+
         // 29x25 的数字填色数据
         const gridData = [
             [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
@@ -596,7 +630,7 @@
             // 步骤 1: 立即加载原图作为背景
             pixelCanvas.classList.add('revealed-bg'); 
             
-            // 播放掌声并停止背景音乐
+            // 播放掌声 (applause.mp3) 并停止背景音乐
             if (navigator.vibrate) {
                 navigator.vibrate([200, 100, 200, 100, 200]);
             }
@@ -609,7 +643,13 @@
             }
             const bgMusic = document.getElementById('bgMusic');
             if (isMusicPlaying) {
-                let volume = 1;
+                // 清除任何正在运行的 99% 渐弱计时器
+                if (fadeOutInterval) {
+                    clearInterval(fadeOutInterval);
+                    isMusicFading = false;
+                }
+                
+                let volume = bgMusic.volume; // 从当前音量开始渐弱（可能是 0.2）
                 const fadeOut = setInterval(() => {
                     volume -= 0.1;
                     bgMusic.volume = volume;
@@ -631,7 +671,7 @@
                 const elements = document.querySelectorAll(`.pixel[data-value="${num}"]`);
                 setTimeout(() => {
                     elements.forEach(el => {
-                        el.classList.add('revealed'); // 应用透明化（但保留边框/阴影）
+                        el.classList.add('revealed'); // 应用透明化（颜色和数字同时淡出）
                         localStorage.setItem(`revealed_${el.dataset.row}_${el.dataset.col}`, 'true'); // 保存揭示状态
                     });
                 }, delay * (index + 1));
@@ -671,15 +711,46 @@
             if (progressPercent) {
                 progressPercent.textContent = `${percent}%`;
             }
+
             if (percent === 100) {
                 if (progressFill) {
                     progressFill.classList.add('completed');
                 }
-                // 完成时调用新的揭示函数
-                startSequentialReveal();
-            } else {
+                // 确保清除 99% 的渐弱计时器
+                if (fadeOutInterval) {
+                    clearInterval(fadeOutInterval);
+                    isMusicFading = false;
+                }
+                startSequentialReveal(); // 触发最终动画和掌声
+            } else if (percent >= 99 && isMusicPlaying && !isMusicFading) {
+                // 99% 音乐渐弱逻辑
+                const bgMusic = document.getElementById('bgMusic');
+                let currentVolume = bgMusic.volume;
+                isMusicFading = true;
+                
+                // 开始将音乐渐弱到 20%
+                fadeOutInterval = setInterval(() => {
+                    currentVolume -= 0.01; // 缓慢渐弱
+                    if (currentVolume <= 0.2) { 
+                        clearInterval(fadeOutInterval);
+                        bgMusic.volume = 0.2; // 确保停在 20%
+                        isMusicFading = false; 
+                    } else {
+                        bgMusic.volume = currentVolume;
+                    }
+                }, 100); 
+            } 
+            else {
                 if (progressFill) {
                     progressFill.classList.remove('completed');
+                }
+                // 如果进度退回到 99% 以下，且正在渐弱中，则重置音量
+                if (isMusicFading && percent < 99) {
+                    clearInterval(fadeOutInterval);
+                    isMusicFading = false;
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    // 恢复到用户设置的音量 (默认为 100%)
+                    setVolume(volumeSlider ? volumeSlider.value : 100); 
                 }
             }
         }
@@ -754,6 +825,11 @@
         function toggleMusic() {
             const bgMusic = document.getElementById('bgMusic');
             if (isMusicPlaying) {
+                // 如果在 99% 渐弱，也要停止
+                if (fadeOutInterval) {
+                    clearInterval(fadeOutInterval);
+                    isMusicFading = false;
+                }
                 bgMusic.pause();
                 isMusicPlaying = false;
                 document.getElementById('musicBtn').textContent = '🎵 音乐开/关';
@@ -762,6 +838,9 @@
                 bgMusic.play().then(() => {
                     isMusicPlaying = true;
                     document.getElementById('musicBtn').textContent = '🔇 关闭音乐';
+                    // 确保恢复到用户设定的音量
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    setVolume(volumeSlider ? volumeSlider.value : 100); 
                 }).catch(e => {
                     console.log('🎵 请先点击页面任意位置，再点此按钮播放音乐');
                 });
@@ -802,6 +881,13 @@
                     pixelCanvas.classList.remove('revealed-bg'); // 隐藏原图
                 }
                 localStorage.removeItem('starNightProgress');
+                
+                // 清除任何正在运行的 99% 渐弱计时器
+                if (fadeOutInterval) {
+                    clearInterval(fadeOutInterval);
+                    isMusicFading = false;
+                }
+                
                 // 自动播放背景音乐
                 const bgMusic = document.getElementById('bgMusic');
                 if (!isMusicPlaying) {
