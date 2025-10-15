@@ -61,7 +61,8 @@
             /* 桌面/iPad 最小宽度 */
             min-width: 500px;
         }
-        /* PC端网格尺寸 (默认/大屏幕) */
+        
+        /* 1. PC端网格尺寸 (默认/大屏幕) */
         #pixelCanvas {
             display: inline-grid;
             grid-template-columns: repeat(29, 30px); /* 29列 x 30px */
@@ -101,29 +102,33 @@
             border: none;
         }
 
-        /* iPad 横屏/小桌面适配 (769px 到 1024px) */
+        /* 2. iPad 横屏/小桌面适配 (769px 到 1024px) */
         @media (max-width: 1024px) and (min-width: 769px) {
             .legend-section {
-                /* 侧边栏宽度稍减 */
+                /* 侧边栏宽度稍减，并调整 flex-basis */
                 flex: 0 0 250px; 
+                min-width: 250px;
             }
             .canvas-section {
-                min-width: 450px; 
+                /* 允许它自动占用剩余空间 */
+                flex: 1 1 auto;
+                min-width: 400px; /* 确保它至少有一定的空间 */
             }
             #pixelCanvas {
-                /* 格子尺寸缩小到 25px x 22.5px，以适应 1024px 屏幕的并排布局 */
-                grid-template-columns: repeat(29, 25px); 
-                grid-template-rows: repeat(25, 22.5px); 
-                aspect-ratio: 725 / 562.5; 
+                /* 格子尺寸缩小到 23px x 20.7px (30/29 * (1024-250-40) = ~23px)，以适应 1024px 屏幕的并排布局 */
+                grid-template-columns: repeat(29, 23px); 
+                grid-template-rows: repeat(25, 20.7px); 
+                aspect-ratio: 667 / 517.5; /* 29*23 / 25*20.7 */
+                padding: 6px;
+                gap: 0.8px;
             }
             .pixel {
-                width: 25px;
-                height: 22.5px;
-                font-size: 14px;
+                width: 23px;
+                height: 20.7px;
+                font-size: 13px;
             }
         }
-
-        /* 手机/竖屏平板适配 (最大 768px) */
+        /* 3. 手机/竖屏平板适配 (最大 768px) - 确保使用 VW 适配 */
         @media (max-width: 768px) {
             body {
                 padding: 5px; /* 进一步减少 body 填充 */
@@ -143,19 +148,24 @@
             }
             /* 关键修改：重新计算 vw 单位以确保 29 列适应屏幕宽度 (约 95vw) */
             .pixel {
-                /* 95vw / 29 约 3.2vw */
-                width: 3.2vw;
-                /* 保持 30:27 比例，高约 2.9vw */
-                height: 2.9vw;
+                /* 95vw / 29 约 3.27vw */
+                width: 3.27vw;
+                /* 保持 30:27 比例，高约 2.94vw */
+                height: 2.94vw;
                 font-size: 2vw; 
+                gap: 0.5px;
             }
             #pixelCanvas {
                 /* 使用新的 vw 尺寸，确保无滚动条 */
-                grid-template-columns: repeat(29, 3.2vw) !important;
-                grid-template-rows: repeat(25, 2.9vw) !important; 
-                aspect-ratio: 928 / 725 !important;
+                grid-template-columns: repeat(29, 3.27vw) !important;
+                grid-template-rows: repeat(25, 2.94vw) !important; 
+                /* 29*3.27 / 25*2.94 比例 */
+                aspect-ratio: 94.83 / 73.5 !important;
                 padding: 4px !important; /* 减少画板内边距 */
                 gap: 0.5px !important; /* 减少格子间距 */
+                /* 确保画板在小屏幕上居中且不溢出 */
+                max-width: 95vw; 
+                width: auto;
             }
             .button-group {
                 flex-wrap: wrap;
@@ -671,7 +681,8 @@
                 const elements = document.querySelectorAll(`.pixel[data-value="${num}"]`);
                 setTimeout(() => {
                     elements.forEach(el => {
-                        el.classList.add('revealed'); // 应用透明化（颜色和数字同时淡出）
+                        // 颜色和数字同时淡出 (CSS transition: background-color 1s ease, color 1s ease)
+                        el.classList.add('revealed'); 
                         localStorage.setItem(`revealed_${el.dataset.row}_${el.dataset.col}`, 'true'); // 保存揭示状态
                     });
                 }, delay * (index + 1));
