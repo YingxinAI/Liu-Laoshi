@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌌 格子下的秘密 (The Secret Beneath the Grid)</title>
+    <title>🌌 星语谜境 (Star Enigma)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -38,7 +38,7 @@
             flex-wrap: wrap; 
         }
         .legend-section {
-            /* 桌面/iPad 横屏默认宽度 */
+            /* 桌面默认宽度 */
             flex: 0 0 300px; 
             background-color: rgba(224, 247, 250, 0.95);
             padding: 15px;
@@ -58,15 +58,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 桌面/iPad 最小宽度 */
+            /* 桌面最小宽度 */
             min-width: 500px;
         }
         
         /* 1. PC端网格尺寸 (默认/大屏幕) */
         #pixelCanvas {
             display: inline-grid;
-            grid-template-columns: repeat(29, 30px); /* 29列 x 30px */
-            grid-template-rows: repeat(25, 27px); /* 25行 x 27px (30:27 比例) */
+            /* 29列 x 30px */
+            grid-template-columns: repeat(29, 30px); 
+            /* 25行 x 27px (30:27 比例) */
+            grid-template-rows: repeat(25, 27px); 
             gap: 1px;
             margin: 0 auto;
             background-color: #333;
@@ -75,6 +77,7 @@
             position: relative;
             max-width: 100%;
             overflow: hidden; 
+            /* 保持网格比例 */
             aspect-ratio: 870 / 675; 
             transition: background-image 2s ease;
         }
@@ -90,11 +93,9 @@
             color: rgba(0, 0, 0, 0.7);
             cursor: pointer;
             user-select: none;
-            /* 确保 color 和 background-color 的过渡速度相同，实现同时消失 */
             transition: all 0.2s ease, background-color 1s ease, color 1s ease;
             position: relative;
             border-radius: 3px;
-            /* 立体感：内阴影 + 边框 */
             box-shadow: 
                 inset 1px 1px 2px rgba(255,255,255,0.8),
                 inset -1px -1px 2px rgba(0,0,0,0.2),
@@ -105,27 +106,45 @@
         /* 2. iPad 横屏/小桌面适配 (769px 到 1024px) */
         @media (max-width: 1024px) and (min-width: 769px) {
             .legend-section {
-                /* 侧边栏宽度稍减，并调整 flex-basis */
-                flex: 0 0 250px; 
-                min-width: 250px;
+                /* 关键调整：侧边栏宽度改为 220px，预留更多空间 */
+                flex: 0 0 220px; 
+                min-width: 220px;
+                padding: 10px;
             }
             .canvas-section {
-                /* 允许它自动占用剩余空间 */
                 flex: 1 1 auto;
-                min-width: 400px; /* 确保它至少有一定的空间 */
+                /* 移除最小宽度限制，让其完全适应剩余空间 */
+                min-width: auto; 
+                padding: 10px;
             }
+            
+            /* 关键调整：使用 calc() 动态计算格子尺寸 */
+            /* 假设总宽度 W。网格宽度 = W - 220px (侧栏) - 15px (间隔) - 20px (body padding) x 2 */
+            /* 实际画板可支配的宽度约为 (W - 220 - 15) - 20 = W - 255 */
+            
+            /* 我们让画板宽度最大化到 canvas-section 的 100% 减去内边距 */
             #pixelCanvas {
-                /* 格子尺寸缩小到 23px x 20.7px (30/29 * (1024-250-40) = ~23px)，以适应 1024px 屏幕的并排布局 */
-                grid-template-columns: repeat(29, 23px); 
-                grid-template-rows: repeat(25, 20.7px); 
-                aspect-ratio: 667 / 517.5; /* 29*23 / 25*20.7 */
-                padding: 6px;
-                gap: 0.8px;
+                /* 确保画板的内边距减小 */
+                padding: 6px; 
+                gap: 0.5px;
+                /* 重新设定 grid-template-columns */
+                /* 29列。每列宽度 = (画板总宽度 - 间距总和) / 29 */
+                /* 假设 29 列有 28 个 0.5px 间距，总间距 14px */
+                /* 每个格子宽度 = (100% - 14px) / 29 */
+                /* 浏览器会四舍五入，但这样比固定 px 更稳妥 */
+                grid-template-columns: repeat(29, calc((100% - 14px) / 29)); 
+                /* 重新设定 grid-template-rows */
+                /* 行高保持 30:27 比例，即 90% 宽度 */
+                grid-template-rows: repeat(25, calc((100% - 14px) / 29 * 0.9)); 
+                /* 维持画板的整体比例，防止容器被挤压 */
+                aspect-ratio: 870 / 675; 
             }
             .pixel {
-                width: 23px;
-                height: 20.7px;
+                /* 移除固定的 width/height，让其从 grid-template 继承 */
+                width: auto;
+                height: auto;
                 font-size: 13px;
+                gap: 0.5px;
             }
         }
         /* 3. 手机/竖屏平板适配 (最大 768px) - 确保使用 VW 适配 */
@@ -419,7 +438,7 @@
     </style>
 </head>
 <body>
-    <h1>🌌 **格子下的秘密** (The Secret Beneath the Grid)</h1>
+    <h1>🌌 **星语谜境** (Star Enigma)</h1>
     <div class="main-container">
         <div class="legend-section" id="leftPanel">
             <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ **游戏说明 (Instructions)**</h3>
