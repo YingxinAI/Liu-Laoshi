@@ -3,8 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌌 星语谜境 (Star Enigma)</title>
+    <title>让我们一起探索-星语谜境 (Let's Explore the Star Enigma Together)</title>
     <style>
+        /* CSS 动画定义 */
+        @keyframes star-pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        @keyframes galaxy-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 将动画应用到 Emoji */
+        .animated-star {
+            display: inline-block;
+            animation: star-pulse 2s infinite ease-in-out;
+        }
+        .animated-galaxy {
+            display: inline-block;
+            animation: galaxy-spin 15s infinite linear; /* 缓慢匀速旋转 */
+        }
+        
         * {
             box-sizing: border-box;
         }
@@ -27,6 +48,7 @@
             margin: 10px 0 5px 0;
             font-size: 1.5rem;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            /* 确保标题文字本身是粗体 */
             font-weight: bold; 
         }
         .main-container {
@@ -392,15 +414,17 @@
     </style>
 </head>
 <body>
-    <h1>🌌 **星语谜境** (Star Enigma)</h1>
+    <h1>
+        <span class="animated-star">🌟</span> 让我们一起探索-星语谜境 (Let's Explore the Star Enigma Together) <span class="animated-galaxy">🌌</span>
+    </h1>
     <div class="main-container">
         <div class="legend-section" id="leftPanel">
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ **游戏说明 (Instructions)**</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ 游戏说明 (Instructions)</h3>
             <p style="font-size: 14px; margin-bottom: 15px; padding: 5px; border: 1px dashed #d35400; border-radius: 5px; color: #333;">
                 请将右边的格子按要求涂色。 (Please color the squares on the right according to the requirements.)
             </p>
             
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 **颜色说明 (Color Legend)**</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明 (Color Legend)</h3>
             <div class="legend">
                 <div class="legend-item" onclick="speakText('黑色')">1 = 黑色 (hēi sè)</div>
                 <div class="legend-item" onclick="speakText('深蓝色')">2 = 深蓝色 (shēn lán sè)</div>
@@ -411,7 +435,7 @@
                 <div class="legend-item" onclick="speakText('白色')">7 = 白色 (bái sè)</div>
                 <div class="legend-item" onclick="speakText('橙色')">8 = 橙色 (chéng sè)</div>
             </div>
-            <div class="palette-label">🎨 **选择颜色**</div>
+            <div class="palette-label">🎨 选择颜色</div>
             <div class="color-palette" id="colorPalette"></div>
             <div class="button-group">
                 <button id="restartBtn">🔄 重新开始</button>
