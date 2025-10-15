@@ -12,8 +12,8 @@
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             max-width: 1300px;
             margin: 0 auto;
-            /* 页面填充改为 10px，留出边缘 */
-            padding: 10px; 
+            /* 页面填充改为 8px，最大限度保留空间 */
+            padding: 8px; 
             background-color: #f9f9f9;
             /* 页面背景（无关游戏） */
             background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
@@ -33,7 +33,7 @@
             display: flex;
             gap: 15px;
             margin-top: 10px;
-            /* 默认不换行，留给 Media Query 控制 */
+            /* 默认桌面布局 */
             flex-wrap: nowrap; 
         }
         .legend-section {
@@ -46,7 +46,6 @@
             min-height: 400px;
         }
         .canvas-section {
-            /* 确保填色区占用剩余空间 */
             flex: 1; 
             background-color: rgba(224, 247, 250, 0.95); 
             padding: 15px;
@@ -57,7 +56,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 桌面最小宽度 */
             min-width: 500px;
         }
         
@@ -76,7 +74,6 @@
             position: relative;
             max-width: 100%;
             overflow: hidden; 
-            /* 保持网格比例 */
             aspect-ratio: 870 / 675; 
             transition: background-image 2s ease;
         }
@@ -102,97 +99,67 @@
             border: none;
         }
 
-        /* 2. iPad 横屏/小桌面适配 (769px 到 1024px) */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .legend-section {
-                /* 侧边栏宽度改为 220px */
-                flex: 0 0 220px; 
-                min-width: 220px;
-                padding: 10px;
-            }
-            .canvas-section {
-                flex: 1 1 auto;
-                min-width: auto; 
-                padding: 10px;
-            }
-            
-            /* 关键调整：使用 calc() 动态计算格子尺寸 */
-            #pixelCanvas {
-                padding: 6px; 
-                gap: 0.5px;
-                /* 29列。假设 28 个 0.5px 间距，总间距 14px */
-                grid-template-columns: repeat(29, calc((100% - 14px) / 29)); 
-                /* 行高保持 30:27 比例，即 90% 宽度 */
-                grid-template-rows: repeat(25, calc((100% - 14px) / 29 * 0.9)); 
-                aspect-ratio: 870 / 675; 
-            }
-            .pixel {
-                width: auto;
-                height: auto;
-                font-size: 13px;
-                gap: 0.5px;
-            }
-        }
-        /* 3. 手机/竖屏平板适配 (最大 768px) - 确保使用 VW 适配 */
-        @media (max-width: 768px) {
+        /* 2. 平板及手机适配 (最大 1024px) - 统一采用垂直堆叠 */
+        @media (max-width: 1024px) {
             body {
                 padding: 5px; /* 进一步减少 body 填充 */
             }
             .main-container {
-                /* 关键改动：强制垂直堆叠 */
+                /* 关键改动：强制垂直堆叠，消除横向挤压 */
                 flex-direction: column; 
-                gap: 10px; /* 减少间距 */
+                gap: 10px; 
             }
             .legend-section, .canvas-section {
-                flex: 1 1 auto;
+                /* 关键改动：都占 100% 宽度 */
+                flex: 1 1 100%; 
                 min-height: auto;
                 min-width: auto; 
-                width: 100%; /* 关键改动：宽度占满 */
+                width: 100%; 
                 padding: 10px;
             }
             h1 {
                 font-size: 1.3rem;
             }
-
-            /* 关键：使用新的 vw 尺寸来确保 29 列完全适应屏幕 */
-            /* 假设屏幕可支配宽度为 98vw（左右各 1vw 边距） */
-            /* 98vw / 29 约 3.379vw (列宽) */
-            /* 行高保持 30:27 比例，高约 3.04vw */
             
+            /* 关键：让 Canvas 适应 Canvas Section 的 100% 宽度 */
             #pixelCanvas {
-                /* 使用 vw 单位，确保无滚动条 */
-                grid-template-columns: repeat(29, 3.379vw) !important;
-                grid-template-rows: repeat(25, 3.04vw) !important; 
-                aspect-ratio: auto !important; /* 移除 aspect-ratio，让 grid-template 决定尺寸 */
-                padding: 4px !important; 
-                gap: 0.5px !important; 
-                /* 确保画板在小屏幕上居中且不溢出 */
-                max-width: 98vw; 
-                width: auto; /* 必须设置 auto 或 100% */
-                margin: 0 auto; /* 居中 */
+                width: 100%; /* 占满 canvas-section 除去 padding 的全部宽度 */
+                max-width: none; 
+                /* 移除 padding 和 gap，让格子最大化 */
+                padding: 0 !important; 
+                gap: 0 !important; 
+                
+                /* 关键改动：使用 1fr 确保 29 列平均分配 100% 宽度 */
+                grid-template-columns: repeat(29, 1fr) !important;
+                /* 行高保持 30:27 比例（即 0.9 宽度） */
+                grid-template-rows: repeat(25, min(0.9vw, 100%)) !important; 
+                
+                /* 使用纵横比来确保高度正确 */
+                aspect-ratio: 29 / 25 * (30 / 27); /* 约 1.288 保持比例 */
+                margin: 0 auto; 
             }
             .pixel {
-                /* 继承自 grid-template */
+                /* 继承 grid-template 设置的尺寸 */
                 width: auto;
                 height: auto;
                 /* 字体缩小 */
-                font-size: 2vw; 
-                gap: 0.5px;
+                font-size: calc(100% / 29 * 0.5); /* 基于格子宽度动态调整字体大小 */
+                min-height: 10px; /* 防止过度压缩 */
+                /* 移除 box-shadow 的复杂阴影，提升性能 */
+                box-shadow: none; 
+                border-radius: 0;
             }
-            .button-group {
-                flex-wrap: wrap;
-            }
-            button {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-            /* 调整左侧面板，确保内容不被压缩 */
-            .legend-item, .palette-label, .palette-color {
-                font-size: 14px;
+             /* 调整左侧面板的组件尺寸，防止字体过大 */
+            .legend-item, .palette-label {
+                font-size: 13px;
             }
             .palette-color {
-                width: 28px;
-                height: 28px;
+                width: 25px;
+                height: 25px;
+            }
+             /* 确保画板中的数字可见 */
+            .pixel.revealed {
+                color: transparent !important;
             }
         }
         
