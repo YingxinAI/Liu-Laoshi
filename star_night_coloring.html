@@ -99,67 +99,53 @@
             border: none;
         }
 
-        /* 2. 平板及手机适配 (最大 1024px) - 统一采用垂直堆叠 */
+        /* 2. 平板及手机适配 (最大 1024px) - 关键改动在这里 */
         @media (max-width: 1024px) {
             body {
-                padding: 5px; /* 进一步减少 body 填充 */
+                padding: 5px; 
             }
             .main-container {
-                /* 关键改动：强制垂直堆叠，消除横向挤压 */
+                /* 强制垂直堆叠 */
                 flex-direction: column; 
                 gap: 10px; 
             }
             .legend-section, .canvas-section {
-                /* 关键改动：都占 100% 宽度 */
+                /* 都占 100% 宽度 */
                 flex: 1 1 100%; 
-                min-height: auto;
-                min-width: auto; 
-                width: 100%; 
                 padding: 10px;
-            }
-            h1 {
-                font-size: 1.3rem;
+                min-width: auto; 
             }
             
-            /* 关键：让 Canvas 适应 Canvas Section 的 100% 宽度 */
+            /* 关键：使用 1fr 配合 aspect-ratio 解决高度塌陷问题 */
             #pixelCanvas {
-                width: 100%; /* 占满 canvas-section 除去 padding 的全部宽度 */
+                width: 100%; 
                 max-width: none; 
-                /* 移除 padding 和 gap，让格子最大化 */
-                padding: 0 !important; 
-                gap: 0 !important; 
+                /* 增加一点内边距和间距，防止深色背景混淆 */
+                padding: 5px !important; 
+                gap: 1px !important; 
                 
-                /* 关键改动：使用 1fr 确保 29 列平均分配 100% 宽度 */
+                /* 强制 29 列平均分配宽度 */
                 grid-template-columns: repeat(29, 1fr) !important;
-                /* 行高保持 30:27 比例（即 0.9 宽度） */
-                grid-template-rows: repeat(25, min(0.9vw, 100%)) !important; 
+                /* 强制 25 行平均分配高度 */
+                grid-template-rows: repeat(25, 1fr) !important; 
                 
-                /* 使用纵横比来确保高度正确 */
-                aspect-ratio: 29 / 25 * (30 / 27); /* 约 1.288 保持比例 */
+                /* 关键：使用精确的比例强制整个画板的高度 */
+                /* 29列 x 30宽 / 25行 x 27高 = 1.2888 */
+                aspect-ratio: 1.2888 !important; 
                 margin: 0 auto; 
             }
             .pixel {
                 /* 继承 grid-template 设置的尺寸 */
                 width: auto;
                 height: auto;
-                /* 字体缩小 */
-                font-size: calc(100% / 29 * 0.5); /* 基于格子宽度动态调整字体大小 */
-                min-height: 10px; /* 防止过度压缩 */
-                /* 移除 box-shadow 的复杂阴影，提升性能 */
+                
+                /* 强制单元格背景色，防止被误认为是黑灰 */
+                background-color: #f8e0e0 !important; 
+                /* 字体大小使用相对视口宽度，确保可见性 */
+                font-size: 2vw; 
+                /* 简化阴影，提升性能 */
                 box-shadow: none; 
                 border-radius: 0;
-            }
-             /* 调整左侧面板的组件尺寸，防止字体过大 */
-            .legend-item, .palette-label {
-                font-size: 13px;
-            }
-            .palette-color {
-                width: 25px;
-                height: 25px;
-            }
-             /* 确保画板中的数字可见 */
-            .pixel.revealed {
-                color: transparent !important;
             }
         }
         
