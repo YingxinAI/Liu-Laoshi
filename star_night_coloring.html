@@ -3,105 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌌 梵高《星夜》在线填色游戏</title>
+    <title>🌌 格子下的秘密 (The Secret Beneath the Grid)</title>
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
         * {
             box-sizing: border-box;
         }
         body {
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-            max-width: none;
+            max-width: 1300px;
+            margin: 0 auto;
             padding: 10px;
             background-color: #f9f9f9;
+            /* 页面背景（无关游戏） */
             background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
-            display: flex;
-            flex-direction: column;
         }
+        /* 标题保持粗体 */
         h1 {
             color: #2c3e50;
             text-align: center;
             margin: 10px 0 5px 0;
             font-size: 1.5rem;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            font-weight: bold; 
+        }
+        /* H3 副标题改为非粗体 */
+        .legend-section h3 {
+            font-weight: normal;
         }
         .main-container {
             display: flex;
-            gap: 5px;
+            gap: 15px;
             margin-top: 10px;
-            flex-wrap: nowrap;
-            flex: 1;
-            align-items: stretch; 
-            border: none;
-            border-radius: 0;
-            overflow: hidden;
+            /* 允许换行以适应小屏幕 */
+            flex-wrap: wrap; 
         }
         .legend-section {
             flex: 0 0 300px;
-            background-color: rgba(243, 229, 245, 0.95);
+            /* ✅ 左边背景色修改为纯净的淡蓝色 (e0f7fa) */
+            background-color: rgba(224, 247, 250, 0.95);
             padding: 15px;
-            border: 2px solid #000000;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            min-height: auto;
+            min-height: 400px;
         }
-        #pixelCanvas {
-            flex: 1;
-            background-color: rgb(51, 51, 51);
-            border: 2px solid #000000;
+        .canvas-section {
+            /* 确保填色区占用剩余空间 */
+            flex: 1; 
+            /* 右边背景色 (保持淡蓝) */
+            background-color: rgba(224, 247, 250, 0.95); 
+            padding: 15px;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            padding: 0px;
-            
-            display: grid;
-            grid-template-columns: repeat(29, 1fr);
-            grid-template-rows: repeat(26, 1fr);
-            /* ✅ 调整: 将网格间距调整为 0.5px */
-            gap: 0.5px;
-            margin: 0 auto;
-            background-color: transparent;
+            text-align: center;
             position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            aspect-ratio: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* 确保填色区在空间不足时可以缩小，但不至于太小 */
+            min-width: 500px;
+        }
+        /* 手机适配 (保持响应式大小) */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .legend-section, .canvas-section {
+                flex: 1 1 auto;
+                min-height: auto;
+                min-width: auto;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            /* 保持上一版的移动端尺寸，确保无滚动条 */
+            .pixel {
+                width: 4vw;
+                height: 3.6vw;
+                font-size: 2vw; 
+            }
+            #pixelCanvas {
+                grid-template-columns: repeat(29, 4vw) !important;
+                grid-template-rows: repeat(25, 3.6vw) !important; 
+                aspect-ratio: 580 / 450 !important;
+            }
+            .button-group {
+                flex-wrap: wrap;
+            }
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+        /* PC端网格尺寸 */
+        #pixelCanvas {
+            display: inline-grid;
+            grid-template-columns: repeat(29, 30px); /* 29列 x 30px */
+            grid-template-rows: repeat(25, 27px); /* 25行 x 27px */
+            gap: 1px;
+            margin: 0 auto;
+            background-color: #333;
+            padding: 8px;
+            border-radius: 8px;
+            position: relative;
+            max-width: 100%;
+            overflow: hidden; 
+            aspect-ratio: 870 / 675; 
             transition: background-image 2s ease;
         }
+        /* 🎨 隐藏画板背景，完成时再加载 */
         #pixelCanvas:not(.revealed-bg) {
             background-image: none;
         }
+        /* 完成时显示的原图 */
         #pixelCanvas.revealed-bg {
             background-image: url('梵高星夜.png');
             background-size: cover;
             background-position: center;
         }
+        /* 修正：仅移除颜色和数字，保留边框和立体感 (拼图效果) */
+        .pixel.revealed {
+            background-color: transparent !important; /* 移除格子颜色，显示背景图 */
+            color: transparent !important; /* 隐藏数字 */
+        }
         .pixel {
-            width: auto;
-            height: auto;
-            background-color: #f8e0e0;
+            width: 30px; 
+            height: 27px; 
+            /* ✅ 保持未着色格子为浅粉色 */
+            background-color: #f8e0e0; 
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
-            font-weight: bold;
+            font-size: 16px; 
+            /* 格子数字改为非粗体 */
+            font-weight: normal; 
             color: rgba(0, 0, 0, 0.7);
             cursor: pointer;
             user-select: none;
             transition: all 0.2s ease, background-color 1s ease, color 1s ease;
             position: relative;
             border-radius: 3px;
+            /* 立体感：内阴影 + 边框 */
             box-shadow: 
                 inset 1px 1px 2px rgba(255,255,255,0.8),
                 inset -1px -1px 2px rgba(0,0,0,0.2),
                 0 1px 2px rgba(0,0,0,0.1);
-            border: 2px solid #0A1E2F;
+            border: none;
         }
         .pixel:hover {
             transform: scale(1.05) translateY(-2px);
@@ -118,10 +167,7 @@
                 inset -1px -1px 2px rgba(0,0,0,0.3),
                 0 1px 3px rgba(0,0,0,0.15);
         }
-        .pixel.revealed {
-            background-color: transparent !important;
-            color: transparent !important;
-        }
+        
         .legend {
             display: flex;
             flex-direction: column;
@@ -129,8 +175,10 @@
             margin-bottom: 20px;
         }
         .legend-item {
-            font-size: 14px;
-            font-weight: bold;
+            /* 字体缩小到 12px */
+            font-size: 12px; 
+            /* 颜色说明改为非粗体 */
+            font-weight: normal; 
             padding: 5px 8px;
             background-color: #f5f5f5;
             border-radius: 6px;
@@ -152,7 +200,8 @@
             cursor: pointer;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
+            /* 按钮文字改为非粗体 */
+            font-weight: normal; 
             transition: all 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             outline: none;
@@ -168,6 +217,7 @@
         #musicBtn:hover {
             background-color: #2980b9;
         }
+        /* 重新开始按钮样式 */
         #restartBtn {
             background-color: #e74c3c;
             color: white;
@@ -186,6 +236,7 @@
             border: 1px solid #bbdefb;
             margin-bottom: 15px;
         }
+        /* 立体感颜色选择器 */
         .palette-color {
             width: 32px;
             height: 32px;
@@ -214,6 +265,7 @@
                 inset -1px -1px 2px rgba(0,0,0,0.3),
                 0 0 0 3px rgba(255,255,255,0.5);
         }
+        /* 特别加强白色显示 */
         .palette-color[style*="#F5F5F5"] {
             border: 2px solid #999;
             box-shadow: 
@@ -231,8 +283,9 @@
         .palette-label {
             margin: 10px 0 8px 0;
             font-size: 14px;
-            font-weight: bold;
             text-align: center;
+            /* 颜色选择器标签改为非粗体 */
+            font-weight: normal;
         }
         .button-group {
             display: flex;
@@ -241,6 +294,7 @@
             margin-top: 15px;
             flex-wrap: wrap;
         }
+        /* 进度条样式 */
         .progress-bar {
             width: 80%;
             height: 25px;
@@ -258,6 +312,7 @@
             transition: width 0.6s ease;
             position: relative;
         }
+        /* 完成时闪光动画 */
         .progress-fill.completed {
             animation: shine 1.5s ease-in-out, pulseGlow 2s infinite;
             background: linear-gradient(90deg, #FFD700, #FFA500);
@@ -289,9 +344,11 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
+        /* 百分比文字样式 */
         .progress-percent {
             font-size: 0.9rem;
-            font-weight: bold;
+            /* 进度百分比改为非粗体 */
+            font-weight: normal; 
             color: #e65100;
             white-space: nowrap;
             padding: 0;
@@ -299,6 +356,7 @@
             box-shadow: none;
             border-radius: 0;
         }
+        /* 进度条容器 */
         .progress-container {
             margin-top: 15px;
             text-align: center;
@@ -310,6 +368,7 @@
             box-sizing: border-box;
             flex-wrap: nowrap;
         }
+        /* 烟花粒子 */
         .firework {
             position: absolute;
             width: 4px;
@@ -321,19 +380,24 @@
     </style>
 </head>
 <body>
-    <h1>🌌 梵高《星夜》在线数字填色游戏</h1>
+    <h1>🌌 格子下的秘密 (The Secret Beneath the Grid)</h1>
     <div class="main-container">
         <div class="legend-section" id="leftPanel">
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">✏️ 游戏说明 (Instructions)</h3>
+            <p style="font-size: 14px; margin-bottom: 15px; padding: 5px; border: 1px dashed #d35400; border-radius: 5px; color: #333;">
+                请将右边的格子按要求涂色。 (Please color the squares on the right according to the requirements.)
+            </p>
+            
+            <h3 style="margin: 0 0 10px 0; font-size: 16px;">🎨 颜色说明 (Color Legend)</h3>
             <div class="legend">
-                <div class="legend-item" onclick="speakText('黑色')">1 = 黑色</div>
-                <div class="legend-item" onclick="speakText('深蓝色')">2 = 深蓝色</div>
-                <div class="legend-item" onclick="speakText('黄色')">3 = 黄色</div>
-                <div class="legend-item" onclick="speakText('浅蓝色')">4 = 浅蓝色</div>
-                <div class="legend-item" onclick="speakText('紫色')">5 = 紫色</div>
-                <div class="legend-item" onclick="speakText('绿色')">6 = 绿色</div>
-                <div class="legend-item" onclick="speakText('白色')">7 = 白色</div>
-                <div class="legend-item" onclick="speakText('橙色')">8 = 橙色</div>
+                <div class="legend-item" onclick="speakText('黑色')">1 = 黑色 (hēi sè)</div>
+                <div class="legend-item" onclick="speakText('深蓝色')">2 = 深蓝色 (shēn lán sè)</div>
+                <div class="legend-item" onclick="speakText('黄色')">3 = 黄色 (huáng sè)</div>
+                <div class="legend-item" onclick="speakText('浅蓝色')">4 = 浅蓝色 (qiǎn lán sè)</div>
+                <div class="legend-item" onclick="speakText('紫色')">5 = 紫色 (zǐ sè)</div>
+                <div class="legend-item" onclick="speakText('绿色')">6 = 绿色 (lǜ sè)</div>
+                <div class="legend-item" onclick="speakText('白色')">7 = 白色 (bái sè)</div>
+                <div class="legend-item" onclick="speakText('橙色')">8 = 橙色 (chéng sè)</div>
             </div>
             <div class="palette-label">🎨 选择颜色</div>
             <div class="color-palette" id="colorPalette"></div>
@@ -342,7 +406,7 @@
                 <button id="musicBtn">🎵 音乐开/关</button>
             </div>
             <div style="margin-top: 15px; text-align: center;">
-                <label for="volumeSlider" style="font-size: 14px; font-weight: bold; display: inline-block; width: 40px; vertical-align: middle;">🔊</label>
+                <label for="volumeSlider" style="font-size: 14px; font-weight: normal; display: inline-block; width: 40px; vertical-align: middle;">🔊</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100" style="width: calc(80% - 50px); vertical-align: middle; cursor: pointer; display: inline-block;">
             </div>
             <div class="progress-container">
@@ -352,20 +416,23 @@
                 <div class="progress-percent" id="progressPercent">0%</div>
             </div>
         </div>
-        <div id="pixelCanvas"></div>
+        <div class="canvas-section" id="rightPanel">
+            <div id="pixelCanvas"></div>
+        </div>
     </div>
     <audio id="applauseSound" src="applause.mp3" preload="auto"></audio>
     <audio id="bgMusic" src="background-music-soft-calm.mp3" loop preload="auto" muted></audio>
     <script>
+        // 颜色映射表
         const colorMap = {
-            1: '#000000',
-            2: '#1E4D7C',
-            3: '#FFD700',
-            4: '#6B9AC4',
-            5: '#5D4B6D',
-            6: '#3A5F3D',
-            7: '#F5F5F5',
-            8: '#FFA500'
+            1: '#000000',    // 黑色
+            2: '#1E4D7C',    // 淡化深蓝
+            3: '#FFD700',    // 金黄
+            4: '#6B9AC4',    // 灰蓝
+            5: '#5D4B6D',    // 灰紫
+            6: '#3A5F3D',    // 暗橄榄绿
+            7: '#F5F5F5',    // 米白
+            8: '#FFA500'     // 橙色
         };
         const numberToColorName = {
             1: '黑色',
@@ -377,12 +444,14 @@
             7: '白色',
             8: '橙色'
         };
+        // 未着色背景色为浅粉色
+        const DEFAULT_UNCOLORED_HEX = '#f8e0e0'; // 浅粉色
+        const DEFAULT_UNCOLORED_RGB = 'rgb(248, 224, 224)'; // 对应浅粉色 RGB
+        
         let selectedColor = null;
-        let isEraserMode = false;
-        let remainingCells = 0;
-        let isCountingDown = false;
         let isMusicPlaying = false;
         let gameStarted = false;
+        // 29x25 的数字填色数据
         const gridData = [
             [1,4,3,4,2,2,3,2,2,4,3,3,3,3,2,2,2,2,2,4,4,4,2,2,2,2,2,3,2],
             [1,4,4,4,2,1,2,4,2,4,2,3,3,4,2,2,4,3,3,4,4,4,2,4,2,3,3,3,3],
@@ -410,6 +479,7 @@
             [6,6,6,6,1,1,1,1,1,1,1,1,1,4,4,4,4,4,1,1,3,1,4,4,1,6,6,1,1],
             [6,6,6,6,6,1,1,1,1,1,1,1,1,4,4,4,1,4,1,1,1,1,6,6,5,5,5,6,1]
         ];
+        // 烟花效果函数
         function createFireworks(container) {
             const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF4500', '#9370DB', '#32CD32'];
             for (let i = 0; i < 50; i++) {
@@ -417,53 +487,34 @@
                     const firework = document.createElement('div');
                     firework.className = 'firework';
                     firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    // 随机位置
                     const rect = container.getBoundingClientRect();
                     const x = Math.random() * rect.width;
                     const y = Math.random() * rect.height;
                     firework.style.left = x + 'px';
                     firework.style.top = y + 'px';
+                    // 动画
                     firework.style.animation = `
                         fireworkExplode 1s ease-out forwards,
                         fireworkFade 1s ease-out 1s forwards
                     `;
                     container.appendChild(firework);
+                    // 2秒后移除
                     setTimeout(() => {
                         if (firework.parentNode) {
                             firework.parentNode.removeChild(firework);
                         }
                     }, 2000);
-                }, i * 30);
+                }, i * 30); // 交错绽放
             }
         }
-        const style = document.createElement('style');
-        style.textContent = `
-        @keyframes fireworkExplode {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-        }
-        @keyframes fireworkFade {
-            0% {
-                opacity: 0.8;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-        `;
-        document.head.appendChild(style);
+        
+        // =============== 核心功能 ===============
         function createCanvas() {
             const canvas = document.getElementById('pixelCanvas');
-            if (!canvas) {
-                console.error("❌ #pixelCanvas 不存在！");
-                return;
-            }
+            if (!canvas) return;
             canvas.innerHTML = '';
+            // 生成所有格子
             for (let row = 0; row < gridData.length; row++) {
                 for (let col = 0; col < gridData[row].length; col++) {
                     const value = gridData[row][col];
@@ -474,12 +525,18 @@
                     pixel.textContent = value;
                     pixel.dataset.value = value;
                     const savedColor = getSavedColor(row, col);
-                    if (savedColor) {
+                    // 检查是否已完成揭示，如果是，则加载透明状态
+                    const isRevealed = localStorage.getItem(`revealed_${row}_${col}`) === 'true';
+                    if (isRevealed) {
+                        pixel.classList.add('revealed');
+                    } else if (savedColor) {
                         pixel.style.backgroundColor = savedColor;
                     }
+
                     pixel.onclick = function() {
                         if (!gameStarted) {
                             gameStarted = true;
+                            // 自动播放背景音乐
                             const bgMusic = document.getElementById('bgMusic');
                             if (!isMusicPlaying) {
                                 bgMusic.muted = false;
@@ -512,12 +569,11 @@
         }
         function createColorPalette() {
             const palette = document.getElementById('colorPalette');
-            if (!palette) {
-                console.error("❌ #colorPalette 不存在！");
-                return;
-            }
+            if (!palette) return;
             palette.innerHTML = '';
-            const shuffledKeys = [3, 7, 2, 5, 8, 1, 4, 6];
+            // 定义一个乱序的键数组，用于打乱颜色显示顺序
+            const shuffledKeys = [3, 7, 2, 5, 8, 1, 4, 6]; 
+            // 按乱序数组遍历 colorMap
             for (const key of shuffledKeys) {
                 const color = colorMap[key];
                 const colorBox = document.createElement('div');
@@ -531,9 +587,16 @@
                 palette.appendChild(colorBox);
             }
         }
+        
+        // 🎨 完成时揭示原图的函数
         function startSequentialReveal() {
             const pixelCanvas = document.getElementById('pixelCanvas');
             const applause = document.getElementById('applauseSound');
+            
+            // 步骤 1: 立即加载原图作为背景
+            pixelCanvas.classList.add('revealed-bg'); 
+            
+            // 播放掌声并停止背景音乐
             if (navigator.vibrate) {
                 navigator.vibrate([200, 100, 200, 100, 200]);
             }
@@ -559,12 +622,27 @@
                     }
                 }, 50);
             }
-            pixelCanvas.classList.add('revealed-bg');
-            document.querySelectorAll('.pixel').forEach(el => {
-                el.classList.add('revealed');
+            
+            // 步骤 2: 分阶段让格子透明化（星光闪烁）
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+            let delay = 600; // 延迟增加至 600ms，让格子消失更慢
+            
+            numbers.forEach((num, index) => {
+                const elements = document.querySelectorAll(`.pixel[data-value="${num}"]`);
+                setTimeout(() => {
+                    elements.forEach(el => {
+                        el.classList.add('revealed'); // 应用透明化（但保留边框/阴影）
+                        localStorage.setItem(`revealed_${el.dataset.row}_${el.dataset.col}`, 'true'); // 保存揭示状态
+                    });
+                }, delay * (index + 1));
             });
-            createFireworks(pixelCanvas);
+            
+            // 步骤 3: 烟花效果，在所有格子揭示（变为透明）后开始
+            setTimeout(() => {
+                createFireworks(pixelCanvas);
+            }, delay * numbers.length + 500); 
         }
+        
         function updateProgressBar() {
             let completedCells = 0;
             let totalFillableCells = 0;
@@ -574,9 +652,11 @@
                     if (typeof value === 'number' && value in colorMap) {
                         totalFillableCells++;
                         const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${i * 29 + j + 1})`);
+                        
+                        // 检查是否仍为默认的未着色状态（浅粉色）
                         if (pixel && pixel.style.backgroundColor !== '' && 
-                            pixel.style.backgroundColor !== 'rgb(248, 224, 224)' && 
-                            pixel.style.backgroundColor !== '#f8e0e0') {
+                            pixel.style.backgroundColor !== DEFAULT_UNCOLORED_RGB && 
+                            pixel.style.backgroundColor !== DEFAULT_UNCOLORED_HEX) {
                             completedCells++;
                         }
                     }
@@ -595,6 +675,7 @@
                 if (progressFill) {
                     progressFill.classList.add('completed');
                 }
+                // 完成时调用新的揭示函数
                 startSequentialReveal();
             } else {
                 if (progressFill) {
@@ -612,20 +693,16 @@
                 console.log("您的浏览器不支持语音播放功能。");
             }
         }
+        // =============== 进度和音频控制 ===============
         function saveProgress() {
             const states = [];
-            for (let i = 0; i < gridData.length; i++) {
-                for (let j = 0; j < gridData[i].length; j++) {
-                    const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${i * 29 + j + 1})`);
-                    if (pixel) {
-                        states.push({
-                            row: i,
-                            col: j,
-                            color: pixel.style.backgroundColor
-                        });
-                    }
-                }
-            }
+            document.querySelectorAll('.pixel').forEach(pixel => {
+                states.push({
+                    row: pixel.dataset.row,
+                    col: pixel.dataset.col,
+                    color: pixel.style.backgroundColor
+                });
+            });
             localStorage.setItem('starNightProgress', JSON.stringify(states));
             localStorage.setItem('lastPlayed', new Date().toLocaleString());
         }
@@ -636,16 +713,24 @@
                     const states = JSON.parse(saved);
                     let hasData = false;
                     states.forEach(item => {
-                        const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${item.row * 29 + item.col + 1})`);
+                        const pixel = document.querySelector(`#pixelCanvas .pixel:nth-child(${item.row * 29 + parseInt(item.col) + 1})`);
                         if (pixel && item.color) {
                             pixel.style.backgroundColor = item.color;
                             hasData = true;
                         }
                     });
                     if (hasData) {
-                        console.log("进度已恢复");
                         gameStarted = true;
                         updateProgressBar();
+                        // 如果进度已完成，并且加载时没有揭示状态，则手动检查一次是否需要揭示
+                        if (document.getElementById('progressPercent').textContent === '100%') {
+                            const isAnyRevealed = document.querySelector('.pixel.revealed');
+                            if (!isAnyRevealed) {
+                                document.getElementById('pixelCanvas').classList.add('revealed-bg');
+                                document.querySelectorAll('.pixel').forEach(p => p.classList.add('revealed'));
+                            }
+                        }
+                        console.log("进度已恢复");
                     }
                 } catch(e) {
                     console.log("恢复进度失败");
@@ -657,7 +742,8 @@
             if (saved) {
                 try {
                     const states = JSON.parse(saved);
-                    const item = states.find(s => s.row === row && s.col === col);
+                    // 确保 row/col 转换为字符串进行比较，因为 dataset 属性是字符串
+                    const item = states.find(s => s.row === String(row) && s.col === String(col));
                     return item ? item.color : null;
                 } catch(e) {
                     return null;
@@ -684,25 +770,24 @@
         function setVolume(volume) {
             const bgMusic = document.getElementById('bgMusic');
             if (bgMusic) {
-                bgMusic.volume = volume / 100;
+                bgMusic.volume = volume / 100; // 将 0-100 转换为 0.0-1.0
             }
         }
+        // =============== 初始化 ===============
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("✅ DOM 加载完成");
-            const pixelCanvas = document.getElementById('pixelCanvas');
-            const colorPalette = document.getElementById('colorPalette');
-            if (!pixelCanvas || !colorPalette) {
-                console.error("❌ 页面加载错误！缺少关键元素");
-                return;
-            }
             createCanvas();
             createColorPalette();
             loadProgress();
             updateProgressBar();
+            
+            // 重新开始按钮逻辑
             document.getElementById('restartBtn').onclick = function() {
+                // 重置所有格子和状态
                 document.querySelectorAll('.pixel').forEach(pixel => {
-                    pixel.style.backgroundColor = '#f8e0e0';
-                    pixel.classList.remove('revealed');
+                    // 确保重置为浅粉色
+                    pixel.style.backgroundColor = DEFAULT_UNCOLORED_HEX; 
+                    pixel.classList.remove('revealed'); // 重置背景
+                    localStorage.removeItem(`revealed_${pixel.dataset.row}_${pixel.dataset.col}`); // 清除单个揭示状态
                 });
                 const progressFill = document.getElementById('progressFill');
                 const progressPercent = document.getElementById('progressPercent');
@@ -714,11 +799,10 @@
                 document.querySelectorAll('.palette-color').forEach(el => el.classList.remove('selected'));
                 const pixelCanvas = document.getElementById('pixelCanvas');
                 if (pixelCanvas) {
-                    pixelCanvas.style.display = 'grid';
-                    pixelCanvas.classList.remove('revealed-bg');
-                    pixelCanvas.style.opacity = '1';
+                    pixelCanvas.classList.remove('revealed-bg'); // 隐藏原图
                 }
                 localStorage.removeItem('starNightProgress');
+                // 自动播放背景音乐
                 const bgMusic = document.getElementById('bgMusic');
                 if (!isMusicPlaying) {
                     bgMusic.muted = false;
@@ -734,6 +818,7 @@
             document.getElementById('musicBtn').onclick = function() {
                 toggleMusic();
             };
+            // 音量滑块初始化
             const volumeSlider = document.getElementById('volumeSlider');
             if (volumeSlider) {
                 volumeSlider.value = 100;
@@ -742,17 +827,15 @@
                     setVolume(this.value);
                 });
             }
+            // 页面首次点击时激活音频上下文
             document.body.addEventListener('click', function initAudio() {
                 const bgMusic = document.getElementById('bgMusic');
                 if (bgMusic) {
                     bgMusic.muted = true;
                     bgMusic.play().then(() => {
-                        console.log("音频上下文已激活");
                         bgMusic.pause();
                         bgMusic.muted = false;
-                    }).catch(e => {
-                        console.log("音频激活失败:", e);
-                    });
+                    }).catch(e => {});
                 }
                 document.body.removeEventListener('click', initAudio);
             }, { once: true });
