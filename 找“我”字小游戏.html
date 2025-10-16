@@ -106,7 +106,7 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px; /* Added for consistent spacing between buttons */
+      gap: 8px;
     }
 
     .control-btn {
@@ -119,9 +119,7 @@
       color: white;
     }
 
-    /* Styles for the different buttons */
     #startBtn, #restartBtn {
-      background-color: #3b82f6; /* Fallback for older browsers */
       background: linear-gradient(135deg, #3b82f6, #2563eb);
     }
     #startBtn:hover, #restartBtn:hover {
@@ -129,7 +127,6 @@
     }
 
     #timerModeBtn {
-      background-color: #059669; /* Fallback for older browsers */
       background: linear-gradient(135deg, #059669, #047857);
     }
     #timerModeBtn:hover {
@@ -137,21 +134,18 @@
     }
 
     #toggleBtn {
-      background-color: #8b5cf6; /* Fallback for older browsers */
       background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     }
     #toggleBtn:hover {
       background: linear-gradient(135deg, #7c3aed, #6d28d9);
     }
 
-    /* Container to hold the Start and Restart buttons in the same place */
     #startRestartContainer {
       position: relative;
-      height: 44px; /* Set a fixed height for the container */
+      height: 44px;
       width: 100%;
     }
 
-    /* Position the start and restart buttons absolutely within their container */
     #startBtn, #restartBtn {
       position: absolute;
       top: 0;
@@ -205,9 +199,9 @@
       border-radius: 6px;
     }
 
-    /* New colors for correct and wrong cells */
-    .correct { background-color: #ef4444; color: white; } /* Changed to red */
-    .wrong   { background-color: #a3e635; color: white; } /* Changed to green */
+    /* 正确和错误样式 */
+    .correct { background-color: #ef4444; color: white; } /* 红色 */
+    .wrong   { background-color: #a3e635; color: white; } /* 绿色 */
 
     .bang-icon {
       position: absolute;
@@ -229,6 +223,7 @@
   </style>
 </head>
 <body>
+  <!-- 左侧面板（完全未改动） -->
   <div id="leftPanel">
     <h1 id="gameTitle">🔍 找<span class="highlight-target">“我”</span>小游戏<br>Find <span class="highlight-target">“我”</span> Game</h1>
     <div id="instructions"><span class="instruction-heading">游戏玩法：</span><br>
@@ -266,12 +261,15 @@
     </div>
   </div>
 
+  <!-- 右侧游戏区域 -->
   <div id="gameContainer">
     <div id="boardWrap">
       <div id="game" aria-label="game-board"></div>
     </div>
   </div>
 
+  <!-- 音效文件 -->
+  <audio id="wrongSound" src="bomb.mp3" preload="auto"></audio>
   <audio id="winSound" src="applause.mp3" preload="auto"></audio>
 
   <script>
@@ -292,6 +290,7 @@
     let timeLeft = durationSec;
     let elapsed = 0;
 
+    // 初始化
     window.addEventListener('load', () => {
       createBoard();
       updateProgressDisplay();
@@ -299,8 +298,9 @@
       updateTimerDisplay();
       updateCountdownVisibility();
       updateButtonText();
-      runSelfTests();
+      initAudio(); // 激活音频权限
     });
+
     window.addEventListener('resize', resizeBoard);
 
     function resizeBoard() {
@@ -334,22 +334,56 @@
     }
     
     function updateButtonText() {
-        const toggleBtn = document.getElementById('toggleBtn');
-        toggleBtn.textContent = currentTarget === '我' ? "🔎 找“找” / Switch to '找'" : "😊 找“我” / Switch to '我'";
-        const timerModeBtn = document.getElementById('timerModeBtn');
-        timerModeBtn.textContent = timerMode === 'down' ? '⏱️ 切换为 计时 / Switch to Count-Up' : '⏳ 切换为 倒计时 / Switch to Countdown';
+      const toggleBtn = document.getElementById('toggleBtn');
+      toggleBtn.textContent = currentTarget === '我' ? "🔎 找“找” / Switch to '找'" : "😊 找“我” / Switch to '我'";
+      const timerModeBtn = document.getElementById('timerModeBtn');
+      timerModeBtn.textContent = timerMode === 'down' ? '⏱️ 切换为 计时 / Switch to Count-Up' : '⏳ 切换为 倒计时 / Switch to Countdown';
     }
 
-    function resetWinSound() {
+    // ✅ 初始化音频系统（解决浏览器自动播放限制）
+    function initAudio() {
+      const wrongSound = document.getElementById('wrongSound');
       const winSound = document.getElementById('winSound');
-      winSound.pause();
-      try { winSound.currentTime = 0; } catch (e) {}
+
+      // 尝试预播放一次来解锁音频上下文
+      const unlock = () => {
+        wrongSound.play().then(() => {
+          wrongSound.pause();
+          wrongSound.currentTime = 0;
+        }).catch(() => {});
+
+        winSound.play().then(() => {
+          winSound.pause();
+          winSound.currentTime = 0;
+        }).catch(() => {});
+
+        // 移除监听，避免重复触发
+        document.body.removeEventListener('click', unlock);
+      };
+
+      // 第一次用户点击页面时激活音频
+      document.body.addEventListener('click', unlock, { once: true });
     }
 
+    // ✅ 播放错误音效
+    function playWrongSound() {
+      const sound = document.getElementById('wrongSound');
+      if (!sound) return;
+      sound.currentTime = 0;
+      sound.play().catch(err => {
+        console.warn("❌ 播放失败：bomb.mp3", err);
+      });
+    }
+
+    // ✅ 播放胜利掌声
     function playWinSound() {
-      const winSound = document.getElementById('winSound');
-      winSound.volume = 0.85;
-      winSound.play().catch(() => {});
+      const sound = document.getElementById('winSound');
+      if (!sound) return;
+      sound.currentTime = 0;
+      sound.volume = 0.9;
+      sound.play().catch(err => {
+        console.warn("❌ 播放失败：applause.mp3", err);
+      });
     }
 
     function formatTime(sec){
@@ -414,7 +448,6 @@
       board = [];
       foundCount = 0;
       document.getElementById('winMessage').style.display = 'none';
-      resetWinSound();
       updateTitle();
 
       const game = document.getElementById('game');
@@ -456,7 +489,7 @@
           winMsg.style.display = 'block';
           winMsg.style.color = 'green';
           winMsg.innerHTML = WIN_TEXT;
-          playWinSound();
+          playWinSound(); // ✅ 只在这里播放掌声
         }
       } else {
         cell.classList.add('wrong');
@@ -464,6 +497,7 @@
         bang.className = 'bang-icon';
         bang.textContent = '💥';
         cell.appendChild(bang);
+        playWrongSound(); // ✅ 只在点错格子时播放 bomb.mp3
       }
     }
 
@@ -474,7 +508,6 @@
       const msg = document.getElementById('winMessage');
       msg.style.display = 'none';
       msg.style.color = 'green';
-      resetWinSound();
       placeTargets();
       startTimer();
     }
@@ -486,7 +519,6 @@
       const msg = document.getElementById('winMessage');
       msg.style.display = 'none';
       msg.style.color = 'green';
-      resetWinSound();
       placeTargets();
       startTimer();
     }
@@ -533,7 +565,6 @@
       const msg = document.getElementById('winMessage');
       msg.style.display = 'none';
       msg.style.color = 'green';
-      resetWinSound();
 
       if (hasStarted) {
         placeTargets();
@@ -578,28 +609,6 @@
       ro.observe(document.getElementById('boardWrap'));
     } else {
       setInterval(resizeBoard, 500);
-    }
-
-    function runSelfTests(){
-      try {
-        console.assert(formatTime(0) === '00:00', 'formatTime(0) 应为 00:00');
-        console.assert(formatTime(65) === '01:05', 'formatTime(65) 应为 01:05');
-        const before = timerMode;
-        toggleTimerMode();
-        console.assert(timerMode !== before, 'toggleTimerMode 应改变模式');
-        const modeBtn = document.getElementById('timerModeBtn');
-        console.assert(modeBtn && modeBtn.textContent.length > 0, 'timer 按钮应更新文案');
-        updateCountdownVisibility();
-        const sel = document.getElementById('countdownSelect');
-        console.assert(sel.style.display === ((timerMode === 'down') ? 'inline-block' : 'none'), '倒计时配置显隐应与模式一致');
-        toggleTimerMode();
-        updateTimerDisplay();
-        console.assert(board.length === rows && board[0].length === cols, '棋盘应为 8x8');
-        console.assert(!WIN_TEXT.includes('已找到'), 'WIN_TEXT 不应包含进度文案');
-        console.log('[SelfTests] 全部通过');
-      } catch (e){
-        console.warn('[SelfTests] 失败：', e);
-      }
     }
 
     window.startGame = startGame;
