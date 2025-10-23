@@ -136,6 +136,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      font-family: "楷体", KaiTi, STKaiti, serif; /* ✅ 楷体字体 */
     }
     .tile:hover {
       transform: scale(1.05);
@@ -151,6 +152,11 @@
     }
     .season-card {
       background-color: #a64ca6;
+      color: white;
+      font-size: 20px;
+    }
+    .honor-card {
+      background-color: #d32f2f;
       color: white;
       font-size: 20px;
     }
@@ -194,7 +200,6 @@
     .btn-restart {
       background-color: #43a047;
     }
-    /* ===== 消息区域：无跳动 + 听牌多行支持 ===== */
     #message {
       margin: 8px 0;
       font-size: clamp(18px, 4vw, 24px);
@@ -229,7 +234,6 @@
       align-items: center;
       line-height: 1.4;
     }
-    /* ===== 胜利时的 🏆 和 🎉 动画 ===== */
     .trophy {
       font-size: clamp(40px, 6vw, 60px);
       color: gold;
@@ -298,7 +302,6 @@
       text-align: center;
       padding: 15px;
     }
-    /* ===== 麻将插图：金色边框 + 立体阴影 ===== */
     #mahjong-img {
       max-width: 45%;
       margin: 15px auto 20px;
@@ -380,7 +383,6 @@
       transform: none;
       transition: none;
     }
-    /* ===== iPad & 小平板优化 (768px ~ 1200px) ===== */
     @media (min-width: 768px) and (max-width: 1200px) {
       .main-container {
         flex-direction: column;
@@ -408,7 +410,7 @@
         height: 65px;
         font-size: 15px;
       }
-      .flower-card, .season-card, .face-down {
+      .flower-card, .season-card, .honor-card, .face-down {
         font-size: 18px;
       }
       .hand .tiles::-webkit-scrollbar {
@@ -488,7 +490,7 @@
         height: 65px;
         font-size: 14px;
       }
-      .flower-card, .season-card, .face-down {
+      .flower-card, .season-card, .honor-card, .face-down {
         font-size: 18px;
       }
     }
@@ -497,7 +499,6 @@
 </head>
 <body>
 <div class="game-title">🎲 欢迎来到刘老师的麻将学习小游戏 🀄<br/>🎮 Welcome to Ms. Liu's Mahjong Learning Game 🎴</div>
-<!-- 首页 -->
 <div id="start-screen">
   <img id="mahjong-img" src="麻将.png" alt="麻将游戏插图">
   <button id="start-button" onclick="startGame()">🎮 开始游戏 / Start Game</button>
@@ -506,9 +507,7 @@
     📈 CTR: <span id="ctrNum">0%</span>
   </div>
 </div>
-<!-- 赢牌音效 -->
 <audio id="applauseAudio" src="applause.mp3" preload="auto"></audio>
-<!-- 游戏区域 -->
 <div class="game-area" id="gameArea">
   <div class="main-container">
     <div class="left-panel" id="leftPanel">
@@ -522,10 +521,10 @@
         <ul class="rules">
           <li><div class="rule-cn">每张牌最多出现 4 次。</div><div class="rule-en">Each tile can appear up to 4 copies.</div></li>
           <li><div class="rule-cn">摸一张 → 必须打一张 → 手牌 + 组合总数保持 14 张。</div><div class="rule-en">Draw one → discard one → hand + sets stays at 14 tiles.</div></li>
-          <li><div class="rule-cn">对子：数字对子 / 同名花（梅梅/兰兰/竹竹/菊菊）/ 同名季（春春/夏夏/秋秋/冬冬）。</div><div class="rule-en">Pair: identical numbers, identical Flowers, or identical Seasons.</div></li>
-          <li><div class="rule-cn">刻子：三张相同。数字/花/季都可以。</div><div class="rule-en">Pong: three identical tiles (numbers/flowers/seasons).</div></li>
-          <li><div class="rule-cn">顺子：<b>仅数字牌</b>可组成。<b>花/季不允许顺子</b>。</div><div class="rule-en">Chow: <b>numbers only</b>. <b>Flowers/Seasons cannot form chows</b>.</div></li>
-          <li><div class="rule-cn">听牌提示只显示当前真正需要的牌（不会显示已不需要的旧结果）。</div><div class="rule-en">Tenpai hint only shows current needed tiles (stays in sync with your hand).</div></li>
+          <li><div class="rule-cn">对子：数字对子 / 同名花（梅梅等）/ 同名季（春春等）/ 同名字牌（东E、南S、西W、北N、中）。</div><div class="rule-en">Pair: identical numbers, Flowers, Seasons, or Honors (EastE, SouthS, WestW, NorthN, Zhong).</div></li>
+          <li><div class="rule-cn">刻子：三张相同。数字/花/季/字牌都可以。</div><div class="rule-en">Pong: three identical tiles (numbers/flowers/seasons/honors).</div></li>
+          <li><div class="rule-cn">顺子：<b>仅数字牌</b>可组成。<b>花/季/字牌不允许顺子</b>。</div><div class="rule-en">Chow: <b>numbers only</b>. <b>Flowers/Seasons/Honors cannot form chows</b>.</div></li>
+          <li><div class="rule-cn">听牌提示只显示当前真正需要的牌。</div><div class="rule-en">Tenpai hint only shows currently needed tiles.</div></li>
           <li><div class="rule-cn">胜利时显示🏆与🎆并播放掌声。</div><div class="rule-en">On win, show 🏆 + 🎆 and play applause.</div></li>
         </ul>
       </div>
@@ -567,7 +566,6 @@
   </div>
 </div>
 <script>
-  /* ===== 本地统计（本浏览器累计） ===== */
   const STATS_KEY = 'mahjong_local_stats_v1';
   function loadStats() {
     try {
@@ -603,14 +601,18 @@
     saveStats(stats);
     renderStats();
   }
-  /* ===== 游戏核心逻辑（保持不变） ===== */
+
   const suits = ['万','筒','条'];
   const suitEmojis = {'万':'🀄','筒':'🐼','条':'🐲'};
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const honors = ['东','南','西','北','中'];
+
   function getFlowerEmoji(n) { return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''; }
   function getSeasonEmoji(n) { return n==='春'?'🌷':n==='夏'?'🌺':n==='秋'?'🍁':n==='冬'?'❄️':''; }
+
   let hand = [], faceDownTiles = [], allTiles = [], validSetsData = [];
   window.isGameOver = false; window.hasDiscarded = true; let handSortable = null;
+
   function playApplause() {
     const a = document.getElementById('applauseAudio');
     if (!a) return;
@@ -621,15 +623,18 @@
     if (!a) return;
     try { a.pause(); a.currentTime = 0; } catch (e) {}
   }
+
   function createFullMahjongSet() {
     const set = [];
     for (let i = 0; i < 4; i++) {
       suits.forEach(s => { for (let n = 1; n <= 9; n++) set.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
       ['梅','兰','竹','菊'].forEach(name => set.push({type:'flower', name, emoji:getFlowerEmoji(name), key:name}));
       ['春','夏','秋','冬'].forEach(name => set.push({type:'season', name, emoji:getSeasonEmoji(name), key:name}));
+      honors.forEach(name => set.push({type:'honor', name, key:name}));
     }
     return set;
   }
+
   function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -637,6 +642,7 @@
     }
     return a;
   }
+
   function startGame() {
     bumpPlays();
     document.getElementById('start-screen').style.display = 'none';
@@ -644,6 +650,7 @@
     window.isGameOver = false; window.hasDiscarded = true;
     generateHand(); enableGame();
   }
+
   function generateHand() {
     allTiles = shuffle(createFullMahjongSet());
     hand = allTiles.slice(0, 13);
@@ -656,12 +663,14 @@
     document.getElementById('winMessage').style.display = 'none';
     checkWaitingTiles();
   }
+
   function safeInitSortable(container, options) {
     if (window.Sortable && typeof window.Sortable === "function") {
       try { return new Sortable(container, options); } catch (e) { console.warn("Sortable init error:", e); }
     } else { console.warn("SortableJS not found; drag disabled."); }
     return null;
   }
+
   function renderHand() {
     const c = document.getElementById('hand'); c.innerHTML = '';
     for (let i = 0; i < 14; i++) {
@@ -688,10 +697,17 @@
           d.textContent = `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}`;
         } else if (t.type === 'flower') { 
           d.className = 'tile flower-card'; 
-          d.textContent = t.name + t.emoji; // ✅ 修改点 1
-        } else if (t.type === 'season') {   // ✅ 显式判断 season
+          d.textContent = t.name + t.emoji;
+        } else if (t.type === 'season') { 
           d.className = 'tile season-card'; 
-          d.textContent = t.name + t.emoji; // ✅ 修改点 2
+          d.textContent = t.name + t.emoji;
+        } else if (t.type === 'honor') {
+          d.className = 'tile honor-card';
+          if (t.name === '中') {
+            d.textContent = '中';
+          } else {
+            d.textContent = t.name + t.name.replace('东','E').replace('南','S').replace('西','W').replace('北','N');
+          }
         }
       }
       c.appendChild(d);
@@ -709,6 +725,7 @@
       }
     });
   }
+
   function renderNextHiddenTile() {
     const c = document.getElementById('hiddenTiles'); c.innerHTML = '';
     if (faceDownTiles.length === 0) {
@@ -731,6 +748,7 @@
     d.textContent = '🀀'; 
     c.appendChild(d);
   }
+
   function renderValidSets() {
     const c = document.getElementById('validSets'); c.innerHTML = '';
     const sorted = [...validSetsData].sort((A, B) => {
@@ -738,7 +756,7 @@
       if (aP && !bP) return 1; 
       if (!aP && bP) return -1;
       const a = A[0], b = B[0]; 
-      const typeOrder = {'normal':1, 'flower':2, 'season':3};
+      const typeOrder = {'normal':1, 'flower':2, 'season':3, 'honor':4};
       if (typeOrder[a.type] !== typeOrder[b.type]) return typeOrder[a.type] - typeOrder[b.type];
       if (a.type === 'normal' && b.type === 'normal') { 
         const suitOrder = {'万':1, '筒':2, '条':3}; 
@@ -764,20 +782,29 @@
           d.textContent = `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}`;
         } else if (t.type === 'flower') { 
           d.className = 'tile flower-card'; 
-          d.textContent = t.name + t.emoji; // ✅ 修改点 3
-        } else if (t.type === 'season') {   // ✅ 显式判断 season
+          d.textContent = t.name + t.emoji;
+        } else if (t.type === 'season') { 
           d.className = 'tile season-card'; 
-          d.textContent = t.name + t.emoji; // ✅ 修改点 4
+          d.textContent = t.name + t.emoji;
+        } else if (t.type === 'honor') {
+          d.className = 'tile honor-card';
+          if (t.name === '中') {
+            d.textContent = '中';
+          } else {
+            d.textContent = t.name + t.name.replace('东','E').replace('南','S').replace('西','W').replace('北','N');
+          }
         }
         g.appendChild(d);
       });
       c.appendChild(g);
     });
   }
+
   function toggleSelection(el) { 
     if (el.dataset.type === 'hidden' || window.isGameOver) return; 
     el.classList.toggle('selected'); 
   }
+
   function getSelectedTilesData() { 
     return Array.from(document.querySelectorAll('#hand .tile.selected')).map(el => ({
       type: el.dataset.tileType,
@@ -788,26 +815,26 @@
       emoji: el.dataset.tileEmoji
     })); 
   }
-  function getTileCounts(arr) { 
-    const m = {}; 
-    arr.forEach(t => { m[t.key] = (m[t.key] || 0) + 1; }); 
-    return m; 
-  }
+
   function isPair(_, arr) {
     if (arr.length !== 2) return false;
     const [a, b] = arr;
     if (a.type === 'normal' && b.type === 'normal' && a.key === b.key) return true;
     if (a.type === 'flower' && b.type === 'flower' && a.name === b.name) return true;
     if (a.type === 'season' && b.type === 'season' && a.name === b.name) return true;
+    if (a.type === 'honor' && b.type === 'honor' && a.name === b.name) return true;
     return false;
   }
+
   function isPong(_, arr) {
     if (arr.length !== 3) return false;
     if (arr[0].type === 'normal' && arr.every(t => t.type === 'normal' && t.key === arr[0].key)) return true;
     if (arr[0].type === 'flower' && arr.every(t => t.type === 'flower' && t.name === arr[0].name)) return true;
     if (arr[0].type === 'season' && arr.every(t => t.type === 'season' && t.name === arr[0].name)) return true;
+    if (arr[0].type === 'honor' && arr.every(t => t.type === 'honor' && t.name === arr[0].name)) return true;
     return false;
   }
+
   function isChow(arr) {
     if (arr.length !== 3) return false;
     const allNormal = arr.every(t => t.type === 'normal'); 
@@ -817,72 +844,13 @@
     const nums = arr.map(t => t.number).sort((a, b) => a - b);
     return nums[0] + 1 === nums[1] && nums[1] + 1 === nums[2];
   }
-  function canWin(freeHand, currentValidSetsData) {
-    const tiles = freeHand.concat(currentValidSetsData.flat());
-    if (tiles.length !== 14) return false;
-    const pairCands = []; 
-    const countBy = (arr, keyFn) => arr.reduce((m, t) => { const k = keyFn(t); m[k] = (m[k] || 0) + 1; return m; }, {});
-    const normals = tiles.filter(t => t.type === 'normal');
-    const flowers = tiles.filter(t => t.type === 'flower');
-    const seasons = tiles.filter(t => t.type === 'season');
-    const nC = countBy(normals, t => `${t.number}${t.suit}`), 
-          fC = countBy(flowers, t => t.name), 
-          sC = countBy(seasons, t => t.name);
-    Object.keys(nC).forEach(k => { if (nC[k] >= 2) pairCands.push({kind: 'normal', key: k}); });
-    Object.keys(fC).forEach(n => { if (fC[n] >= 2) pairCands.push({kind: 'flower', key: n}); });
-    Object.keys(sC).forEach(n => { if (sC[n] >= 2) pairCands.push({kind: 'season', key: n}); });
-    function removePairOnce(arr, p) {
-      const out = [...arr]; let removed = 0;
-      for (let i = out.length - 1; i >= 0 && removed < 2; i--) {
-        const t = out[i];
-        if (p.kind === 'normal' && t.type === 'normal' && `${t.number}${t.suit}` === p.key) { out.splice(i, 1); removed++; }
-        else if (p.kind === 'flower' && t.type === 'flower' && t.name === p.key) { out.splice(i, 1); removed++; }
-        else if (p.kind === 'season' && t.type === 'season' && t.name === p.key) { out.splice(i, 1); removed++; }
-      }
-      return removed === 2 ? out : null;
-    }
-    function canFormSets(arr, need) {
-      if (need === 0) return arr.length === 0;
-      if (arr.length < need * 3) return false;
-      for (let i = 0; i < arr.length; i++) {
-        const a = arr[i]; const idxs = [];
-        for (let j = 0; j < arr.length && idxs.length < 3; j++) {
-          const b = arr[j];
-          if (a.type === 'normal' && b.type === 'normal' && a.key === b.key) idxs.push(j);
-          else if (a.type === 'flower' && b.type === 'flower' && a.name === b.name) idxs.push(j);
-          else if (a.type === 'season' && b.type === 'season' && a.name === b.name) idxs.push(j);
-        }
-        if (idxs.length >= 3) {
-          const next = arr.filter((_, idx) => !idxs.slice(0, 3).includes(idx));
-          if (canFormSets(next, need - 1)) return true;
-        }
-      }
-      const normals = arr.filter(t => t.type === 'normal').sort((x, y) => x.suit === y.suit ? x.number - y.number : x.suit.localeCompare(y.suit));
-      for (let i = 0; i < normals.length; i++) {
-        const t1 = normals[i];
-        const i2 = normals.findIndex((t, idx) => idx > i && t.suit === t1.suit && t.number === t1.number + 1);
-        const i3 = normals.findIndex((t, idx) => idx > i2 && t.suit === t1.suit && t.number === t1.number + 2);
-        if (i2 !== -1 && i3 !== -1) {
-          const t2 = normals[i2], t3 = normals[i3];
-          const needArr = [t1, t2, t3]; const rest = [];
-          for (const x of arr) { const k = needArr.findIndex(n => n === x); if (k !== -1) needArr.splice(k, 1); else rest.push(x); }
-          if (needArr.length === 0 && canFormSets(rest, need - 1)) return true;
-        }
-      }
-      return false;
-    }
-    for (const p of pairCands) {
-      const rest = removePairOnce(tiles, p); 
-      if (!rest || rest.length !== 12) continue;
-      if (canFormSets(rest, 4)) return true;
-    }
-    return false;
-  }
+
   function canCompleteWithFixedSets(freeTiles, validSets) {
     const fixedSets = validSets.filter(s => s.length === 3 && (isPong({}, s) || isChow(s))).length;
     const fixedPairs = validSets.filter(s => s.length === 2 && isPair({}, s)).length;
     const setsNeed = 4 - fixedSets;
     const pairsNeed = 1 - fixedPairs;
+
     function removeNTiles(tiles, matchFn, n) {
       const out = []; let removed = 0;
       for (const t of tiles) {
@@ -891,6 +859,7 @@
       }
       return removed === n ? out : null;
     }
+
     function removeChow(tiles, suit, startN) {
       let a = false, b = false, c = false; const out = [];
       for (const t of tiles) {
@@ -901,13 +870,17 @@
       }
       return (a && b && c) ? out : null;
     }
+
     function canMeetTargets(tiles, needSets, needPairs) {
       if (needSets === 0 && needPairs === 0) return tiles.length === 0;
       if (tiles.length < needSets * 3 + needPairs * 2) return false;
+
       if (needPairs > 0) {
         const countMap = {};
         tiles.forEach(t => {
-          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : 
+                     (t.type === 'flower' ? `F|${t.name}` : 
+                     (t.type === 'season' ? `S|${t.name}` : `H|${t.name}`));
           countMap[k] = (countMap[k] || 0) + 1;
         });
         for (const k in countMap) {
@@ -916,16 +889,20 @@
             const rest = removeNTiles(tiles, tt => {
               if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
               if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
-              return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'S') return tt.type === 'season' && tt.name === parts[1];
+              return tt.type === 'honor' && tt.name === parts[1];
             }, 2);
             if (rest && canMeetTargets(rest, needSets, needPairs - 1)) return true;
           }
         }
       }
+
       if (needSets > 0) {
         const countMap = {};
         tiles.forEach(t => {
-          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : 
+                     (t.type === 'flower' ? `F|${t.name}` : 
+                     (t.type === 'season' ? `S|${t.name}` : `H|${t.name}`));
           countMap[k] = (countMap[k] || 0) + 1;
         });
         for (const k in countMap) {
@@ -934,17 +911,21 @@
             const rest = removeNTiles(tiles, tt => {
               if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
               if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
-              return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'S') return tt.type === 'season' && tt.name === parts[1];
+              return tt.type === 'honor' && tt.name === parts[1];
             }, 3);
             if (rest && canMeetTargets(rest, needSets - 1, needPairs)) return true;
           }
         }
+
         for (const s of suits) {
           for (let n = 1; n <= 7; n++) {
             let a = false, b = false, c = false;
             for (const t of tiles) {
               if (t.type === 'normal' && t.suit === s) {
-                if (t.number === n) a = true; else if (t.number === n + 1) b = true; else if (t.number === n + 2) c = true;
+                if (t.number === n) a = true;
+                else if (t.number === n + 1) b = true;
+                else if (t.number === n + 2) c = true;
               }
               if (a && b && c) break;
             }
@@ -957,8 +938,10 @@
       }
       return false;
     }
+
     return canMeetTargets(freeTiles, setsNeed, pairsNeed);
   }
+
   function checkSelection() {
     if (window.isGameOver) return;
     const sel = getSelectedTilesData();
@@ -970,11 +953,10 @@
       showMessage("请选择 2 张（对子）或 3 张（刻/顺）验证<br/>Select 2 (pair) or 3 (pong/chow)", "error"); 
       return; 
     }
-    const groups = getTileCounts(sel);
     const hasPair = validSetsData.some(s => s.length === 2);
     let ok = false;
     if (sel.length === 2) {
-      if (isPair(groups, sel)) {
+      if (isPair({}, sel)) {
         if (hasPair) { 
           showMessage("⚠️ 你已有一对，请先做三张组合", "error"); 
         } else { 
@@ -986,7 +968,7 @@
         showMessage("这不是有效对子", "error"); 
       }
     } else {
-      if (isPong(groups, sel) || isChow(sel)) { 
+      if (isPong({}, sel) || isChow(sel)) { 
         moveSelectedToValidSet(sel); 
         showMessage("恭喜！这是一个有效的三张组合", "normal"); 
         ok = true; 
@@ -1001,6 +983,7 @@
       checkWaitingTiles(); 
     }
   }
+
   function moveSelectedToValidSet(sel) {
     validSetsData.push(sel);
     const rm = {}; 
@@ -1009,6 +992,7 @@
     renderHand(); 
     renderValidSets();
   }
+
   function handleFlip() {
     if (window.isGameOver) return;
     if (!window.hasDiscarded) { 
@@ -1028,6 +1012,7 @@
     renderNextHiddenTile(); 
     setTimeout(checkTileCount, 100);
   }
+
   function discardSelectedTile() {
     if (window.isGameOver) return;
     if (window.hasDiscarded) { 
@@ -1054,6 +1039,7 @@
     renderNextHiddenTile(); 
     checkWaitingTiles();
   }
+
   function getWinningTiles() {
     const combined = hand.concat(validSetsData.flat());
     if (combined.length !== 13) return [];
@@ -1061,6 +1047,7 @@
     suits.forEach(s => { for (let n = 1; n <= 9; n++) cands.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
     ['梅','兰','竹','菊'].forEach(n => cands.push({type:'flower', name:n, emoji:getFlowerEmoji(n), key:n}));
     ['春','夏','秋','冬'].forEach(n => cands.push({type:'season', name:n, emoji:getSeasonEmoji(n), key:n}));
+    honors.forEach(n => cands.push({type:'honor', name:n, key:n}));
     const waiting = [];
     for (const d of cands) {
       const tryHand = hand.concat([d]);
@@ -1073,7 +1060,7 @@
     Array.from(document.querySelectorAll('#discards .tile')).forEach(el => { const k = el.dataset.tile || ''; if (k) add(k); });
     const filtered = waiting.filter(t => (visible[t.key] || 0) < 4);
     const suitOrd = {'万':1, '筒':2, '条':3};
-    const typeRank = t => t.type === 'normal' ? 1 : (t.type === 'flower' ? 2 : 3);
+    const typeRank = t => t.type === 'normal' ? 1 : (t.type === 'flower' ? 2 : (t.type === 'season' ? 3 : 4));
     filtered.sort((a, b) => {
       const ra = typeRank(a), rb = typeRank(b); 
       if (ra !== rb) return ra - rb;
@@ -1081,9 +1068,7 @@
         if (a.suit !== b.suit) return suitOrd[a.suit] - suitOrd[b.suit]; 
         return a.number - b.number; 
       }
-      if (a.type === 'flower' && b.type === 'flower') return (a.name > b.name) - (a.name < b.name);
-      if (a.type === 'season' && b.type === 'season') return (a.name > b.name) - (a.name < b.name);
-      return 0;
+      return (a.name || '').localeCompare(b.name || '');
     });
     const seen = new Set(), out = []; 
     for (const t of filtered) { 
@@ -1091,13 +1076,21 @@
     }
     return out;
   }
+
   function formatWaitingList(waitingTiles) {
-    const labels = waitingTiles.map(t => t.type === 'normal' ? `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}` : (t.name + t.emoji));
+    const labels = waitingTiles.map(t => {
+      if (t.type === 'normal') return `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}`;
+      if (t.type === 'flower') return t.name + t.emoji;
+      if (t.type === 'season') return t.name + t.emoji;
+      if (t.name === '中') return '中';
+      return t.name + t.name.replace('东','E').replace('南','S').replace('西','W').replace('北','N');
+    });
     if (labels.length === 0) return '';
     if (labels.length === 1) return `“${labels[0]}”`;
     if (labels.length === 2) return `“${labels[0]}” 或 “${labels[1]}”`;
     return labels.slice(0, -1).map(x => `“${x}”`).join('、') + ` 或 “${labels.at(-1)}”`;
   }
+
   function checkWaitingTiles() {
     const combined = hand.concat(validSetsData.flat());
     if (combined.length === 13) {
@@ -1113,12 +1106,14 @@
       showMessage("请选择一张要打出的牌<br/>Please select a tile to discard", "discardPrompt");
     }
   }
+
   function updateCombinationCount() {
     const setsCount = validSetsData.filter(set => set.length === 3 && (isPong({}, set) || isChow(set))).length;
     const pairCount = validSetsData.filter(set => set.length === 2 && isPair({}, set)).length;
     document.getElementById('combination-count').textContent =
       `🔢 已组数：${setsCount} 组 + ${pairCount} 对 / Count of Sets: ${setsCount} sets + ${pairCount} pair`;
   }
+
   function checkTileCount() {
     const handCount = document.querySelectorAll('#hand .tile').length;
     const validCount = validSetsData.flat().length;
@@ -1131,6 +1126,7 @@
     if (window.hasDiscarded && combined !== 13) console.warn(`⚠️ 已打牌应13张，当前${combined}`);
     if (!window.hasDiscarded && combined !== 14) console.warn(`⚠️ 已摸牌应14张，当前${combined}`);
   }
+
   function checkVictory() {
     updateCombinationCount();
     const m = document.getElementById('combination-count').textContent.match(/：(\d+)\s*组 \+ (\d+)\s*对/);
@@ -1150,6 +1146,7 @@
       }
     }
   }
+
   function showFireworks() {
     const p = document.getElementById('rightPanel'); 
     const fw = document.createElement('div'); 
@@ -1158,6 +1155,7 @@
     p.appendChild(fw); 
     setTimeout(() => fw.remove(), 5000);
   }
+
   function restartGame() {
     stopApplause();
     document.getElementById('hand').innerHTML = '';
@@ -1176,6 +1174,7 @@
     generateHand(); 
     enableGame();
   }
+
   function disableGame(allowRestart = false) {
     document.getElementById('btnCheck').disabled = true;
     document.getElementById('btnDiscard').disabled = true;
@@ -1183,6 +1182,7 @@
     if (handSortable && handSortable.option) handSortable.option("disabled", true);
     document.getElementById('btnRestart').disabled = !allowRestart;
   }
+
   function enableGame() {
     document.getElementById('btnCheck').disabled = false;
     document.getElementById('btnDiscard').disabled = false;
@@ -1191,17 +1191,17 @@
     renderNextHiddenTile();
     if (handSortable && handSortable.option) handSortable.option("disabled", false);
   }
+
   function showMessage(msg, type = "normal") {
     const m = document.getElementById('message');
     m.className = ''; 
     m.classList.add(`message-${type}`); 
     m.innerHTML = msg;
   }
-  // 👇 监听窗口 resize，解决横竖屏切换显示问题
-  let resizeTimer;
+
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(() => {
       if (document.getElementById('gameArea').style.display === 'block' && !window.isGameOver) {
         renderHand();
         renderNextHiddenTile();
