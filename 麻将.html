@@ -92,9 +92,11 @@
       display: flex;
       flex-wrap: nowrap;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
-      gap: 5px;
-      justify-content: center;
+      gap: 4px;
+      justify-content: flex-start;
+      padding: 5px 0;
       scrollbar-width: thin;
       scrollbar-color: #888 #f0f0f0;
     }
@@ -174,7 +176,7 @@
         0 6px 12px rgba(0, 0, 0, 0.35),
         inset 0 -2px 5px rgba(0, 0, 0, 0.2),
         inset 0 2px 4px rgba(255, 255, 255, 0.5),
-        0 0 0 3px rgba(50, 200, 50, 0.6); /* 柔和绿光高亮 */
+        0 0 0 3px rgba(50, 200, 50, 0.6); /* 柔和绿光 */
     }
     .inactive {
       opacity: 0.5;
@@ -391,6 +393,8 @@
       transform: none;
       transition: none;
     }
+
+    /* ===== 响应式：iPad & 小平板 (768px ~ 1200px) ===== */
     @media (min-width: 768px) and (max-width: 1200px) {
       .main-container {
         flex-direction: column;
@@ -408,18 +412,20 @@
       }
       .hand .tiles,
       .hidden-tiles .tiles {
-        flex-wrap: wrap;
-        overflow-x: hidden;
-        justify-content: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
         gap: 4px;
+        padding: 5px 0;
       }
       .tile {
-        width: 50px;
-        height: 65px;
-        font-size: 15px;
+        width: 48px;
+        height: 62px;
+        font-size: 14px;
       }
       .flower-card, .season-card, .face-down {
-        font-size: 18px;
+        font-size: 17px;
       }
       .hand .tiles::-webkit-scrollbar {
         display: none;
@@ -429,6 +435,8 @@
         scrollbar-width: none;
       }
     }
+
+    /* ===== 手机优化 (≤767px) ===== */
     @media (max-width: 767px) {
       .main-container {
         flex-direction: column;
@@ -444,6 +452,23 @@
       .game-title {
         font-size: 24px;
         padding: 12px;
+      }
+      .hand .tiles,
+      .hidden-tiles .tiles {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        gap: 4px;
+        padding: 5px 0;
+      }
+      .tile {
+        width: 46px;
+        height: 60px;
+        font-size: 13px;
+      }
+      .flower-card, .season-card, .face-down {
+        font-size: 16px;
       }
       .button-row {
         gap: 10px;
@@ -470,7 +495,16 @@
       .trophy {
         font-size: 45px;
       }
+      .hand .tiles::-webkit-scrollbar {
+        display: none;
+      }
+      .hand .tiles {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     }
+
+    /* ===== 小屏手机优化 (≤480px) ===== */
     @media (max-width: 480px) {
       .game-title {
         font-size: 20px;
@@ -481,25 +515,33 @@
         font-size: 13px;
       }
       #message {
-        font-size: 16px;
+        font-size: 15px;
         min-height: 40px;
         max-height: 65px;
       }
+      .button-row {
+        gap: 8px;
+      }
       button {
-        padding: 6px 12px;
-        font-size: 13px;
+        padding: 5px 12px;
+        font-size: 12px;
       }
       #start-button {
         padding: 8px 16px;
         font-size: 15px;
       }
       .tile {
-        width: 50px;
-        height: 65px;
-        font-size: 14px;
+        width: 44px;
+        height: 58px;
+        font-size: 12px;
       }
       .flower-card, .season-card, .face-down {
-        font-size: 18px;
+        font-size: 15px;
+      }
+      .hand .tiles,
+      .hidden-tiles .tiles {
+        gap: 3px;
+        padding: 4px 0;
       }
     }
   </style>
@@ -552,7 +594,7 @@
         <div class="tiles" id="hiddenTiles"></div>
       </div>
       <div class="hand">
-        <div class="label-cn-en"><span class="label-cn">🂠 你的手牌（最多13张）：</span><span class="label-en">Your Hand (Max 13 tiles):</span></div>
+        <div class="label-cn-en"><span class="label-cn">🂠 你的手牌（左右滑动查看）</span><span class="label-en">Your Hand (swipe left/right)</span></div>
         <div id="message"></div>
         <div class="tiles" id="hand"></div>
       </div>
@@ -574,7 +616,7 @@
   </div>
 </div>
 <script>
-  /* ===== 本地统计（本浏览器累计） ===== */
+  /* ===== 本地统计 ===== */
   const STATS_KEY = 'mahjong_local_stats_v1';
   function loadStats() {
     try {
@@ -610,14 +652,17 @@
     saveStats(stats);
     renderStats();
   }
-  /* ===== 游戏核心逻辑（保持不变） ===== */
+
+  /* ===== 游戏逻辑 ===== */
   const suits = ['万','筒','条'];
   const suitEmojis = {'万':'🀄','筒':'🐼','条':'🐲'};
   const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
   function getFlowerEmoji(n) { return n==='梅'?'🌸':n==='兰'?'🌿':n==='竹'?'🎋':n==='菊'?'🌼':''; }
   function getSeasonEmoji(n) { return n==='春'?'🌷':n==='夏'?'🌺':n==='秋'?'🍁':n==='冬'?'❄️':''; }
+
   let hand = [], faceDownTiles = [], allTiles = [], validSetsData = [];
   window.isGameOver = false; window.hasDiscarded = true; let handSortable = null;
+
   function playApplause() {
     const a = document.getElementById('applauseAudio');
     if (!a) return;
@@ -628,6 +673,7 @@
     if (!a) return;
     try { a.pause(); a.currentTime = 0; } catch (e) {}
   }
+
   function createFullMahjongSet() {
     const set = [];
     for (let i = 0; i < 4; i++) {
@@ -637,6 +683,7 @@
     }
     return set;
   }
+
   function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -644,6 +691,7 @@
     }
     return a;
   }
+
   function startGame() {
     bumpPlays();
     document.getElementById('start-screen').style.display = 'none';
@@ -651,6 +699,7 @@
     window.isGameOver = false; window.hasDiscarded = true;
     generateHand(); enableGame();
   }
+
   function generateHand() {
     allTiles = shuffle(createFullMahjongSet());
     hand = allTiles.slice(0, 13);
@@ -663,12 +712,14 @@
     document.getElementById('winMessage').style.display = 'none';
     checkWaitingTiles();
   }
+
   function safeInitSortable(container, options) {
     if (window.Sortable && typeof window.Sortable === "function") {
       try { return new Sortable(container, options); } catch (e) { console.warn("Sortable init error:", e); }
     } else { console.warn("SortableJS not found; drag disabled."); }
     return null;
   }
+
   function renderHand() {
     const c = document.getElementById('hand'); c.innerHTML = '';
     for (let i = 0; i < 14; i++) {
@@ -716,6 +767,7 @@
       }
     });
   }
+
   function renderNextHiddenTile() {
     const c = document.getElementById('hiddenTiles'); c.innerHTML = '';
     if (faceDownTiles.length === 0) {
@@ -738,6 +790,7 @@
     d.textContent = '🀀'; 
     c.appendChild(d);
   }
+
   function renderValidSets() {
     const c = document.getElementById('validSets'); c.innerHTML = '';
     const sorted = [...validSetsData].sort((A, B) => {
@@ -781,10 +834,12 @@
       c.appendChild(g);
     });
   }
+
   function toggleSelection(el) { 
     if (el.dataset.type === 'hidden' || window.isGameOver) return; 
     el.classList.toggle('selected'); 
   }
+
   function getSelectedTilesData() { 
     return Array.from(document.querySelectorAll('#hand .tile.selected')).map(el => ({
       type: el.dataset.tileType,
@@ -795,6 +850,7 @@
       emoji: el.dataset.tileEmoji
     })); 
   }
+
   function isPair(_, arr) {
     if (arr.length !== 2) return false;
     const [a, b] = arr;
@@ -803,6 +859,7 @@
     if (a.type === 'season' && b.type === 'season' && a.name === b.name) return true;
     return false;
   }
+
   function isPong(_, arr) {
     if (arr.length !== 3) return false;
     if (arr[0].type === 'normal' && arr.every(t => t.type === 'normal' && t.key === arr[0].key)) return true;
@@ -810,6 +867,7 @@
     if (arr[0].type === 'season' && arr.every(t => t.type === 'season' && t.name === arr[0].name)) return true;
     return false;
   }
+
   function isChow(arr) {
     if (arr.length !== 3) return false;
     const allNormal = arr.every(t => t.type === 'normal'); 
@@ -819,11 +877,13 @@
     const nums = arr.map(t => t.number).sort((a, b) => a - b);
     return nums[0] + 1 === nums[1] && nums[1] + 1 === nums[2];
   }
+
   function canCompleteWithFixedSets(freeTiles, validSets) {
     const fixedSets = validSets.filter(s => s.length === 3 && (isPong({}, s) || isChow(s))).length;
     const fixedPairs = validSets.filter(s => s.length === 2 && isPair({}, s)).length;
     const setsNeed = 4 - fixedSets;
     const pairsNeed = 1 - fixedPairs;
+
     function removeNTiles(tiles, matchFn, n) {
       const out = []; let removed = 0;
       for (const t of tiles) {
@@ -832,6 +892,7 @@
       }
       return removed === n ? out : null;
     }
+
     function removeChow(tiles, suit, startN) {
       let a = false, b = false, c = false; const out = [];
       for (const t of tiles) {
@@ -842,9 +903,11 @@
       }
       return (a && b && c) ? out : null;
     }
+
     function canMeetTargets(tiles, needSets, needPairs) {
       if (needSets === 0 && needPairs === 0) return tiles.length === 0;
       if (tiles.length < needSets * 3 + needPairs * 2) return false;
+
       if (needPairs > 0) {
         const countMap = {};
         tiles.forEach(t => {
@@ -863,6 +926,7 @@
           }
         }
       }
+
       if (needSets > 0) {
         const countMap = {};
         tiles.forEach(t => {
@@ -880,12 +944,15 @@
             if (rest && canMeetTargets(rest, needSets - 1, needPairs)) return true;
           }
         }
+
         for (const s of suits) {
           for (let n = 1; n <= 7; n++) {
             let a = false, b = false, c = false;
             for (const t of tiles) {
               if (t.type === 'normal' && t.suit === s) {
-                if (t.number === n) a = true; else if (t.number === n + 1) b = true; else if (t.number === n + 2) c = true;
+                if (t.number === n) a = true;
+                else if (t.number === n + 1) b = true;
+                else if (t.number === n + 2) c = true;
               }
               if (a && b && c) break;
             }
@@ -898,8 +965,10 @@
       }
       return false;
     }
+
     return canMeetTargets(freeTiles, setsNeed, pairsNeed);
   }
+
   function checkSelection() {
     if (window.isGameOver) return;
     const sel = getSelectedTilesData();
@@ -941,6 +1010,7 @@
       checkWaitingTiles(); 
     }
   }
+
   function moveSelectedToValidSet(sel) {
     validSetsData.push(sel);
     const rm = {}; 
@@ -949,6 +1019,7 @@
     renderHand(); 
     renderValidSets();
   }
+
   function handleFlip() {
     if (window.isGameOver) return;
     if (!window.hasDiscarded) { 
@@ -968,6 +1039,7 @@
     renderNextHiddenTile(); 
     setTimeout(checkTileCount, 100);
   }
+
   function discardSelectedTile() {
     if (window.isGameOver) return;
     if (window.hasDiscarded) { 
@@ -994,6 +1066,7 @@
     renderNextHiddenTile(); 
     checkWaitingTiles();
   }
+
   function getWinningTiles() {
     const combined = hand.concat(validSetsData.flat());
     if (combined.length !== 13) return [];
@@ -1031,6 +1104,7 @@
     }
     return out;
   }
+
   function formatWaitingList(waitingTiles) {
     const labels = waitingTiles.map(t => t.type === 'normal' ? `${chineseNumbers[t.number - 1]}${suitEmojis[t.suit]}` : (t.name + t.emoji));
     if (labels.length === 0) return '';
@@ -1038,6 +1112,7 @@
     if (labels.length === 2) return `“${labels[0]}” 或 “${labels[1]}”`;
     return labels.slice(0, -1).map(x => `“${x}”`).join('、') + ` 或 “${labels.at(-1)}”`;
   }
+
   function checkWaitingTiles() {
     const combined = hand.concat(validSetsData.flat());
     if (combined.length === 13) {
@@ -1053,12 +1128,14 @@
       showMessage("请选择一张要打出的牌<br/>Please select a tile to discard", "discardPrompt");
     }
   }
+
   function updateCombinationCount() {
     const setsCount = validSetsData.filter(set => set.length === 3 && (isPong({}, set) || isChow(set))).length;
     const pairCount = validSetsData.filter(set => set.length === 2 && isPair({}, set)).length;
     document.getElementById('combination-count').textContent =
       `🔢 已组数：${setsCount} 组 + ${pairCount} 对 / Count of Sets: ${setsCount} sets + ${pairCount} pair`;
   }
+
   function checkTileCount() {
     const handCount = document.querySelectorAll('#hand .tile').length;
     const validCount = validSetsData.flat().length;
@@ -1071,6 +1148,7 @@
     if (window.hasDiscarded && combined !== 13) console.warn(`⚠️ 已打牌应13张，当前${combined}`);
     if (!window.hasDiscarded && combined !== 14) console.warn(`⚠️ 已摸牌应14张，当前${combined}`);
   }
+
   function checkVictory() {
     updateCombinationCount();
     const m = document.getElementById('combination-count').textContent.match(/：(\d+)\s*组 \+ (\d+)\s*对/);
@@ -1090,6 +1168,7 @@
       }
     }
   }
+
   function showFireworks() {
     const p = document.getElementById('rightPanel'); 
     const fw = document.createElement('div'); 
@@ -1098,6 +1177,7 @@
     p.appendChild(fw); 
     setTimeout(() => fw.remove(), 5000);
   }
+
   function restartGame() {
     stopApplause();
     document.getElementById('hand').innerHTML = '';
@@ -1116,6 +1196,7 @@
     generateHand(); 
     enableGame();
   }
+
   function disableGame(allowRestart = false) {
     document.getElementById('btnCheck').disabled = true;
     document.getElementById('btnDiscard').disabled = true;
@@ -1123,6 +1204,7 @@
     if (handSortable && handSortable.option) handSortable.option("disabled", true);
     document.getElementById('btnRestart').disabled = !allowRestart;
   }
+
   function enableGame() {
     document.getElementById('btnCheck').disabled = false;
     document.getElementById('btnDiscard').disabled = false;
@@ -1131,12 +1213,14 @@
     renderNextHiddenTile();
     if (handSortable && handSortable.option) handSortable.option("disabled", false);
   }
+
   function showMessage(msg, type = "normal") {
     const m = document.getElementById('message');
     m.className = ''; 
     m.classList.add(`message-${type}`); 
     m.innerHTML = msg;
   }
+
   window.addEventListener('resize', () => {
     clearTimeout(window.resizeTimer);
     window.resizeTimer = setTimeout(() => {
