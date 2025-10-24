@@ -92,13 +92,9 @@
       display: flex;
       flex-wrap: nowrap;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
       gap: 5px;
       justify-content: center;
-      width: 100%;
-      padding: 5px 0;
-      box-sizing: border-box;
       scrollbar-width: thin;
       scrollbar-color: #888 #f0f0f0;
     }
@@ -135,23 +131,17 @@
       cursor: pointer;
       user-select: none;
       transition: transform 0.2s, box-shadow 0.2s;
-      /* ===== 无边框 + 自然立体感 ===== */
-      box-shadow:
-        0 4px 8px rgba(0, 0, 0, 0.25),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.15),
-        inset 0 2px 3px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-family: "楷体", KaiTi, STKaiti, serif; /* ✅ 楷体 */
+      /* ===== 设置为楷体 ===== */
+      font-family: "楷体", KaiTi, STKaiti, serif;
     }
     .tile:hover {
       transform: scale(1.05);
-      box-shadow:
-        0 6px 12px rgba(0, 0, 0, 0.3),
-        inset 0 -2px 5px rgba(0, 0, 0, 0.2),
-        inset 0 2px 4px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 5px 8px rgba(0,0,0,0.3);
     }
     .wan { background-color: #fbc02d; color: black; }
     .tong { background-color: #1976d2; color: white; }
@@ -168,18 +158,13 @@
     }
     /* ===== Joker 牌专用样式 ===== */
     .joker-card {
-      background-color: #6a0dad; /* 深紫色，区别于其他牌 */
-      color: white;
+      background-color: #e0e0e0; /* 浅灰色 */
+      color: #333;               /* 深灰色文字 */
       font-size: 24px;
     }
     .selected {
-      outline: none;
-      transform: scale(1.12);
-      box-shadow:
-        0 6px 12px rgba(0, 0, 0, 0.35),
-        inset 0 -2px 5px rgba(0, 0, 0, 0.2),
-        inset 0 2px 4px rgba(255, 255, 255, 0.5),
-        0 0 0 3px rgba(50, 200, 50, 0.6); /* 柔和绿光 */
+      outline: 2px solid green;
+      transform: scale(1.1);
     }
     .inactive {
       opacity: 0.5;
@@ -212,17 +197,18 @@
     .btn-restart {
       background-color: #43a047;
     }
-    /* ===== 消息区域 ===== */
+    /* ===== 消息区域：无跳动 + 固定高度 ===== */
     #message {
       margin: 8px 0;
       font-size: clamp(18px, 4vw, 24px);
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
       overflow: hidden;
-      min-height: 50px;
-      max-height: 80px;
+      height: 60px; /* 固定高度 */
       line-height: 1.4;
+      word-break: break-all; /* 防止超长文本撑开容器 */
     }
     .message-waiting {
       color: #FF8C00;
@@ -486,8 +472,7 @@
       }
       #message {
         font-size: 18px;
-        min-height: 45px;
-        max-height: 70px;
+        height: 60px; /* 确保手机上也固定高度 */
       }
       #combination-count {
         font-size: 16px;
@@ -518,15 +503,14 @@
         font-size: 13px;
       }
       #message {
-        font-size: 15px;
-        min-height: 40px;
-        max-height: 65px;
+        font-size: 16px;
+        height: 60px;
       }
       .button-row {
         gap: 8px;
       }
       button {
-        padding: 5px 12px;
+        padding: 6px 12px;
         font-size: 12px;
       }
       #start-button {
@@ -592,7 +576,7 @@
           <span class="confetti-emoji">🎉</span> You won! Congratulations! <span class="confetti-emoji">🎉</span> 
         </div>
       </div>
-      <!-- ✅ Joker 隐藏牌在顶部，居中，专用样式 -->
+      <!-- ✅ Joker 隐藏牌在顶部，居中 -->
       <div class="hidden-tiles">
         <div class="label-cn-en"><span class="label-cn"> Joker 隐藏牌（点击翻出）：</span><span class="label-en">Face-Down Tiles (Click to Flip):</span></div>
         <div class="tiles" id="hiddenTiles"></div>
