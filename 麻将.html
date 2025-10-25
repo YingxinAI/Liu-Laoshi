@@ -131,7 +131,11 @@
       cursor: pointer;
       user-select: none;
       transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+      /* ===== 立体效果：三重阴影 ===== */
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.25),     /* 主阴影 - 浮起感 */
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15), /* 内阴影 - 边缘凹陷 */
+        inset 0 2px 3px rgba(255, 255, 255, 0.4); /* 内高光 - 顶部反光 */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -141,7 +145,10 @@
     }
     .tile:hover {
       transform: scale(1.05);
-      box-shadow: 0 5px 8px rgba(0,0,0,0.3);
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.3),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5);
     }
     .wan { background-color: #fbc02d; color: black; }
     .tong { background-color: #1976d2; color: white; }
@@ -156,11 +163,20 @@
       color: white;
       font-size: 20px;
     }
-    /* ===== Joker 牌专用样式 ===== */
+    .wind-card {
+      background-color: #8b0000; /* 深红 */
+      color: white;
+      font-size: 20px;
+    }
     .joker-card {
       background-color: #e0e0e0; /* 浅灰色 */
       color: #333;               /* 深灰色文字 */
       font-size: 24px;
+    }
+    .face-down {
+      background-color: #888;
+      color: white;
+      font-size: 20px;
     }
     .selected {
       outline: 2px solid green;
@@ -206,9 +222,9 @@
       justify-content: center;
       text-align: center;
       overflow: hidden;
-      height: 60px; /* 固定高度 */
+      height: 60px;
       line-height: 1.4;
-      word-break: break-all; /* 防止超长文本撑开容器 */
+      word-break: break-all;
     }
     .message-waiting {
       color: #FF8C00;
@@ -401,20 +417,18 @@
       }
       .hand .tiles,
       .hidden-tiles .tiles {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        flex-wrap: wrap;
+        overflow-x: hidden;
         justify-content: center;
         gap: 4px;
-        padding: 5px 0;
       }
       .tile {
-        width: 48px;
-        height: 62px;
-        font-size: 14px;
+        width: 50px;
+        height: 65px;
+        font-size: 15px;
       }
-      .flower-card, .season-card, .joker-card {
-        font-size: 17px;
+      .flower-card, .season-card, .wind-card, .joker-card {
+        font-size: 18px;
       }
       .hand .tiles::-webkit-scrollbar {
         display: none;
@@ -442,6 +456,30 @@
         font-size: 24px;
         padding: 12px;
       }
+      .button-row {
+        gap: 10px;
+      }
+      button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+      #start-button {
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+      #message {
+        font-size: 18px;
+        height: 60px;
+      }
+      #combination-count {
+        font-size: 16px;
+      }
+      .win-message {
+        font-size: 24px;
+      }
+      .trophy {
+        font-size: 45px;
+      }
       .hand .tiles,
       .hidden-tiles .tiles {
         flex-wrap: nowrap;
@@ -456,32 +494,8 @@
         height: 60px;
         font-size: 13px;
       }
-      .flower-card, .season-card, .joker-card {
+      .flower-card, .season-card, .wind-card, .joker-card {
         font-size: 16px;
-      }
-      .button-row {
-        gap: 10px;
-      }
-      button {
-        padding: 8px 16px;
-        font-size: 14px;
-      }
-      #start-button {
-        padding: 10px 20px;
-        font-size: 16px;
-      }
-      #message {
-        font-size: 18px;
-        height: 60px; /* 确保手机上也固定高度 */
-      }
-      #combination-count {
-        font-size: 16px;
-      }
-      .win-message {
-        font-size: 24px;
-      }
-      .trophy {
-        font-size: 45px;
       }
       .hand .tiles::-webkit-scrollbar {
         display: none;
@@ -506,9 +520,6 @@
         font-size: 16px;
         height: 60px;
       }
-      .button-row {
-        gap: 8px;
-      }
       button {
         padding: 6px 12px;
         font-size: 12px;
@@ -522,7 +533,7 @@
         height: 58px;
         font-size: 12px;
       }
-      .flower-card, .season-card, .joker-card {
+      .flower-card, .season-card, .wind-card, .joker-card {
         font-size: 15px;
       }
       .hand .tiles,
@@ -558,9 +569,9 @@
         <ul class="rules">
           <li><div class="rule-cn">每张牌最多出现 4 次。</div><div class="rule-en">Each tile can appear up to 4 copies.</div></li>
           <li><div class="rule-cn">摸一张 → 必须打一张 → 手牌 + 组合总数保持 14 张。</div><div class="rule-en">Draw one → discard one → hand + sets stays at 14 tiles.</div></li>
-          <li><div class="rule-cn">对子：数字对子 / 同名花（梅梅/兰兰/竹竹/菊菊）/ 同名季（春春/夏夏/秋秋/冬冬）。</div><div class="rule-en">Pair: identical numbers, identical Flowers, or identical Seasons.</div></li>
-          <li><div class="rule-cn">刻子：三张相同。数字/花/季都可以。</div><div class="rule-en">Pong: three identical tiles (numbers/flowers/seasons).</div></li>
-          <li><div class="rule-cn">顺子：<b>仅数字牌</b>可组成。<b>花/季不允许顺子</b>。</div><div class="rule-en">Chow: <b>numbers only</b>. <b>Flowers/Seasons cannot form chows</b>.</div></li>
+          <li><div class="rule-cn">对子：数字对子 / 同名花（梅梅/兰兰/竹竹/菊菊）/ 同名季（春春/夏夏/秋秋/冬冬）/ 同名风（东东/南南/西西/北北）/ 中中。</div><div class="rule-en">Pair: identical numbers, identical Flowers, identical Seasons, identical Winds, or 中中.</div></li>
+          <li><div class="rule-cn">刻子：三张相同。数字/花/季/风/中都可以。</div><div class="rule-en">Pong: three identical tiles (numbers/flowers/seasons/winds/中).</div></li>
+          <li><div class="rule-cn">顺子：<b>仅数字牌</b>可组成。<b>花/季/风/中不允许顺子</b>。</div><div class="rule-en">Chow: <b>numbers only</b>. <b>Flowers/Seasons/Winds/中 cannot form chows</b>.</div></li>
           <li><div class="rule-cn">听牌提示只显示当前真正需要的牌。</div><div class="rule-en">Tenpai hint only shows currently needed tiles.</div></li>
           <li><div class="rule-cn">胜利时显示🏆与🎆并播放掌声。</div><div class="rule-en">On win, show 🏆 + 🎆 and play applause.</div></li>
         </ul>
@@ -668,6 +679,15 @@
       suits.forEach(s => { for (let n = 1; n <= 9; n++) set.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
       ['梅','兰','竹','菊'].forEach(name => set.push({type:'flower', name, emoji:getFlowerEmoji(name), key:name}));
       ['春','夏','秋','冬'].forEach(name => set.push({type:'season', name, emoji:getSeasonEmoji(name), key:name}));
+      // ✅ 新增：字牌（风牌 + 红中）
+      ['东','南','西','北','中'].forEach(name => {
+        set.push({
+          type: 'wind',
+          name,
+          emoji: name === '中' ? '🀄' : (name === '东' ? '➡️' : name === '南' ? '⬇️' : name === '西' ? '⬅️' : '⬆️'),
+          key: name
+        });
+      });
     }
     return set;
   }
@@ -681,6 +701,7 @@
   }
 
   function startGame() {
+    console.log("✅ 开始游戏按钮被点击！");
     bumpPlays();
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('gameArea').style.display = 'block';
@@ -738,6 +759,9 @@
         } else if (t.type === 'season') {   
           d.className = 'tile season-card'; 
           d.textContent = t.name + t.emoji;
+        } else if (t.type === 'wind') {   // ✅ 新增 wind 类型
+          d.className = 'tile wind-card'; 
+          d.textContent = t.name + t.emoji;
         }
       }
       c.appendChild(d);
@@ -786,7 +810,7 @@
       if (aP && !bP) return 1; 
       if (!aP && bP) return -1;
       const a = A[0], b = B[0]; 
-      const typeOrder = {'normal':1, 'flower':2, 'season':3};
+      const typeOrder = {'normal':1, 'flower':2, 'season':3, 'wind':4};
       if (typeOrder[a.type] !== typeOrder[b.type]) return typeOrder[a.type] - typeOrder[b.type];
       if (a.type === 'normal' && b.type === 'normal') { 
         const suitOrder = {'万':1, '筒':2, '条':3}; 
@@ -815,6 +839,9 @@
           d.textContent = t.name + t.emoji;
         } else if (t.type === 'season') {   
           d.className = 'tile season-card'; 
+          d.textContent = t.name + t.emoji;
+        } else if (t.type === 'wind') {   // ✅ 新增 wind 类型
+          d.className = 'tile wind-card'; 
           d.textContent = t.name + t.emoji;
         }
         g.appendChild(d);
@@ -845,6 +872,7 @@
     if (a.type === 'normal' && b.type === 'normal' && a.key === b.key) return true;
     if (a.type === 'flower' && b.type === 'flower' && a.name === b.name) return true;
     if (a.type === 'season' && b.type === 'season' && a.name === b.name) return true;
+    if (a.type === 'wind' && b.type === 'wind' && a.name === b.name) return true; // ✅ 支持风牌对子
     return false;
   }
 
@@ -853,6 +881,7 @@
     if (arr[0].type === 'normal' && arr.every(t => t.type === 'normal' && t.key === arr[0].key)) return true;
     if (arr[0].type === 'flower' && arr.every(t => t.type === 'flower' && t.name === arr[0].name)) return true;
     if (arr[0].type === 'season' && arr.every(t => t.type === 'season' && t.name === arr[0].name)) return true;
+    if (arr[0].type === 'wind' && arr.every(t => t.type === 'wind' && t.name === arr[0].name)) return true; // ✅ 支持风牌刻子
     return false;
   }
 
@@ -899,7 +928,9 @@
       if (needPairs > 0) {
         const countMap = {};
         tiles.forEach(t => {
-          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : 
+                    (t.type === 'flower' ? `F|${t.name}` : 
+                     (t.type === 'season' ? `S|${t.name}` : `W|${t.name}`)); // ✅ 新增 wind 类型
           countMap[k] = (countMap[k] || 0) + 1;
         });
         for (const k in countMap) {
@@ -908,7 +939,9 @@
             const rest = removeNTiles(tiles, tt => {
               if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
               if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
-              return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'S') return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'W') return tt.type === 'wind' && tt.name === parts[1]; // ✅ 支持 wind
+              return false;
             }, 2);
             if (rest && canMeetTargets(rest, needSets, needPairs - 1)) return true;
           }
@@ -918,7 +951,9 @@
       if (needSets > 0) {
         const countMap = {};
         tiles.forEach(t => {
-          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : (t.type === 'flower' ? `F|${t.name}` : `S|${t.name}`);
+          const k = t.type === 'normal' ? `N|${t.suit}|${t.number}` : 
+                    (t.type === 'flower' ? `F|${t.name}` : 
+                     (t.type === 'season' ? `S|${t.name}` : `W|${t.name}`)); // ✅ 新增 wind 类型
           countMap[k] = (countMap[k] || 0) + 1;
         });
         for (const k in countMap) {
@@ -927,7 +962,9 @@
             const rest = removeNTiles(tiles, tt => {
               if (parts[0] === 'N') return tt.type === 'normal' && tt.suit === parts[1] && tt.number === parseInt(parts[2]);
               if (parts[0] === 'F') return tt.type === 'flower' && tt.name === parts[1];
-              return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'S') return tt.type === 'season' && tt.name === parts[1];
+              if (parts[0] === 'W') return tt.type === 'wind' && tt.name === parts[1]; // ✅ 支持 wind
+              return false;
             }, 3);
             if (rest && canMeetTargets(rest, needSets - 1, needPairs)) return true;
           }
@@ -1062,6 +1099,7 @@
     suits.forEach(s => { for (let n = 1; n <= 9; n++) cands.push({type:'normal', suit:s, number:n, key:`${n}${s}`}); });
     ['梅','兰','竹','菊'].forEach(n => cands.push({type:'flower', name:n, emoji:getFlowerEmoji(n), key:n}));
     ['春','夏','秋','冬'].forEach(n => cands.push({type:'season', name:n, emoji:getSeasonEmoji(n), key:n}));
+    ['东','南','西','北','中'].forEach(n => cands.push({type:'wind', name:n, emoji:n === '中' ? '🀄' : (n === '东' ? '➡️' : n === '南' ? '⬇️' : n === '西' ? '⬅️' : '⬆️'), key:n})); // ✅ 新增字牌
     const waiting = [];
     for (const d of cands) {
       const tryHand = hand.concat([d]);
@@ -1074,7 +1112,7 @@
     Array.from(document.querySelectorAll('#discards .tile')).forEach(el => { const k = el.dataset.tile || ''; if (k) add(k); });
     const filtered = waiting.filter(t => (visible[t.key] || 0) < 4);
     const suitOrd = {'万':1, '筒':2, '条':3};
-    const typeRank = t => t.type === 'normal' ? 1 : (t.type === 'flower' ? 2 : 3);
+    const typeRank = t => t.type === 'normal' ? 1 : (t.type === 'flower' ? 2 : (t.type === 'season' ? 3 : 4)); // ✅ 新增 wind 类型
     filtered.sort((a, b) => {
       const ra = typeRank(a), rb = typeRank(b); 
       if (ra !== rb) return ra - rb;
@@ -1084,6 +1122,7 @@
       }
       if (a.type === 'flower' && b.type === 'flower') return (a.name > b.name) - (a.name < b.name);
       if (a.type === 'season' && b.type === 'season') return (a.name > b.name) - (a.name < b.name);
+      if (a.type === 'wind' && b.type === 'wind') return (a.name > b.name) - (a.name < b.name); // ✅ 支持 wind 排序
       return 0;
     });
     const seen = new Set(), out = []; 
