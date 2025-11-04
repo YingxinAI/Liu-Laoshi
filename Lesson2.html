@@ -2451,9 +2451,9 @@ Answer: 他是我的同学 (Tā shì wǒde tóngxué)。 - He is my classmate.</
             // Index 2: Bot asks "他/她是谁？"
             {
                 id: 'ASK_WHO_SHE_IS',
-                bot: "你好, [STUDENT_GIVEN_NAME_PLACEHOLDER] 学生。他/她是谁？",
+                bot: "你好, [STUDENT_GIVEN_NAME_PLACEHOLDER] 学生。👩🏻‍🏫她是谁？",
                 pinyin: "Nǐ hǎo, [STUDENT_GIVEN_NAME_PLACEHOLDER] xuéshēng. Tā/Tā shì shéi?",
-                hint: "Answer who she is, e.g., '她是老师' or '她是我的同学'.",
+                hint: "Answer who she is, e.g., '她是老师' or '她是学生'.",
                 expectedUserResponse: ["她是老师", "她是我的同学"],
                 nextStateId: {
                     '她是老师': 'ASK_WHOSE_TEACHER',
@@ -2463,7 +2463,7 @@ Answer: 他是我的同学 (Tā shì wǒde tóngxué)。 - He is my classmate.</
             // Index 3: Teacher Scenario: Ask "Whose teacher is she?" (ASK_WHOSE_TEACHER)
             {
                 id: 'ASK_WHOSE_TEACHER',
-                bot: "她是谁的老师？",
+                bot: "👩🏻‍🏫她是谁的老师？",
                 pinyin: "Tā shì shéi de lǎoshī?",
                 hint: "Answer: '她是我的老师'.",
                 expectedUserResponse: ["她是我的老师"],
@@ -4193,4 +4193,5 @@ Answer: 他是我的同学 (Tā shì wǒde tóngxué)。 - He is my classmate.</
 </script>
 </body>
 </html>
+
 
