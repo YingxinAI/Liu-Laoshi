@@ -200,7 +200,7 @@ const WMO_CODES = {
   99: { desc: '强雷暴冰雹', icon: '⛈️' }
 };
 
-// ============ 风向转换（角度 → 中文方位） ============
+// ============ 风向转换 ============
 function windDirection(deg) {
   const dirs = ['北风','东北风','东风','东南风','南风','西南风','西风','西北风'];
   return dirs[Math.round(deg / 45) % 8];
@@ -221,7 +221,6 @@ function windLevel(speedKmh) {
 
 // ============ 月相图标 ============
 function moonIcon(phase) {
-  // phase: 0=新月, 25=上弦, 50=满月, 75=下弦
   if (phase < 3 || phase > 97) return { icon: '🌑', name: '新月' };
   if (phase < 22) return { icon: '🌒', name: '蛾眉月' };
   if (phase < 28) return { icon: '🌓', name: '上弦月' };
@@ -232,7 +231,7 @@ function moonIcon(phase) {
   return { icon: '🌘', name: '残月' };
 }
 
-// ============ 获取实时本地时间 ============
+// ============ 获取本地时间 ============
 function getLocalTime(timezone) {
   return new Date().toLocaleString('zh-CN', {
     timeZone: timezone,
@@ -242,7 +241,25 @@ function getLocalTime(timezone) {
   });
 }
 
-// ============ 调用 Open-Meteo API ============
+// ============ 带重试的API请求 ============
+async function fetchWithRetry(url, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+}
+
+// ============ 获取天气数据 ============
 async function fetchWeather() {
   const results = [];
   for (const city of CITIES) {
@@ -251,15 +268,14 @@ async function fetchWeather() {
       `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m` +
       `&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,uv_index_max,wind_speed_10m_max,wind_direction_10m_dominant,moon_phase` +
       `&timezone=auto&forecast_days=2`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`获取 ${city.name} 天气失败`);
-    const data = await res.json();
+    
+    const data = await fetchWithRetry(url);
     results.push({ city, data });
   }
   return results;
 }
 
-// ============ 渲染卡片 ============
+// ============ 渲染界面 ============
 let weatherData = null;
 let currentDay = 0;
 
@@ -269,6 +285,7 @@ function render() {
     container.innerHTML = '<div class="loading">⏳ 正在获取天气数据...</div>';
     return;
   }
+  
   let html = '<div class="cards">';
   for (const { city, data } of weatherData) {
     const daily = data.daily;
@@ -323,7 +340,7 @@ async function init() {
     render();
   } catch (err) {
     document.getElementById('content').innerHTML =
-      `<div class="error">❌ ${err.message}<br>请检查网络连接后刷新页面</div>`;
+      `<div class="error">❌ 获取天气失败: ${err.message}<br>请检查网络连接后刷新页面</div>`;
   }
 }
 
@@ -338,7 +355,6 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 init();
-// 每10分钟自动刷新数据
 setInterval(init, 10 * 60 * 1000);
 </script>
 </body>
