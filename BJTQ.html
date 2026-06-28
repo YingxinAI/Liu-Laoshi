@@ -6,356 +6,166 @@
 <title>北京 - 丹佛 天气预报</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+  .container { width: 100%; max-width: 1100px; text-align: center; }
+  h1 { color: #fff; margin-bottom: 25px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+  
+  .cards { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+  .card { 
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+    border-radius: 20px; padding: 30px; width: 480px; max-width: 100%; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: left;
   }
-  .container {
-    width: 100%;
-    max-width: 1100px;
-    text-align: center;
-  }
-  h1 {
-    color: #fff;
-    font-size: 2rem;
-    margin-bottom: 20px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  }
-  .tabs {
-    display: inline-flex;
-    background: rgba(255,255,255,0.2);
-    border-radius: 30px;
-    padding: 5px;
-    margin-bottom: 25px;
-    backdrop-filter: blur(10px);
-  }
-  .tab {
-    padding: 10px 30px;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 25px;
-    font-weight: 500;
-    transition: all 0.3s;
-    border: none;
-    background: transparent;
-    font-size: 1rem;
-  }
-  .tab.active {
-    background: #fff;
-    color: #667eea;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  }
-  .cards {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    flex-wrap: wrap;
-  }
-  .card {
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    padding: 25px;
-    width: 480px;
-    max-width: 100%;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    text-align: left;
-  }
-  .city-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-  }
-  .city-name {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-  }
-  .city-time {
-    color: #888;
-    font-size: 0.95rem;
-  }
-  .main-temp {
-    display: flex;
-    align-items: center;
-    margin: 15px 0;
-  }
-  .weather-icon {
-    font-size: 4rem;
-    margin-right: 20px;
-  }
-  .temp-value {
-    font-size: 3.5rem;
-    font-weight: bold;
-    color: #333;
-    line-height: 1;
-  }
-  .weather-desc {
-    color: #666;
-    font-size: 1.1rem;
-    margin-top: 5px;
-  }
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 2px solid #f0f0f0;
-  }
-  .info-item {
-    display: flex;
-    align-items: center;
-    color: #555;
-    font-size: 0.95rem;
-  }
-  .info-item .icon {
-    margin-right: 8px;
-    font-size: 1.2rem;
-    width: 24px;
-    text-align: center;
-  }
-  .moon-section {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 2px solid #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: #666;
-  }
-  .moon-icon { font-size: 2rem; }
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #fff;
-    font-size: 1.2rem;
-  }
-  .error {
-    background: rgba(255,100,100,0.9);
-    color: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 10px 0;
-  }
-  @media (max-width: 768px) {
-    .card { width: 100%; }
-    .temp-value { font-size: 2.8rem; }
-    .weather-icon { font-size: 3rem; }
-  }
+  
+  .city-header { font-size: 1.8rem; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
+  .info-line { font-size: 1.1rem; color: #333; margin: 10px 0; display: flex; align-items: center; }
+  .temp-main { font-size: 3.5rem; font-weight: bold; color: #222; margin: 15px 0; text-align: center; }
+  .footer-line { margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; font-size: 1.1rem; }
+  
+  .nav-buttons { margin-top: 40px; display: flex; justify-content: center; gap: 20px; }
+  .nav-btn { padding: 12px 30px; font-size: 1.1rem; font-weight: bold; color: #667eea; background: #fff; border: none; border-radius: 30px; cursor: pointer; transition: 0.3s; }
+  .nav-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+  .emoji { display: inline-block; }
+  .spin { animation: spinAnim 2s linear infinite; }
+  @keyframes spinAnim { 100% { transform: rotate(360deg); } }
+  .float { animation: floatAnim 3s ease-in-out infinite; }
+  @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .pulse { animation: pulseAnim 2s ease-in-out infinite; }
+  @keyframes pulseAnim { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <h1>🌍 北京 · 丹佛 天气预报</h1>
-  <div class="tabs">
-    <button class="tab active" data-day="0">📅 今天</button>
-    <button class="tab" data-day="1">📅 明天</button>
-  </div>
-  <div id="content">
-    <div class="loading">⏳ 正在获取天气数据...</div>
+  <h1 id="page-title">🌍 北京 · 丹佛 今天天气预报</h1>
+  <div id="content" class="cards">正在加载数据...</div>
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="switchDay(0)">⬅️ 今天天气</button>
+    <button class="nav-btn" onclick="switchDay(1)">明天天气 ➡️</button>
   </div>
 </div>
 
 <script>
-// ============ 城市配置 ============
+// 修正后的完整农历算法 (支持 1900-2100 年及闰月)
+function getLunar(date) {
+    const lunarInfo = [0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0,0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150,0x0f252,0x0d520];
+    const baseDate = new Date(1900, 0, 31);
+    let offset = Math.floor((date - baseDate) / 86400000);
+    let year = 1900, days = 0;
+    
+    for (year = 1900; year < 2100 && offset > 0; year++) {
+        days = 0;
+        for (let i = 0x8000; i > 0x8; i >>= 1) {
+            days += (lunarInfo[year - 1900] & i) ? 30 : 29;
+        }
+        days += (lunarInfo[year - 1900] & 0xf) ? ((lunarInfo[year - 1900] & 0x10000) ? 30 : 29) : 0;
+        offset -= days;
+    }
+    if (offset < 0) { offset += days; year--; }
+    
+    let leapMonth = lunarInfo[year - 1900] & 0xf;
+    let isLeap = false;
+    let month = 1;
+    
+    for (month = 1; month < 13 && offset > 0; month++) {
+        if (leapMonth > 0 && month === (leapMonth + 1) && !isLeap) {
+            --month; isLeap = true;
+            days = (lunarInfo[year - 1900] & 0x10000) ? 30 : 29;
+        } else {
+            days = (lunarInfo[year - 1900] & (0x10000 >> month)) ? 30 : 29;
+        }
+        if (isLeap && month === (leapMonth + 1)) isLeap = false;
+        offset -= days;
+    }
+    if (offset === 0 && leapMonth > 0 && month === leapMonth + 1) {
+        if (isLeap) isLeap = false;
+        else { isLeap = true; --month; }
+    }
+    if (offset < 0) { offset += days; --month; }
+    
+    const mN = ["", "正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月"];
+    const dN = ["", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
+    
+    return (isLeap ? "闰" : "") + mN[month] + dN[offset + 1];
+}
+
+const WMO_MAP = { 0: '☀️ 晴天', 1: '🌤️ 晴间多云', 2: '⛅ 多云', 3: '☁️ 阴天', 45: '🌫️ 雾', 61: '🌧️ 小雨', 63: '🌧️ 中雨', 95: '⛈️ 雷暴', 71: '🌨️ 小雪', 75: '❄️ 大雪' };
 const CITIES = [
   { name: '北京', lat: 39.9042, lon: 116.4074, tz: 'Asia/Shanghai' },
   { name: '丹佛', lat: 39.7392, lon: -104.9903, tz: 'America/Denver' }
 ];
 
-// ============ WMO天气代码映射 ============
-const WMO_CODES = {
-  0:  { desc: '晴', icon: '☀️' },
-  1:  { desc: '大部晴朗', icon: '🌤️' },
-  2:  { desc: '多云', icon: '⛅' },
-  3:  { desc: '阴天', icon: '☁️' },
-  45: { desc: '雾', icon: '🌫️' },
-  48: { desc: '雾凇', icon: '🌫️' },
-  51: { desc: '小毛毛雨', icon: '🌦️' },
-  53: { desc: '毛毛雨', icon: '🌦️' },
-  55: { desc: '大毛毛雨', icon: '🌧️' },
-  61: { desc: '小雨', icon: '🌧️' },
-  63: { desc: '中雨', icon: '🌧️' },
-  65: { desc: '大雨', icon: '🌧️' },
-  71: { desc: '小雪', icon: '🌨️' },
-  73: { desc: '中雪', icon: '🌨️' },
-  75: { desc: '大雪', icon: '❄️' },
-  77: { desc: '雪粒', icon: '❄️' },
-  80: { desc: '阵雨', icon: '🌦️' },
-  81: { desc: '中阵雨', icon: '🌧️' },
-  82: { desc: '大暴雨', icon: '⛈️' },
-  85: { desc: '阵雪', icon: '🌨️' },
-  86: { desc: '大阵雪', icon: '❄️' },
-  95: { desc: '雷暴', icon: '⛈️' },
-  96: { desc: '雷暴伴冰雹', icon: '⛈️' },
-  99: { desc: '强雷暴冰雹', icon: '⛈️' }
-};
+let weatherCache = [];
+let currentDayIndex = 0;
 
-// ============ 风向转换 ============
-function windDirection(deg) {
-  const dirs = ['北风','东北风','东风','东南风','南风','西南风','西风','西北风'];
-  return dirs[Math.round(deg / 45) % 8];
+function getSeason(date) {
+  const m = date.getMonth() + 1;
+  return m >= 3 && m <= 5 ? '🌸 春季' : m >= 6 && m <= 8 ? '🌴 夏季' : m >= 9 && m <= 11 ? '🍁 秋季' : '❄️ 冬季';
 }
 
-// ============ 风力等级 ============
-function windLevel(speedKmh) {
-  const levels = [
-    [1, '1级'], [6, '2级'], [12, '3级'], [20, '4级'],
-    [29, '5级'], [39, '6级'], [50, '7级'], [62, '8级'],
-    [75, '9级'], [89, '10级'], [103, '11级'], [117, '12级']
-  ];
-  for (const [threshold, level] of levels) {
-    if (speedKmh < threshold) return level;
-  }
-  return '12级以上';
+function getMoon(date) {
+  const phases = ["🌑 新月", "🌒 峨眉月", "🌓 上弦月", "🌕 满月", "🌖 下弦月", "🌘 残月"];
+  return phases[Math.floor((date.getDate() / 31) * phases.length)] || phases[0];
 }
 
-// ============ 月相图标 ============
-function moonIcon(phase) {
-  if (phase < 3 || phase > 97) return { icon: '🌑', name: '新月' };
-  if (phase < 22) return { icon: '🌒', name: '蛾眉月' };
-  if (phase < 28) return { icon: '🌓', name: '上弦月' };
-  if (phase < 47) return { icon: '🌔', name: '盈凸月' };
-  if (phase < 53) return { icon: '🌕', name: '满月' };
-  if (phase < 72) return { icon: '🌖', name: '亏凸月' };
-  if (phase < 78) return { icon: '🌗', name: '下弦月' };
-  return { icon: '🌘', name: '残月' };
-}
-
-// ============ 获取本地时间 ============
-function getLocalTime(timezone) {
-  return new Date().toLocaleString('zh-CN', {
-    timeZone: timezone,
-    month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
-    hour12: false
-  });
-}
-
-// ============ 带重试的API请求 ============
-async function fetchWithRetry(url, retries = 3, delay = 1000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
-    } catch (err) {
-      if (i === retries - 1) throw err;
-      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-    }
-  }
-}
-
-// ============ 获取天气数据 ============
 async function fetchWeather() {
-  const results = [];
+  weatherCache = [];
   for (const city of CITIES) {
-    const url = `https://api.open-meteo.com/v1/forecast?` +
-      `latitude=${city.lat}&longitude=${city.lon}` +
-      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m` +
-      `&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,uv_index_max,wind_speed_10m_max,wind_direction_10m_dominant,moon_phase` +
-      `&timezone=auto&forecast_days=2`;
-    
-    const data = await fetchWithRetry(url);
-    results.push({ city, data });
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&timezone=${city.tz}&forecast_days=2`;
+    const res = await fetch(url);
+    const data = await res.json();
+    weatherCache.push({ city, data });
   }
-  return results;
+  render();
 }
 
-// ============ 渲染界面 ============
-let weatherData = null;
-let currentDay = 0;
+function switchDay(index) {
+  currentDayIndex = index;
+  document.getElementById('page-title').innerText = index === 0 ? "🌍 北京 · 丹佛 今天天气预报" : "🌍 北京 · 丹佛 明天天气预报";
+  render();
+}
 
 function render() {
   const container = document.getElementById('content');
-  if (!weatherData) {
-    container.innerHTML = '<div class="loading">⏳ 正在获取天气数据...</div>';
-    return;
-  }
-  
-  let html = '<div class="cards">';
-  for (const { city, data } of weatherData) {
-    const daily = data.daily;
-    const isToday = currentDay === 0;
-    const weatherCode = daily.weather_code[currentDay];
-    const info = WMO_CODES[weatherCode] || { desc: '未知', icon: '❓' };
-    const tempMax = Math.round(daily.temperature_2m_max[currentDay]);
-    const tempMin = Math.round(daily.temperature_2m_min[currentDay]);
-    const feelsMax = Math.round(daily.apparent_temperature_max[currentDay]);
-    const feelsMin = Math.round(daily.apparent_temperature_min[currentDay]);
-    const uv = Math.round(daily.uv_index_max[currentDay] * 10) / 10;
-    const windSpeed = Math.round(daily.wind_speed_10m_max[currentDay]);
-    const windDir = daily.wind_direction_10m_dominant[currentDay];
-    const moon = moonIcon(daily.moon_phase[currentDay]);
-    const localTime = getLocalTime(city.tz);
+  let html = '';
+  for (const item of weatherCache) {
+    const { city, data } = item;
+    const now = new Date(new Date().toLocaleString("en-US", {timeZone: city.tz}));
+    const date = new Date(now);
+    date.setDate(date.getDate() + currentDayIndex);
+    
+    const code = currentDayIndex === 0 ? data.current.weather_code : data.daily.weather_code[1];
+    const status = WMO_MAP[code] || '🌤️ 天气良好';
+    const temp = currentDayIndex === 0 ? data.current.temperature_2m : ((data.daily.temperature_2m_max[1] + data.daily.temperature_2m_min[1])/2).toFixed(1);
+    const wind = currentDayIndex === 0 ? data.current.wind_speed_10m : data.daily.wind_speed_10m_max[1];
+    
+    const timeDisplay = currentDayIndex === 0 
+      ? now.getHours()+':'+now.getMinutes().toString().padStart(2,'0')
+      : (city.name === '北京' ? '北京比丹佛早 14 小时' : '丹佛比北京晚 14 小时');
 
     html += `
       <div class="card">
         <div class="city-header">
-          <div class="city-name">📍 ${city.name}</div>
-          <div class="city-time">🕒 ${localTime}</div>
+          <span><span class="emoji float">📍</span> ${city.name}</span>
+          <span>${status}</span>
         </div>
-        <div class="main-temp">
-          <div class="weather-icon">${info.icon}</div>
-          <div>
-            <div class="temp-value">${tempMax}° / ${tempMin}°</div>
-            <div class="weather-desc">${info.desc}</div>
-          </div>
-        </div>
-        <div class="info-grid">
-          <div class="info-item"><span class="icon">💧</span>湿度：${isToday ? data.current.relative_humidity_2m : '--'}%</div>
-          <div class="info-item"><span class="icon">🌡️</span>体感：${feelsMax}° / ${feelsMin}°</div>
-          <div class="info-item"><span class="icon">💨</span>风力：${windLevel(windSpeed)} ${windDirection(windDir)}</div>
-          <div class="info-item"><span class="icon">☀️</span>紫外线：${uv}</div>
-        </div>
-        <div class="moon-section">
-          <span class="moon-icon">${moon.icon}</span>
-          <span>月相：${moon.name}</span>
+        <div class="info-line"><span class="emoji pulse">📅</span> ${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 星期${'日一二三四五六'[date.getDay()]}</div>
+        <div class="info-line"><span class="emoji pulse">🏮</span> 农历 ${getLunar(date)}</div>
+        <div class="info-line"><span class="emoji pulse">🕒</span> ${timeDisplay}</div>
+        <div class="temp-main">${temp}°C</div>
+        <div class="info-line"><span class="emoji pulse">🌡️</span> 最高: ${data.daily.temperature_2m_max[currentDayIndex]}°C / 最低: ${data.daily.temperature_2m_min[currentDayIndex]}°C</div>
+        <div class="info-line"><span class="emoji spin">🌀</span> 风力: ${wind} km/h</div>
+        <div class="footer-line">
+            <span>${getSeason(date)}</span>
+            <span>🌙 ${getMoon(date)}</span>
         </div>
       </div>
     `;
   }
-  html += '</div>';
   container.innerHTML = html;
 }
-
-// ============ 初始化 ============
-async function init() {
-  render();
-  try {
-    weatherData = await fetchWeather();
-    render();
-  } catch (err) {
-    document.getElementById('content').innerHTML =
-      `<div class="error">❌ 获取天气失败: ${err.message}<br>请检查网络连接后刷新页面</div>`;
-  }
-}
-
-// 切换今天/明天
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentDay = parseInt(tab.dataset.day);
-    render();
-  });
-});
-
-init();
-setInterval(init, 10 * 60 * 1000);
+fetchWeather();
 </script>
 </body>
 </html>
