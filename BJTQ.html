@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北京 - 丹佛 天气预报</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    width: 100%;
+    max-width: 1100px;
+    text-align: center;
+  }
+  h1 {
+    color: #fff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .tabs {
+    display: inline-flex;
+    background: rgba(255,255,255,0.2);
+    border-radius: 30px;
+    padding: 5px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(10px);
+  }
+  .tab {
+    padding: 10px 30px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+  }
+  .tab.active {
+    background: #fff;
+    color: #667eea;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .cards {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+  }
+  .card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 25px;
+    width: 480px;
+    max-width: 100%;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    text-align: left;
+  }
+  .city-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+  .city-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  .city-time {
+    color: #888;
+    font-size: 0.95rem;
+  }
+  .main-temp {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+  }
+  .weather-icon {
+    font-size: 4rem;
+    margin-right: 20px;
+  }
+  .temp-value {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #333;
+    line-height: 1;
+  }
+  .weather-desc {
+    color: #666;
+    font-size: 1.1rem;
+    margin-top: 5px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #f0f0f0;
+  }
+  .info-item {
+    display: flex;
+    align-items: center;
+    color: #555;
+    font-size: 0.95rem;
+  }
+  .info-item .icon {
+    margin-right: 8px;
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+  }
+  .moon-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #666;
+  }
+  .moon-icon { font-size: 2rem; }
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #fff;
+    font-size: 1.2rem;
+  }
+  .error {
+    background: rgba(255,100,100,0.9);
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+  @media (max-width: 768px) {
+    .card { width: 100%; }
+    .temp-value { font-size: 2.8rem; }
+    .weather-icon { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🌍 北京 · 丹佛 天气预报</h1>
+  <div class="tabs">
+    <button class="tab active" data-day="0">📅 今天</button>
+    <button class="tab" data-day="1">📅 明天</button>
+  </div>
+  <div id="content">
+    <div class="loading">⏳ 正在获取天气数据...</div>
+  </div>
+</div>
+
+<script>
+// ============ 城市配置 ============
+const CITIES = [
+  { name: '北京', lat: 39.9042, lon: 116.4074, tz: 'Asia/Shanghai' },
+  { name: '丹佛', lat: 39.7392, lon: -104.9903, tz: 'America/Denver' }
+];
+
+// ============ WMO天气代码映射 ============
+const WMO_CODES = {
+  0:  { desc: '晴', icon: '☀️' },
+  1:  { desc: '大部晴朗', icon: '🌤️' },
+  2:  { desc: '多云', icon: '⛅' },
+  3:  { desc: '阴天', icon: '☁️' },
+  45: { desc: '雾', icon: '🌫️' },
+  48: { desc: '雾凇', icon: '🌫️' },
+  51: { desc: '小毛毛雨', icon: '🌦️' },
+  53: { desc: '毛毛雨', icon: '🌦️' },
+  55: { desc: '大毛毛雨', icon: '🌧️' },
+  61: { desc: '小雨', icon: '🌧️' },
+  63: { desc: '中雨', icon: '🌧️' },
+  65: { desc: '大雨', icon: '🌧️' },
+  71: { desc: '小雪', icon: '🌨️' },
+  73: { desc: '中雪', icon: '🌨️' },
+  75: { desc: '大雪', icon: '❄️' },
+  77: { desc: '雪粒', icon: '❄️' },
+  80: { desc: '阵雨', icon: '🌦️' },
+  81: { desc: '中阵雨', icon: '🌧️' },
+  82: { desc: '大暴雨', icon: '⛈️' },
+  85: { desc: '阵雪', icon: '🌨️' },
+  86: { desc: '大阵雪', icon: '❄️' },
+  95: { desc: '雷暴', icon: '⛈️' },
+  96: { desc: '雷暴伴冰雹', icon: '⛈️' },
+  99: { desc: '强雷暴冰雹', icon: '⛈️' }
+};
+
+// ============ 风向转换（角度 → 中文方位） ============
+function windDirection(deg) {
+  const dirs = ['北风','东北风','东风','东南风','南风','西南风','西风','西北风'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+// ============ 风力等级 ============
+function windLevel(speedKmh) {
+  const levels = [
+    [1, '1级'], [6, '2级'], [12, '3级'], [20, '4级'],
+    [29, '5级'], [39, '6级'], [50, '7级'], [62, '8级'],
+    [75, '9级'], [89, '10级'], [103, '11级'], [117, '12级']
+  ];
+  for (const [threshold, level] of levels) {
+    if (speedKmh < threshold) return level;
+  }
+  return '12级以上';
+}
+
+// ============ 月相图标 ============
+function moonIcon(phase) {
+  // phase: 0=新月, 25=上弦, 50=满月, 75=下弦
+  if (phase < 3 || phase > 97) return { icon: '🌑', name: '新月' };
+  if (phase < 22) return { icon: '🌒', name: '蛾眉月' };
+  if (phase < 28) return { icon: '🌓', name: '上弦月' };
+  if (phase < 47) return { icon: '🌔', name: '盈凸月' };
+  if (phase < 53) return { icon: '🌕', name: '满月' };
+  if (phase < 72) return { icon: '🌖', name: '亏凸月' };
+  if (phase < 78) return { icon: '🌗', name: '下弦月' };
+  return { icon: '🌘', name: '残月' };
+}
+
+// ============ 获取实时本地时间 ============
+function getLocalTime(timezone) {
+  return new Date().toLocaleString('zh-CN', {
+    timeZone: timezone,
+    month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false
+  });
+}
+
+// ============ 调用 Open-Meteo API ============
+async function fetchWeather() {
+  const results = [];
+  for (const city of CITIES) {
+    const url = `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${city.lat}&longitude=${city.lon}` +
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m` +
+      `&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,uv_index_max,wind_speed_10m_max,wind_direction_10m_dominant,moon_phase` +
+      `&timezone=auto&forecast_days=2`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`获取 ${city.name} 天气失败`);
+    const data = await res.json();
+    results.push({ city, data });
+  }
+  return results;
+}
+
+// ============ 渲染卡片 ============
+let weatherData = null;
+let currentDay = 0;
+
+function render() {
+  const container = document.getElementById('content');
+  if (!weatherData) {
+    container.innerHTML = '<div class="loading">⏳ 正在获取天气数据...</div>';
+    return;
+  }
+  let html = '<div class="cards">';
+  for (const { city, data } of weatherData) {
+    const daily = data.daily;
+    const isToday = currentDay === 0;
+    const weatherCode = daily.weather_code[currentDay];
+    const info = WMO_CODES[weatherCode] || { desc: '未知', icon: '❓' };
+    const tempMax = Math.round(daily.temperature_2m_max[currentDay]);
+    const tempMin = Math.round(daily.temperature_2m_min[currentDay]);
+    const feelsMax = Math.round(daily.apparent_temperature_max[currentDay]);
+    const feelsMin = Math.round(daily.apparent_temperature_min[currentDay]);
+    const uv = Math.round(daily.uv_index_max[currentDay] * 10) / 10;
+    const windSpeed = Math.round(daily.wind_speed_10m_max[currentDay]);
+    const windDir = daily.wind_direction_10m_dominant[currentDay];
+    const moon = moonIcon(daily.moon_phase[currentDay]);
+    const localTime = getLocalTime(city.tz);
+
+    html += `
+      <div class="card">
+        <div class="city-header">
+          <div class="city-name">📍 ${city.name}</div>
+          <div class="city-time">🕒 ${localTime}</div>
+        </div>
+        <div class="main-temp">
+          <div class="weather-icon">${info.icon}</div>
+          <div>
+            <div class="temp-value">${tempMax}° / ${tempMin}°</div>
+            <div class="weather-desc">${info.desc}</div>
+          </div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><span class="icon">💧</span>湿度：${isToday ? data.current.relative_humidity_2m : '--'}%</div>
+          <div class="info-item"><span class="icon">🌡️</span>体感：${feelsMax}° / ${feelsMin}°</div>
+          <div class="info-item"><span class="icon">💨</span>风力：${windLevel(windSpeed)} ${windDirection(windDir)}</div>
+          <div class="info-item"><span class="icon">☀️</span>紫外线：${uv}</div>
+        </div>
+        <div class="moon-section">
+          <span class="moon-icon">${moon.icon}</span>
+          <span>月相：${moon.name}</span>
+        </div>
+      </div>
+    `;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ============ 初始化 ============
+async function init() {
+  render();
+  try {
+    weatherData = await fetchWeather();
+    render();
+  } catch (err) {
+    document.getElementById('content').innerHTML =
+      `<div class="error">❌ ${err.message}<br>请检查网络连接后刷新页面</div>`;
+  }
+}
+
+// 切换今天/明天
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentDay = parseInt(tab.dataset.day);
+    render();
+  });
+});
+
+init();
+// 每10分钟自动刷新数据
+setInterval(init, 10 * 60 * 1000);
+</script>
+</body>
+</html>
