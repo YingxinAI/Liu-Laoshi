@@ -13,33 +13,42 @@
         .font-game {
             font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
         }
-        /* 3D 赛道透视 */
+        /* 3D 赛道透气 */
         .road-container {
             perspective: 800px;
         }
         .road {
-            transform: rotateX(60deg);
+            transform: rotateX(72deg); /* 更加扁平的旋转角度，将蓝色垫子下拉 */
             transform-origin: bottom center;
             background: linear-gradient(to top, #3b82f6 0%, #1d4ed8 100%);
             box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
         }
-        /* 砖墙碎裂动画 */
-        @keyframes break-wall {
-            0% { transform: scale(1) translateZ(0); opacity: 1; }
-            50% { transform: scale(1.1) rotate(5deg) translateY(-20px); opacity: 0.8; }
-            100% { transform: scale(0) rotate(-45deg) translateY(200px); opacity: 0; }
-        }
-        .wall-break {
-            animation: break-wall 0.6s forwards ease-in-out;
-        }
         /* 抖动动画 */
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
+            0%, 100% { transform: translateX(0) rotate(-1deg); }
+            20%, 60% { transform: translateX(-10px) rotate(-3deg); }
+            40%, 80% { transform: translateX(10px) rotate(1deg); }
         }
         .shake-error {
             animation: shake 0.4s ease-in-out;
+        }
+        /* 弹幕浮动动画 */
+        @keyframes float-up {
+            0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+            20% { transform: translateY(0px) scale(1.1); opacity: 1; }
+            80% { transform: translateY(-10px) scale(1); opacity: 1; }
+            100% { transform: translateY(-30px) scale(0.9); opacity: 0; }
+        }
+        .feedback-pop {
+            animation: float-up 1.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 🧱 拼音展示区左右滑开门过渡效果 */
+        #wall-gate-left {
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #wall-gate-right {
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
     </style>
 </head>
@@ -48,7 +57,7 @@
     <!-- 主容器：手机长宽比 -->
     <div class="relative w-full max-w-md h-[92vh] max-h-[850px] bg-slate-950 rounded-3xl border-4 border-slate-700 shadow-2xl flex flex-col overflow-hidden">
         
-        <!-- 背景：摄像头画面 / 备用卡通背景 -->
+        <!-- 背景：摄像头画面 / 备用渐变背景 -->
         <div class="absolute inset-0 z-0">
             <!-- 摄像头轨道 -->
             <video id="webcam" class="w-full h-full object-cover scale-x-[-1] opacity-60 hidden" autoplay playsinline></video>
@@ -59,91 +68,139 @@
             </div>
         </div>
 
-        <!-- 游戏层：覆盖在背景之上 -->
-        <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
+        <!-- 游戏层：采用纯 Flex 垂直流式布局，自适应间距，杜绝重叠 -->
+        <div class="relative z-10 flex flex-col h-full justify-between p-3 sm:p-4 pointer-events-none">
             
-            <!-- 顶部栏：得分、生命值、模式切换 -->
-            <div class="p-4 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent pt-6 pointer-events-auto">
-                <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md">
-                    <i data-lucide="trophy" class="text-amber-400 w-5 h-5"></i>
-                    <span class="font-game text-xl tracking-wider">SCORE: <span id="score" class="text-yellow-300">0</span></span>
+            <!-- 1. 顶部栏：整合得分、魔性卡米拉、生命值 -->
+            <div class="p-3 bg-black/60 rounded-2xl border border-slate-800 backdrop-blur-md pointer-events-auto flex justify-between items-center w-full z-30">
+                <!-- 左：得分 -->
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-1 bg-black/30 px-2 py-1 rounded-xl border border-slate-700/20">
+                        <i data-lucide="trophy" class="text-amber-400 w-4 h-4"></i>
+                        <span class="font-game text-xs tracking-wider">得分: <span id="score" class="text-yellow-300">0</span></span>
+                    </div>
+                    <!-- 随时重来按钮 -->
+                    <button id="btn-restart-mid" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 p-1.5 rounded-xl border border-slate-700/50 transition-all flex items-center justify-center" title="重新开始">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    </button>
                 </div>
                 
-                <!-- 生命值 -->
-                <div class="flex space-x-1 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md" id="hearts-container">
-                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-5 h-5"></i>
-                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-5 h-5"></i>
-                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-5 h-5"></i>
-                </div>
-            </div>
-
-            <!-- 右上角：魔性卡米拉表情框 -->
-            <div class="absolute top-20 right-4 w-28 h-28 bg-black/60 border-2 border-pink-500 rounded-2xl overflow-hidden shadow-lg flex flex-col items-center justify-center p-1 backdrop-blur-md pointer-events-auto">
-                <div class="relative w-16 h-16 flex items-center justify-center">
-                    <!-- 恶搞嘴巴与五官 (SVG) -->
-                    <svg id="reaction-face" viewBox="0 0 100 100" class="w-full h-full transition-transform duration-100">
+                <!-- 中：魔性卡米拉反应小窗口 -->
+                <div class="flex flex-col items-center bg-slate-900/90 border border-pink-500/50 px-2 py-0.5 rounded-xl w-20 shadow-inner">
+                    <svg id="reaction-face" viewBox="0 0 100 100" class="w-8 h-8 transition-transform duration-100">
                         <!-- 脸底 -->
-                        <circle cx="50" cy="50" r="45" fill="#fbcfe8" stroke="#ec4899" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="45" fill="#fbcfe8" stroke="#ec4899" stroke-width="2.5"/>
                         <!-- 眼睛 -->
                         <ellipse cx="35" cy="40" rx="6" ry="8" fill="#1e1b4b" id="left-eye"/>
                         <ellipse cx="65" cy="40" rx="6" ry="8" fill="#1e1b4b" id="right-eye"/>
                         <!-- 眉毛 -->
-                        <path d="M25,30 Q35,28 42,35" stroke="#ec4899" stroke-width="3" stroke-linecap="round" fill="none" id="left-brow"/>
-                        <path d="M75,30 Q65,28 58,35" stroke="#ec4899" stroke-width="3" stroke-linecap="round" fill="none" id="right-brow"/>
-                        <!-- 巨大的嘴巴 (动态变化) -->
+                        <path d="M25,30 Q35,28 42,35" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round" fill="none" id="left-brow"/>
+                        <path d="M75,30 Q65,28 58,35" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round" fill="none" id="right-brow"/>
+                        <!-- 巨大的嘴巴 -->
                         <path d="M30,65 Q50,65 70,65" fill="#9d174d" stroke="#ec4899" stroke-width="2" id="mouth" class="transition-all duration-100"/>
                     </svg>
-                </div>
-                <div id="reaction-bubble" class="text-[10px] text-pink-300 font-semibold text-center mt-1 leading-tight h-8 flex items-center justify-center px-1">
-                    准备好了吗？
-                </div>
-            </div>
-
-            <!-- 中间：3D 赛道与拼音墙 -->
-            <div class="flex-1 flex flex-col items-center justify-end relative h-full">
-                <!-- 3D 道路 -->
-                <div class="road-container absolute bottom-0 w-full h-1/2 flex justify-center overflow-hidden">
-                    <div class="road w-[150%] h-[200px] border-t-8 border-yellow-400/50 flex flex-col justify-between p-4">
-                        <!-- 车道线 -->
-                        <div class="w-full h-full border-l-4 border-r-4 border-dashed border-white/30 flex justify-center">
-                            <div class="w-1 h-full bg-white/20"></div>
-                        </div>
+                    <div id="reaction-bubble" class="text-[8px] text-pink-300 font-bold text-center leading-none mt-1 h-3 flex items-center justify-center truncate w-full">
+                        准备好了吗？
                     </div>
                 </div>
 
-                <!-- 拼音墙体 -->
-                <div id="pinyin-wall" class="absolute bottom-16 w-11/12 max-w-[340px] flex flex-col items-center transition-all duration-300 transform scale-100">
-                    <!-- 墙上漂浮的拼音卡片 -->
-                    <div class="bg-gradient-to-r from-amber-500 to-orange-600 border-4 border-white rounded-2xl shadow-2xl p-4 text-center w-full z-20 transform -rotate-1 relative">
+                <!-- 右：生命值 -->
+                <div class="flex space-x-0.5 bg-black/30 px-2 py-1 rounded-xl border border-slate-700/20" id="hearts-container">
+                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-4 h-4"></i>
+                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-4 h-4"></i>
+                    <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- 2. 中间主区域：使用自然流自适应布局，拒绝绝对位置重叠 -->
+            <div class="flex-1 flex flex-col items-center justify-between py-2.5 relative w-full overflow-hidden">
+                <!-- 趣味浮动文字反馈 -->
+                <div id="text-feedback-container" class="absolute top-2 w-full flex flex-col items-center pointer-events-none z-40"></div>
+
+                <!-- 【上部展示群组】：自上而下自适应排列 -->
+                <div class="w-full flex flex-col items-center space-y-2.5 px-4 pointer-events-auto z-20">
+                    
+                    <!-- 橘黄色显示区 -->
+                    <div id="orange-display-card" class="w-full max-w-[340px] bg-gradient-to-r from-amber-500 to-orange-600 border-4 border-white rounded-2xl shadow-2xl p-3 text-center transform -rotate-1 relative transition-all duration-300">
                         <!-- 进度条 -->
                         <div class="absolute top-0 left-0 h-1.5 bg-yellow-400 rounded-full transition-all duration-100 ease-linear" id="timer-bar" style="width: 100%;"></div>
                         
-                        <div class="text-sm font-semibold tracking-widest text-yellow-100 uppercase mt-2">请读出拼音</div>
-                        <div id="target-pinyin" class="text-4xl font-black text-white py-3 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] font-game">tǔ dòu</div>
-                        <div class="flex justify-center space-x-2 text-xs text-amber-100 bg-amber-950/40 py-1 px-3 rounded-full w-fit mx-auto">
-                            <span>字数: <strong id="word-len">2</strong></span>
-                            <span>•</span>
-                            <span>提示：说出对应的中文</span>
+                        <div class="text-[9px] font-semibold tracking-widest text-yellow-100 uppercase mt-1">请大声读出</div>
+                        
+                        <!-- 拼音置于图片之上布局且具有“左右拉门式隔离墙门” -->
+                        <div class="relative flex items-center justify-center h-24 my-1 overflow-hidden rounded-xl border border-amber-700/30 bg-amber-950/20">
+                            <!-- 对应物品大图片/Emoji (半透明背景) -->
+                            <div id="target-emoji" class="text-7xl select-none opacity-30 transition-all duration-300 transform scale-100">🥔</div>
+                            <!-- 对应的拼音文本（覆盖在Emoji上方，强阴影） -->
+                            <div id="target-pinyin" class="absolute text-3xl font-black text-white tracking-widest drop-shadow-[0_4px_6px_rgba(0,0,0,0.95)] font-game z-10 transition-all duration-300">tǔ dòu</div>
+
+                            <!-- 🧱 左右拉门式堵门墙 (左侧门) —— 完美硬件加速动画，开局完全遮挡 -->
+                            <div id="wall-gate-left" class="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-orange-700 to-orange-850 border-r-2 border-orange-950 z-20 grid grid-rows-3 grid-cols-2 gap-0.5 p-1">
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                            </div>
+
+                            <!-- 🧱 左右拉门式堵门墙 (右侧门) —— 完美硬件加速动画，开局完全遮挡 -->
+                            <div id="wall-gate-right" class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-orange-700 to-orange-850 border-l-2 border-orange-950 z-20 grid grid-rows-3 grid-cols-2 gap-0.5 p-1">
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-750 rounded-sm border border-orange-900/40"></div>
+                                <div class="bg-orange-600 rounded-sm border border-orange-900/40"></div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- 砖墙底座 (利用CSS画出砖块堆叠效果) -->
-                    <div class="w-full bg-orange-800 border-x-4 border-b-4 border-orange-950 h-16 rounded-b-2xl shadow-md grid grid-cols-4 gap-0.5 p-1 -mt-1 z-10">
-                        <div class="bg-orange-700 rounded-sm border border-orange-900"></div>
-                        <div class="bg-orange-600 rounded-sm border border-orange-900"></div>
-                        <div class="bg-orange-700 rounded-sm border border-orange-900"></div>
-                        <div class="bg-orange-600 rounded-sm border border-orange-900"></div>
+
+                    <!-- 提示部分：置于卡片正下方 -->
+                    <div id="mat-hints" class="flex justify-center space-x-2 text-[10px] text-blue-100 bg-blue-950/85 py-1 px-3 rounded-full border border-blue-400/30 backdrop-blur-md">
+                        <span>字数: <strong id="word-len" class="text-yellow-300 font-bold">2</strong></span>
+                        <span>•</span>
+                        <span class="text-cyan-200 font-medium">提示：读准声调与发音</span>
                     </div>
+
+                    <!-- 实时发音听写气泡 (彻底修复：h-auto 自适应配合 py-4 解决显示一半的问题) -->
+                    <div class="w-full max-w-[320px] bg-black/90 border border-slate-800 rounded-xl px-4 py-4 backdrop-blur-lg flex flex-col items-center space-y-2 shadow-2xl h-auto justify-center transition-all duration-300 pointer-events-auto" id="speech-preview-box">
+                        <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            AI 实时发音听写器
+                        </span>
+                        <!-- 移除了书名号和引号，且行高优化为 leading-normal 彻底杜绝文字截断 -->
+                        <div class="text-lg font-black text-center tracking-wide text-slate-300 leading-normal break-all" id="speech-transcript">
+                            等待发音...
+                        </div>
+                        <div class="text-[10px] text-rose-400 font-semibold text-center hidden leading-tight" id="speech-error-hint">
+                            ⚠️ 声调好像不对哦，请重新尝试！
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- 爆炸特效爆出物 -->
-                <div id="victory-item" class="absolute bottom-28 z-30 text-8xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center">
-                    <span id="victory-emoji">🥔</span>
-                    <span id="victory-text" class="text-3xl font-black bg-black/80 px-4 py-1 rounded-full text-yellow-300 mt-2 border border-yellow-400 font-game">土豆</span>
+                <!-- 【下部赛道群组】：蓝色垫子移至最底部，不设置静态重叠砖墙 -->
+                <div class="relative w-full h-24 flex items-center justify-center mt-auto pointer-events-auto">
+                    <!-- 3D 道路 (蓝色垫子) -->
+                    <div class="road-container absolute inset-0 w-full h-full flex justify-center overflow-hidden pointer-events-none">
+                        <div class="road w-[150%] h-[80px] border-t-4 border-yellow-400/50 flex flex-col justify-between p-2">
+                            <!-- 车道线 -->
+                            <div class="w-full h-full border-l-4 border-r-4 border-dashed border-white/30 flex justify-center">
+                                <div class="w-1 h-full bg-white/20"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 爆炸特效爆出物 (答对时直接在蓝色跑道上爆出来) -->
+                    <div id="victory-item" class="absolute bottom-6 z-30 text-8xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center">
+                        <span id="victory-emoji">🥔</span>
+                        <span id="victory-text" class="text-2xl font-black bg-black/85 px-4 py-1 rounded-full text-yellow-300 mt-2 border border-yellow-400 font-game shadow-lg">土豆</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 底部栏：控制台、麦克风指示、手动操作 -->
+            <!-- 3. 底部控制栏：控制台、麦克风指示、手动操作 -->
             <div class="p-4 bg-gradient-to-t from-black/90 via-black/70 to-transparent space-y-3 pb-8 pointer-events-auto">
                 
                 <!-- 状态提示 -->
@@ -155,22 +212,31 @@
                     <span class="text-emerald-300 font-medium" id="status-text">麦克风已就绪，等待读音...</span>
                 </div>
 
-                <!-- 教师/手动操作键盘 (备用及课堂互动) -->
-                <div class="flex justify-between items-center gap-2">
-                    <!-- 左：手动判断错 -->
+                <!-- 教师/学生操作区域 -->
+                <div class="flex justify-between items-center gap-2 w-full">
+                    <!-- 左：手动判定错 -->
                     <button id="btn-wrong" class="flex-1 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white py-3 rounded-2xl flex items-center justify-center space-x-1 font-bold shadow-lg transition-all border-b-4 border-rose-800">
                         <i data-lucide="x-circle"></i>
                         <span>判定错 (Esc)</span>
                     </button>
-                    <!-- 中：语音/手动模式切换 -->
+                    <!-- 中：切换裁判/语音模式 -->
                     <button id="btn-mode-toggle" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-2xl flex items-center justify-center shadow-lg transition-all" title="切换模式">
                         <i data-lucide="mic" id="mode-icon"></i>
                     </button>
-                    <!-- 右：手动判断对 -->
+                    <!-- 右：手动判定对 -->
                     <button id="btn-correct" class="flex-[1.5] bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white py-3 rounded-2xl flex items-center justify-center space-x-1 font-bold shadow-lg transition-all border-b-4 border-emerald-700">
                         <i data-lucide="check-circle"></i>
                         <span>判定对 (Space)</span>
                     </button>
+
+                    <!-- 学生语音模式提示条 -->
+                    <div id="voice-status-container" class="hidden flex-1 bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-3 px-4 rounded-2xl flex items-center justify-center space-x-2 font-bold shadow-lg border-b-4 border-indigo-800 animate-pulse">
+                        <span class="relative flex h-2.5 w-2.5">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                        </span>
+                        <span id="voice-status-lbl" class="text-sm font-game tracking-wider">🎤 请大声读出拼音...</span>
+                    </div>
                 </div>
 
                 <div class="text-[10px] text-center text-slate-400">
@@ -179,8 +245,8 @@
             </div>
         </div>
 
-        <!-- 遮罩层：游戏未开始 / 游戏结束 -->
-        <div id="overlay-screen" class="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-between p-6 text-center">
+        <!-- 遮罩层：游戏未开始 / 游戏成功 / 失败 -->
+        <div id="overlay-screen" class="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-between p-6 text-center font-game">
             
             <!-- 顶部装饰 -->
             <div class="mt-8">
@@ -194,12 +260,12 @@
             <div id="overlay-content" class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
                 <div class="text-5xl" id="overlay-emoji">🎮</div>
                 <h2 class="text-2xl font-bold text-white font-game" id="overlay-title">挑战开始！</h2>
-                <p class="text-sm text-slate-300 leading-relaxed" id="overlay-desc">
-                    请大声读出屏幕上的拼音。如果发音正确，大墙就会被击碎！
-                </p>
+                <div id="overlay-desc" class="text-sm text-slate-300 leading-relaxed font-sans">
+                    请大声读出屏幕上的拼音。如果发音和声调都正确，滑动的挡门墙就会开启！
+                </div>
 
                 <!-- 游戏配置 -->
-                <div class="space-y-3 pt-2 text-left" id="game-setup">
+                <div class="space-y-3 pt-2 text-left font-sans" id="game-setup">
                     <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">选择词库类型</label>
                     <div class="grid grid-cols-2 gap-2">
                         <button class="cat-btn py-2.5 px-3 rounded-xl border-2 border-yellow-500 bg-yellow-500/10 text-yellow-300 text-sm font-semibold transition-all flex items-center justify-center space-x-1" data-cat="veggies">
@@ -231,30 +297,119 @@
         // 游戏词库数据
         const wordBanks = {
             veggies: [
-                { word: '土豆', pinyin: 'tǔ dòu', emoji: '🥔' },
-                { word: '西兰花', pinyin: 'xī lán huā', emoji: '🥦' },
-                { word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅' },
-                { word: '西瓜', pinyin: 'xī guā', emoji: '🍉' },
-                { word: '香蕉', pinyin: 'xiāng jiāo', emoji: '🍌' },
-                { word: '胡萝卜', pinyin: 'hú luó bo', emoji: '🥕' },
-                { word: '玉米', pinyin: 'yù mǐ', emoji: '🌽' },
-                { word: '草莓', pinyin: 'cǎo méi', emoji: '🍓' },
-                { word: '菠萝', pinyin: 'bō luó', emoji: '🍍' },
-                { word: '南瓜', pinyin: 'nán guā', emoji: '🎃' }
+                { 
+                    word: '土豆', pinyin: 'tǔ dòu', emoji: '🥔',
+                    tones: {
+                        '吐 du': '变成 吐都 😢 啦，‘豆’要读第四声哦！',
+                        '吐都': '变成 吐都 😢 啦，‘豆’要读第四声哦！',
+                        '兔兜': '哎呀，声调全跑偏啦，变成 兔兜 😭 啦！',
+                        '图都': '注意声调！那是 图都 🥺 噢！'
+                    }
+                },
+                { 
+                    word: '西兰花', pinyin: 'xī lán huā', emoji: '🥦',
+                    tones: {
+                        '西蓝画': '注意最后一个字是第一声哦 😢！',
+                        '细兰花': '‘西’是一声 (xī)，不要读成四声的 细 😭 噢！'
+                    }
+                },
+                { 
+                    word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
+                    tones: {
+                        '西红十': '注意！是柿子(shì)，不是数字十(shí) 🥺！',
+                        '细红柿': '‘西’是一声 (xī)，注意声调 😭！'
+                    }
+                },
+                { 
+                    word: '西瓜', pinyin: 'xī guā', emoji: '🍉',
+                    tones: {
+                        '细挂': '西瓜不是 细挂 😢 噢！'
+                    }
+                },
+                { 
+                    word: '香蕉', pinyin: 'xiāng jiāo', emoji: '🍌',
+                    tones: {
+                        '想叫': '天哪，变成 想叫 😭 啦！都是第一声平声唷！',
+                        '相脚': '‘蕉’是平声，不是脚(jiǎo) 🥺！'
+                    }
+                },
+                { 
+                    word: '胡萝卜', pinyin: 'hú luó bo', emoji: '🥕',
+                    tones: {
+                        '户落破': '读太重啦，‘萝卜’要读轻声 😢！',
+                        '虎萝卜': '‘胡’是二声，不是老虎的虎(hǔ) 😭！'
+                    }
+                },
+                { 
+                    word: '玉米', pinyin: 'yù mǐ', emoji: '🌽',
+                    tones: {
+                        '鱼米': '‘玉’是第四声 (yù) 唷 🥺！'
+                    }
+                },
+                { 
+                    word: '草莓', pinyin: 'cǎo méi', emoji: '🍓',
+                    tones: {
+                        '吵妹': '哈哈，‘草莓’听起来像 吵妹 😭 了！',
+                        '超美': '虽然超美，但‘草’是三声(cǎo)哦 🥺！'
+                    }
+                },
+                { 
+                    word: '菠萝', pinyin: 'bō luó', emoji: '🍍',
+                    tones: {
+                        '波落': '变成 波落 😢 啦，‘萝’是二声(luó)哦！',
+                        '博落': '声调跑偏啦 😭！'
+                    }
+                },
+                { 
+                    word: '苹果', pinyin: 'píng guǒ', emoji: '🍎',
+                    tones: {
+                        '病国': '不要读成四声的 病国 😭 噢！',
+                        '凭国': '‘果’是第三声(guǒ)哦 🥺！'
+                    }
+                }
             ],
             animals: [
-                { word: '老虎', pinyin: 'lǎo hǔ', emoji: '🐯' },
-                { word: '熊猫', pinyin: 'xióng māo', emoji: '🐼' },
-                { word: '长颈鹿', pinyin: 'cháng jǐng lù', emoji: '🦒' },
-                { word: '兔子', pinyin: 'tù zi', emoji: '🐰' },
-                { word: '青蛙', pinyin: 'qīng wā', emoji: '🐸' },
-                { word: '企鹅', pinyin: 'qǐ é', emoji: '🐧' },
-                { word: '松鼠', pinyin: 'sōng shǔ', emoji: '🐿️' },
-                { word: '大象', pinyin: 'dà xiàng', emoji: '🐘' },
-                { word: '狮子', pinyin: 'shī zi', emoji: '🦁' },
-                { word: '恐龙', pinyin: 'kǒng lóng', emoji: '🦖' }
+                { 
+                    word: '老虎', pinyin: 'lǎo hǔ', emoji: '🐯',
+                    tones: {
+                        '老夫': '老虎变成 老夫 🥺 啦！',
+                        '落户': '声调跑偏啦，变成 落户 😢 了！'
+                    }
+                },
+                { 
+                    word: '熊猫', pinyin: 'xióng māo', emoji: '🐼',
+                    tones: {
+                        '凶猫': '‘熊’是二声 (xióng)，不是凶巴巴的猫哦 😭！',
+                        '胸猫': '声调平了，请读二声 🥺！'
+                    }
+                },
+                { 
+                    word: '兔子', pinyin: 'tù zi', emoji: '🐰',
+                    tones: {
+                        '图纸': '兔子变成了 图纸 😢 啦！',
+                        '吐司': '那是好吃的 吐司 🍞，‘兔’是第四声(tù)！'
+                    }
+                },
+                { 
+                    word: '青蛙', pinyin: 'qīng wā', emoji: '🐸',
+                    tones: {
+                        '晴挖': '‘青’是一声平声，不是晴天的晴(qíng) 🥺！'
+                    }
+                },
+                { 
+                    word: '大象', pinyin: 'dà xiàng', emoji: '🐘',
+                    tones: {
+                        '打响': '注意两个字都是第四声 (dà xiàng) 噢 😭！'
+                    }
+                }
             ]
         };
+
+        // 简化后的魔性好评
+        const encouragementPool = ["👍"];
+
+        // 简化后的魔性差评
+        const teasePool = ["Try again😢"];
 
         // 状态管理
         let score = 0;
@@ -264,15 +419,13 @@
         let currentWords = [];
         let isPlaying = false;
         let isListening = false;
-        let isManualMode = false; // 手动模式（课堂演示模式）
+        let isManualMode = false;
         let timerInterval = null;
-        let wordTimeLimit = 15; // 15秒一题
+        let wordTimeLimit = 15;
         let timeLeft = 15;
 
-        // 音频上下文（纯代码生成音效，不依赖外部mp3）
+        // 音频上下文
         let audioCtx = null;
-
-        // 语音识别组件 (Web Speech API)
         let recognition = null;
 
         // DOM 元素引用
@@ -280,9 +433,12 @@
             score: document.getElementById('score'),
             heartsContainer: document.getElementById('hearts-container'),
             targetPinyin: document.getElementById('target-pinyin'),
+            targetEmoji: document.getElementById('target-emoji'),
+            orangeDisplayCard: document.getElementById('orange-display-card'),
+            wallGateLeft: document.getElementById('wall-gate-left'),
+            wallGateRight: document.getElementById('wall-gate-right'),
             wordLen: document.getElementById('word-len'),
             timerBar: document.getElementById('timer-bar'),
-            pinyinWall: document.getElementById('pinyin-wall'),
             victoryItem: document.getElementById('victory-item'),
             victoryEmoji: document.getElementById('victory-emoji'),
             victoryText: document.getElementById('victory-text'),
@@ -303,7 +459,13 @@
             fallbackBg: document.getElementById('fallback-bg'),
             gameSetup: document.getElementById('game-setup'),
             reactionFace: document.getElementById('reaction-face'),
-            reactionBubble: document.getElementById('reaction-bubble')
+            reactionBubble: document.getElementById('reaction-bubble'),
+            textFeedbackContainer: document.getElementById('text-feedback-container'),
+            speechTranscript: document.getElementById('speech-transcript'),
+            speechErrorHint: document.getElementById('speech-error-hint'),
+            speechPreviewBox: document.getElementById('speech-preview-box'),
+            voiceStatusContainer: document.getElementById('voice-status-container'),
+            btnRestartMid: document.getElementById('btn-restart-mid') // 顶部栏重新开始按键
         };
 
         // 卡米拉人脸动态控制
@@ -335,7 +497,6 @@
 
         function playSound(type) {
             if (!audioCtx) return;
-            // 处理 iOS 声音锁定
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
@@ -348,17 +509,15 @@
             const now = audioCtx.currentTime;
 
             if (type === 'success') {
-                // 叮咚声
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
                 gain.gain.setValueAtTime(0.3, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                 osc.start(now);
                 osc.stop(now + 0.4);
             } else if (type === 'error') {
-                // 警报声
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(150, now);
                 osc.frequency.linearRampToValueAtTime(80, now + 0.3);
@@ -367,7 +526,6 @@
                 osc.start(now);
                 osc.stop(now + 0.3);
             } else if (type === 'explosion') {
-                // 爆炸白噪音
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(100, now);
                 osc.frequency.exponentialRampToValueAtTime(10, now + 0.5);
@@ -375,21 +533,28 @@
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
                 osc.start(now);
                 osc.stop(now + 0.5);
-            } else if (type === 'fanfare') {
-                // 游戏胜利欢呼
+            } else if (type === 'slide') {
+                // 🔊 浑厚的滑动门声效
                 osc.type = 'triangle';
-                const notes = [261.63, 329.63, 392.00, 523.25];
+                osc.frequency.setValueAtTime(75, now);
+                osc.frequency.linearRampToValueAtTime(130, now + 0.5);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+                osc.start(now);
+                osc.stop(now + 0.6);
+            } else if (type === 'fanfare') {
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
                     const oscNote = audioCtx.createOscillator();
                     const gainNote = audioCtx.createGain();
                     oscNote.connect(gainNote);
                     gainNote.connect(audioCtx.destination);
                     oscNote.type = 'sine';
-                    oscNote.frequency.setValueAtTime(freq, now + idx * 0.1);
-                    gainNote.gain.setValueAtTime(0.2, now + idx * 0.1);
-                    gainNote.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
-                    oscNote.start(now + idx * 0.1);
-                    oscNote.stop(now + idx * 0.1 + 0.3);
+                    oscNote.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gainNote.gain.setValueAtTime(0.2, now + idx * 0.08);
+                    gainNote.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.4);
+                    oscNote.start(now + idx * 0.08);
+                    oscNote.stop(now + idx * 0.08 + 0.5);
                 });
             }
         }
@@ -426,7 +591,6 @@
 
             recognition.onend = () => {
                 isListening = false;
-                // 如果游戏正在进行，并且没有被切回手动模式，则重新启动监听
                 if (isPlaying && !isManualMode) {
                     try {
                         recognition.start();
@@ -450,56 +614,99 @@
                     }
                 }
 
-                // 实时嘴型变化模拟：听到音量/字数时张嘴
                 if (interimTranscript.length > 0 || finalTranscript.length > 0) {
                     animateFace('speaking');
                     const text = finalTranscript || interimTranscript;
-                    updateStatus(`听到了: "${text}"`, 'success');
                     
-                    // 校验是否读对
-                    checkSpeechAnswer(text);
+                    // 去除多余标点和空格
+                    const cleanText = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()？。！，\s]/g, "");
+                    // 彻底移除双引号 “ 和 ” 包裹，避免空间不足被截断
+                    elements.speechTranscript.innerText = cleanText;
+                    elements.speechTranscript.className = "text-lg font-black text-center tracking-wide text-yellow-300 leading-normal";
+
+                    checkSpeechAnswer(cleanText);
                 }
             };
         }
 
-        // 检测语音答案是否包含目标汉字
+        // 检验拼音发音以及声调
         function checkSpeechAnswer(speechText) {
             const currentItem = currentWords[currentWordIndex];
             if (!currentItem) return;
 
-            // 清理无用标点
-            const cleanText = speechText.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()？。！，]/g, "");
-            
-            // 模糊匹配：如果识别出的文本中包含了当前的汉字（如“土豆”），即通关
-            if (cleanText.includes(currentItem.word)) {
+            // 1. 如果完全读对（代表发音与声调都准确）
+            if (speechText.includes(currentItem.word)) {
+                elements.speechErrorHint.classList.add('hidden');
                 handleCorrectAnswer();
+                return;
+            }
+
+            // 2. 智能声调报错过滤
+            for (let errorWord in currentItem.tones) {
+                if (speechText.includes(errorWord)) {
+                    elements.speechErrorHint.innerText = `⚠️ ${currentItem.tones[errorWord]}`;
+                    elements.speechErrorHint.classList.remove('hidden');
+                    handleWrongAnswer(currentItem.tones[errorWord]); 
+                    return;
+                }
+            }
+
+            // 3. 声调或拼音完全不着边际
+            if (speechText.length >= currentItem.word.length) {
+                elements.speechErrorHint.innerText = `⚠️ 声调/读音不对哦 🥺，大声重试！`;
+                elements.speechErrorHint.classList.remove('hidden');
+                handleWrongAnswer();
             }
         }
 
-        // 事件监听
+        // 创建飘字反馈
+        function spawnFeedbackText(isCorrect, customText = "") {
+            elements.textFeedbackContainer.innerHTML = '';
+            const textSpan = document.createElement('div');
+            
+            let feedbackText = "";
+            if (isCorrect) {
+                feedbackText = encouragementPool[Math.floor(Math.random() * encouragementPool.length)];
+                textSpan.className = "feedback-pop text-2xl font-black px-4 py-2 bg-emerald-500 text-white rounded-full border-2 border-white shadow-lg font-game tracking-wide";
+            } else {
+                feedbackText = customText || teasePool[Math.floor(Math.random() * teasePool.length)];
+                textSpan.className = "feedback-pop text-lg font-black px-4 py-2 bg-rose-600 text-white rounded-full border-2 border-white shadow-lg font-game tracking-wide text-center max-w-[90%]";
+            }
+
+            textSpan.innerText = feedbackText;
+            elements.textFeedbackContainer.appendChild(textSpan);
+
+            setTimeout(() => {
+                textSpan.remove();
+            }, 2000);
+        }
+
+        // 事件监听 Setup
         function setupEventListeners() {
-            // 开始按钮
             elements.btnStart.onclick = () => {
-                initAudio(); // 解决用户交互解锁音频问题
+                initAudio();
                 startGame();
             };
 
-            // 手动判断正确 (空格键)
+            // 顶部栏随时重置并返回主配置遮罩
+            elements.btnRestartMid.onclick = () => {
+                resetGameToMainScreen();
+            };
+
+            // 手动判定正确：触发爆炸倒墙，进入下一个
             elements.btnCorrect.onclick = () => {
                 if (isPlaying) handleCorrectAnswer();
             };
 
-            // 手动判断错误 (ESC键)
+            // 手动判定错：扣心、震动、重置本题时间重新挑战 (绝不跳过)
             elements.btnWrong.onclick = () => {
                 if (isPlaying) handleWrongAnswer();
             };
 
-            // 模式切换按钮
             elements.btnModeToggle.onclick = () => {
                 enableManualMode(!isManualMode);
             };
 
-            // 词库类别切换
             const catButtons = document.querySelectorAll('.cat-btn');
             catButtons.forEach(btn => {
                 btn.onclick = () => {
@@ -513,7 +720,6 @@
                 };
             });
 
-            // 键盘事件支持（太适合教室里投影了，老师拿着键盘就可以判定）
             document.addEventListener('keydown', (e) => {
                 if (!isPlaying) return;
                 if (e.code === 'Space') {
@@ -526,13 +732,51 @@
             });
         }
 
-        // 切换模式功能（手动/语音）
+        // 随时重开回到主屏逻辑
+        function resetGameToMainScreen() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            stopWebcam();
+
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+            }
+
+            // 重新显示设置区
+            elements.gameSetup.classList.remove('hidden');
+
+            // 合拢两扇挡门（通过原生 JS style 赋值）
+            elements.wallGateLeft.style.transform = 'translateX(0)';
+            elements.wallGateRight.style.transform = 'translateX(0)';
+
+            // 还原遮罩配置为初始状态
+            elements.overlayEmoji.innerText = "🎮";
+            elements.overlayTitle.innerText = "挑战开始！";
+            elements.overlayDesc.innerText = "请大声读出屏幕上的拼音。如果发音和声调都正确，大门墙就会开启！";
+            elements.btnStartText.innerText = "开始挑战";
+
+            animateFace('normal');
+            elements.overlayScreen.classList.remove('hidden');
+        }
+
+        // 切换裁判模式与语音识别状态
         function enableManualMode(enable) {
             isManualMode = enable;
+            const btnWrong = elements.btnWrong;
+            const btnCorrect = elements.btnCorrect;
+            const voiceStatusContainer = elements.voiceStatusContainer;
+
             if (isManualMode) {
                 elements.modeIcon.setAttribute('data-lucide', 'keyboard');
                 elements.btnModeToggle.classList.add('bg-emerald-600/30', 'text-emerald-300', 'border', 'border-emerald-500/50');
-                updateStatus('已进入教师手动裁判模式（空格对，Esc错）', 'normal');
+                updateStatus('已进入教师手动裁判模式（键盘空格对，Esc错）', 'normal');
+                elements.speechPreviewBox.classList.add('hidden');
+                
+                // 教师模式下，展现判定按键
+                btnWrong.classList.remove('hidden');
+                btnCorrect.classList.remove('hidden');
+                voiceStatusContainer.classList.add('hidden');
+
                 if (recognition) {
                     try { recognition.stop(); } catch(e){}
                 }
@@ -540,12 +784,18 @@
                 elements.modeIcon.setAttribute('data-lucide', 'mic');
                 elements.btnModeToggle.classList.remove('bg-emerald-600/30', 'text-emerald-300', 'border', 'border-emerald-500/50');
                 updateStatus('正在尝试启动语音识别...', 'normal');
+                elements.speechPreviewBox.classList.remove('hidden');
+
+                // 学生语音模式下，隐藏判定按键，避免随意点击直接跳过
+                btnWrong.classList.add('hidden');
+                btnCorrect.classList.add('hidden');
+                voiceStatusContainer.classList.remove('hidden');
+
                 startVoiceListening();
             }
             lucide.createIcons();
         }
 
-        // 开启语音监听
         function startVoiceListening() {
             if (recognition && !isListening && isPlaying && !isManualMode) {
                 try {
@@ -556,7 +806,6 @@
             }
         }
 
-        // 更新状态指示
         function updateStatus(text, type = 'normal') {
             elements.statusText.innerText = text;
             elements.statusDot.className = "relative inline-flex rounded-full h-3 w-3 ";
@@ -572,54 +821,80 @@
             }
         }
 
-        // 开始游戏
         function startGame() {
             score = 0;
             lives = 3;
             currentWordIndex = 0;
             isPlaying = true;
             elements.score.innerText = score;
+            elements.textFeedbackContainer.innerHTML = '';
+            elements.speechTranscript.innerText = "等待发音...";
+            elements.speechTranscript.className = "text-lg font-bold text-center tracking-wide text-slate-300";
+            elements.speechErrorHint.classList.add('hidden');
+            
             updateHeartsUI();
 
-            // 乱序排列词库
             currentWords = [...wordBanks[activeBank]].sort(() => Math.random() - 0.5);
-
-            // 隐藏遮罩
             elements.overlayScreen.classList.add('hidden');
 
-            // 开启摄像头 (如果勾选)
             if (elements.useCamera.checked) {
                 startWebcam();
             } else {
                 stopWebcam();
             }
 
-            // 加载第一个词
+            enableManualMode(isManualMode);
             loadWord();
-
-            // 开启语音监听
-            if (!isManualMode) {
-                startVoiceListening();
-            }
         }
 
-        // 加载词语
+        // 加载词语并播放滑门动画
         function loadWord() {
             if (currentWordIndex >= currentWords.length) {
-                // 如果玩通了所有词，就重新打乱
-                currentWords = [...wordBanks[activeBank]].sort(() => Math.random() - 0.5);
-                currentWordIndex = 0;
+                // 如果答通了全部，触发胜利结算
+                showGameWonScreen();
+                return;
             }
 
             const currentItem = currentWords[currentWordIndex];
-            elements.targetPinyin.innerText = currentItem.pinyin;
-            elements.wordLen.innerText = currentItem.word.length;
 
-            // 还原墙体状态与大小
-            elements.pinyinWall.className = "absolute bottom-16 w-11/12 max-w-[340px] flex flex-col items-center transition-all duration-300 transform scale-100";
-            elements.victoryItem.className = "absolute bottom-28 z-30 text-8xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center";
+            // 1. 关闭挡门墙（使用安全的 JS style 原生赋值）
+            elements.wallGateLeft.style.transform = 'translateX(0)';
+            elements.wallGateRight.style.transform = 'translateX(0)';
 
-            // 开启倒计时
+            // 隐藏上一个爆出的胜利实物
+            elements.victoryItem.className = "absolute bottom-6 z-30 text-8xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center";
+
+            // 清理已有的倒计时
+            clearInterval(timerInterval);
+            elements.timerBar.style.width = '100%';
+
+            // 2. 延迟加载数据并开门（在门完全闭合后重开，展现完美顺畅的动态效果）
+            setTimeout(() => {
+                elements.targetPinyin.innerText = currentItem.pinyin;
+                elements.targetEmoji.innerText = currentItem.emoji;
+                elements.wordLen.innerText = currentItem.word.length;
+
+                // 播放石门滑开声效
+                playSound('slide');
+
+                // 左右滑门拉开（利用内联样式直接驱动，100% 成功开门！）
+                elements.wallGateLeft.style.transform = 'translateX(-101%)';
+                elements.wallGateRight.style.transform = 'translateX(101%)';
+
+                // 开门动画完成后（约600ms），才启动学生的答题倒计时，保证绝不浪费时间
+                setTimeout(() => {
+                    if (isPlaying) {
+                        resetWordTimer();
+                    }
+                }, 600);
+
+            }, 400); 
+
+            animateFace('normal');
+        }
+
+        // 重置倒计时（允许学生在同一题原地复活挑战）
+        function resetWordTimer() {
             timeLeft = wordTimeLimit;
             updateTimerBar();
             
@@ -629,14 +904,11 @@
                 updateTimerBar();
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    handleWrongAnswer(); // 超时算错
+                    handleWrongAnswer("时间到 😢！声调不要犹豫噢！⏳");
                 }
             }, 100);
-
-            animateFace('normal');
         }
 
-        // 更新时间条
         function updateTimerBar() {
             const percentage = (timeLeft / wordTimeLimit) * 100;
             elements.timerBar.style.width = `${percentage}%`;
@@ -648,7 +920,7 @@
             }
         }
 
-        // 判定正确 (破墙通关)
+        // 判定正确 (破门开箱成功，获得水果/动物并展示在下方蓝色垫子上)
         function handleCorrectAnswer() {
             clearInterval(timerInterval);
             playSound('success');
@@ -656,50 +928,51 @@
 
             const currentItem = currentWords[currentWordIndex];
 
-            // 爆出物动画
+            // 下方蓝色赛道上直接爆出高保真的可爱 Emoji 实物
             elements.victoryEmoji.innerText = currentItem.emoji;
             elements.victoryText.innerText = currentItem.word;
-            elements.victoryItem.className = "absolute bottom-36 z-30 text-9xl transform scale-125 opacity-100 pointer-events-none flex flex-col items-center transition-all duration-500 ease-out";
-
-            // 墙裂开消失
-            elements.pinyinWall.classList.add('wall-break');
+            elements.victoryItem.className = "absolute bottom-12 z-30 text-8xl transform scale-125 opacity-100 pointer-events-none flex flex-col items-center transition-all duration-500 ease-out";
 
             score += 10;
             elements.score.innerText = score;
 
+            // 鼓励飘字与动态表情
+            spawnFeedbackText(true);
             animateFace('happy');
 
-            // 延迟后加载下一个
+            // 答对后 1.8 秒后载入下一个拼音卡
             setTimeout(() => {
                 currentWordIndex++;
+                elements.speechTranscript.innerText = "等待发音...";
+                elements.speechTranscript.className = "text-lg font-bold text-center tracking-wide text-slate-300";
+                elements.speechErrorHint.classList.add('hidden');
                 loadWord();
-            }, 1500);
+            }, 1800);
         }
 
-        // 判定错误 (撞墙或超时)
-        function handleWrongAnswer() {
+        // 判定错误 (扣分/扣心，不跳过当前题，橘黄色显示卡剧烈抖动)
+        function handleWrongAnswer(customHintText = "") {
             clearInterval(timerInterval);
             playSound('error');
 
-            // 墙壁抖动
-            elements.pinyinWall.classList.add('shake-error');
+            // 拼音橘黄展示卡发生剧烈颤抖（完美的交互反馈）
+            elements.orangeDisplayCard.classList.add('shake-error');
             setTimeout(() => {
-                elements.pinyinWall.classList.remove('shake-error');
+                elements.orangeDisplayCard.classList.remove('shake-error');
             }, 400);
 
-            lives--;
+            lives = Math.max(0, lives - 1); // 扣心
             updateHeartsUI();
+
+            // 触发趣味伤心弹幕
+            spawnFeedbackText(false, customHintText);
             animateFace('angry');
 
-            if (lives <= 0) {
-                gameOver(false);
-            } else {
-                // 延迟后自动跳到下一个词
-                setTimeout(() => {
-                    currentWordIndex++;
-                    loadWord();
-                }, 1500);
-            }
+            // 重置倒计时，学生在当前题上可以进行二次发音纠正
+            setTimeout(() => {
+                resetWordTimer();
+                animateFace('normal');
+            }, 1500);
         }
 
         // 更新生命值 UI
@@ -718,8 +991,8 @@
             lucide.createIcons();
         }
 
-        // 游戏结束
-        function gameOver(win = false) {
+        // 终极通关：大奖杯大拇指庆典，增添“返回主菜单 (Back to Menu)”专属交互
+        function showGameWonScreen() {
             isPlaying = false;
             clearInterval(timerInterval);
             stopWebcam();
@@ -728,19 +1001,52 @@
                 try { recognition.stop(); } catch (e) {}
             }
 
-            // 修改遮罩文案
-            elements.overlayEmoji.innerText = "😭";
-            elements.overlayTitle.innerText = "游戏结束 - 挑战失败";
-            elements.overlayDesc.innerHTML = `你总共击碎了 <strong class="text-yellow-400">${score / 10}</strong> 面拼音墙，获得了 <strong class="text-yellow-400">${score}</strong> 分！<br>卡米拉大吼：<i>"I hate this one!"</i>`;
-            elements.btnStartText.innerText = "重新挑战";
+            // 隐藏底部的游戏设置选单，防止推开界面高度
+            elements.gameSetup.classList.add('hidden');
 
-            animateFace('dead');
+            elements.overlayEmoji.innerText = "🏆";
+            elements.overlayTitle.innerText = "祝贺你挑战成功！";
+            elements.overlayDesc.innerHTML = `
+                <div class="flex flex-col items-center space-y-4 py-2">
+                    <span class="text-8xl animate-bounce">🏆👍</span>
+                    <p class="text-xl font-bold text-yellow-300 font-game">发音精准！所有拼音通关！</p>
+                    <p class="text-sm text-slate-300 mb-2">完美获得：<strong class="text-yellow-400 text-lg">${score}</strong> 积分</p>
+                    
+                    <!-- 极其醒目、高优先级的卡片内专属“返回主菜单”交互按钮，点击后平滑返回最开端的游戏配置页 -->
+                    <button id="btn-play-again-inner" class="w-full max-w-[240px] bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 active:scale-95 text-slate-950 font-black text-lg py-3 px-6 rounded-2xl shadow-lg shadow-emerald-500/20 tracking-wider transition-all border-b-4 border-green-700 flex items-center justify-center space-x-2 font-game pointer-events-auto">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                        <span>返回主菜单</span>
+                    </button>
+                </div>
+            `;
+            elements.btnStartText.innerText = "返回主菜单"; // 同时改变下方主按钮文本
 
-            // 显示遮罩
+            animateFace('happy');
+            playSound('fanfare'); // 播放激昂的凯旋 fanfare
             elements.overlayScreen.classList.remove('hidden');
+
+            // 动态刷新图标
+            lucide.createIcons();
+
+            // 绑定全新增加的内部中心按钮点击事件，返回最开端
+            const playAgainBtn = document.getElementById('btn-play-again-inner');
+            if (playAgainBtn) {
+                playAgainBtn.onclick = () => {
+                    resetGameToMainScreen();
+                };
+            }
+            // 主开始按钮点击在结算页中时同样也绑定为返回主屏
+            elements.btnStart.onclick = () => {
+                resetGameToMainScreen();
+                // 还原开始按钮本意绑定
+                elements.btnStart.onclick = () => {
+                    initAudio();
+                    startGame();
+                };
+            };
         }
 
-        // 摄像头调用
+        // 摄像头
         async function startWebcam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -749,13 +1055,14 @@
                 });
                 elements.webcam.srcObject = stream;
                 elements.webcam.classList.remove('hidden');
-                elements.fallbackBg.classList.add('opacity-40'); // 让原背景变暗，提升对比度
+                elements.fallbackBg.classList.add('opacity-40');
             } catch (err) {
                 console.warn("无法打开摄像头:", err);
                 stopWebcam();
             }
         }
 
+        // 关闭摄像头
         function stopWebcam() {
             if (elements.webcam.srcObject) {
                 const tracks = elements.webcam.srcObject.getTracks();
@@ -766,59 +1073,57 @@
             elements.fallbackBg.classList.remove('opacity-40');
         }
 
-        // 卡米拉恶搞人脸表情控制
+        // 卡米拉颜表情
         function animateFace(state) {
             const mouth = faceParts.mouth;
             const face = faceParts.face;
             
-            // 还原所有变形
             face.style.transform = "scale(1)";
             faceParts.leftBrow.setAttribute('d', 'M25,30 Q35,28 42,35');
             faceParts.rightBrow.setAttribute('d', 'M75,30 Q65,28 58,35');
 
             switch (state) {
                 case 'normal':
-                    mouth.setAttribute('d', 'M35,62 Q50,62 65,62'); // 闭嘴
-                    elements.reactionBubble.innerText = "加油！加油！";
+                    mouth.setAttribute('d', 'M35,62 Q50,62 65,62');
+                    elements.reactionBubble.innerText = "加油！发准声调！";
                     elements.reactionBubble.className = "text-[10px] text-pink-300 font-semibold text-center mt-1 h-8 flex items-center justify-center";
                     break;
                 case 'listening':
-                    mouth.setAttribute('d', 'M40,62 Q50,65 60,62'); // 微微张嘴
+                    mouth.setAttribute('d', 'M40,62 Q50,65 60,62');
                     elements.reactionBubble.innerText = "倾听中👂...";
                     break;
                 case 'speaking':
-                    // 嘴巴疯狂张大（视频同款）
                     mouth.setAttribute('d', 'M25,58 Q50,85 75,58 Q50,45 25,58'); 
                     face.style.transform = "scale(1.1)";
                     elements.reactionBubble.innerText = "大声点！";
                     break;
                 case 'happy':
-                    mouth.setAttribute('d', 'M30,55 Q50,75 70,55'); // 大笑
+                    mouth.setAttribute('d', 'M30,55 Q50,75 70,55');
                     faceParts.leftBrow.setAttribute('d', 'M25,28 Q35,23 42,28');
                     faceParts.rightBrow.setAttribute('d', 'M75,28 Q65,23 58,28');
                     elements.reactionBubble.innerText = "好标准！🎉";
                     elements.reactionBubble.className = "text-[12px] text-emerald-400 font-bold text-center mt-1 h-8 flex items-center justify-center";
                     break;
                 case 'panic':
-                    mouth.setAttribute('d', 'M40,60 Q50,75 60,60 Q50,55 40,60'); // O型嘴
+                    mouth.setAttribute('d', 'M40,60 Q50,75 60,60 Q50,55 40,60');
                     faceParts.leftBrow.setAttribute('d', 'M25,35 Q35,32 42,28');
                     faceParts.rightBrow.setAttribute('d', 'M75,35 Q65,32 58,28');
                     elements.reactionBubble.innerText = "时间不够啦！💥";
                     elements.reactionBubble.className = "text-[10px] text-red-400 font-bold text-center mt-1 h-8 flex items-center justify-center animate-pulse";
                     break;
                 case 'angry':
-                    mouth.setAttribute('d', 'M35,68 Q50,55 65,68'); // 撇嘴
-                    faceParts.leftBrow.setAttribute('d', 'M25,35 Q35,33 42,42'); // 皱眉
+                    mouth.setAttribute('d', 'M35,68 Q50,55 65,68');
+                    faceParts.leftBrow.setAttribute('d', 'M25,35 Q35,33 42,42');
                     faceParts.rightBrow.setAttribute('d', 'M75,35 Q65,33 58,42');
                     face.style.transform = "scale(1.1)";
-                    elements.reactionBubble.innerText = "这读得啥呀！🤦‍♂️";
+                    elements.reactionBubble.innerText = "声调不对 😭";
                     elements.reactionBubble.className = "text-[11px] text-orange-400 font-bold text-center mt-1 h-8 flex items-center justify-center";
                     break;
                 case 'dead':
-                    mouth.setAttribute('d', 'M35,68 Q50,55 65,68'); // 撇嘴
+                    mouth.setAttribute('d', 'M35,68 Q50,55 65,68');
                     faceParts.leftBrow.setAttribute('d', 'M25,38 Q35,35 42,44');
                     faceParts.rightBrow.setAttribute('d', 'M75,38 Q65,35 58,44');
-                    elements.reactionBubble.innerText = "I hate this one! 😡";
+                    elements.reactionBubble.innerText = "加油啊！😭";
                     elements.reactionBubble.className = "text-[12px] text-rose-500 font-black text-center mt-1 h-8 flex items-center justify-center";
                     break;
             }
