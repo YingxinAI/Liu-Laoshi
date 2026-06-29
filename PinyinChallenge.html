@@ -43,7 +43,7 @@
             animation: float-up 1.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 🧱 拼音展示区左右滑开门过渡效果 */
+        /* 🧱 拼音展示区左右滑开门过渡效果 (物理滑门关闭需要 0.6s) */
         #wall-gate-left {
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
@@ -435,6 +435,7 @@
         let wordTimeLimit = 15;
         let timeLeft = 15;
         let consecutiveSpeechErrors = 0; // 记录连续发音失败或超时的次数
+        let isTransitioning = false; // 是否处于开门/关门过渡期
 
         // 音频上下文
         let audioCtx = null;
@@ -625,6 +626,7 @@
 
         // 检验拼音发音以及声调
         function checkSpeechAnswer(speechText) {
+            if (isTransitioning) return; // 过渡期间不处理新的语音输入
             const currentItem = currentWords[currentWordIndex];
             if (!currentItem) return;
 
@@ -687,12 +689,12 @@
 
             // 手动判定正确：触发爆炸倒墙，进入下一个
             elements.btnCorrect.onclick = () => {
-                if (isPlaying) handleCorrectAnswer();
+                if (isPlaying && !isTransitioning) handleCorrectAnswer();
             };
 
             // 手动判定错：扣心、震动、重置本题时间重新挑战 (绝不跳过)
             elements.btnWrong.onclick = () => {
-                if (isPlaying) handleWrongAnswer();
+                if (isPlaying && !isTransitioning) handleWrongAnswer();
             };
 
             elements.btnModeToggle.onclick = () => {
@@ -713,7 +715,7 @@
             });
 
             document.addEventListener('keydown', (e) => {
-                if (!isPlaying) return;
+                if (!isPlaying || isTransitioning) return; // 锁定状态时不响应键盘
                 if (e.code === 'Space') {
                     e.preventDefault();
                     handleCorrectAnswer();
@@ -727,6 +729,7 @@
         // 随时重开回到主屏逻辑
         function resetGameToMainScreen() {
             isPlaying = false;
+            isTransitioning = false;
             consecutiveSpeechErrors = 0;
             clearInterval(timerInterval);
             stopWebcam();
@@ -808,6 +811,7 @@
             lives = 3;
             currentWordIndex = 0;
             isPlaying = true;
+            isTransitioning = false;
             consecutiveSpeechErrors = 0;
             elements.score.innerText = score;
             elements.textFeedbackContainer.innerHTML = '';
@@ -848,20 +852,20 @@
             clearInterval(timerInterval);
             elements.timerBar.style.width = '100%';
 
-            // 2. 延迟加载数据并开门
+            // 2. 延迟加载数据并开门 (等待滑门在650ms内完全关闭，确保学生绝不穿帮看到上一个拼音)
             setTimeout(() => {
                 elements.targetPinyin.innerText = currentItem.pinyin;
                 elements.targetEmoji.innerText = currentItem.emoji;
                 elements.wordLen.innerText = currentItem.word.length;
 
-                // 🌟 动态调整拼音的字体大小，确保不管拼音长短，100%保持在单行显示！
+                // 🌟 动态调整拼音的字体大小，进行舒适微调，确保不管拼音长短，100%保持在单行显示！
                 const pinyinLength = currentItem.pinyin.length;
                 if (pinyinLength > 11) {
-                    elements.targetPinyin.style.fontSize = '2.2rem'; // 精确微缩至 35px，适配长词
+                    elements.targetPinyin.style.fontSize = '1.6rem'; // 微调缩放至 25.6px，适配长词，完全防溢出
                 } else if (pinyinLength > 8) {
-                    elements.targetPinyin.style.fontSize = '2.8rem'; // 约 45px，适配中词
+                    elements.targetPinyin.style.fontSize = '2.0rem'; // 微调缩放至 32px，适配中词，两端呼吸感极佳
                 } else {
-                    elements.targetPinyin.style.fontSize = '3.5rem'; // 56px 超大号，适配短词
+                    elements.targetPinyin.style.fontSize = '2.5rem'; // 微调缩放至 40px，适配短词，醒目舒适
                 }
 
                 // 播放石门滑开声效
@@ -871,14 +875,15 @@
                 elements.wallGateLeft.style.transform = 'translateX(-101%)';
                 elements.wallGateRight.style.transform = 'translateX(101%)';
 
-                // 开门动画完成后（约600ms），才启动学生的答题倒计时
+                // 开门动画完成后（约600ms），才启动学生的答题倒计时并解除过渡态
                 setTimeout(() => {
                     if (isPlaying) {
                         resetWordTimer();
+                        isTransitioning = false; // 解除状态锁，允许进行下一次发音与判定
                     }
                 }, 600);
 
-            }, 400); 
+            }, 650); // 从原来的 400ms 调整为 650ms，以契合 0.6s 的滑门关闭物理过渡
         }
 
         // 重置倒计时（允许学生在同一题原地复活挑战）
@@ -909,6 +914,9 @@
 
         // 判定正确 (破门开箱成功，获得水果/动物并展示在下方蓝色垫子上)
         function handleCorrectAnswer() {
+            if (isTransitioning) return; // 如果正在播放过渡动画，忽略此次触发
+            isTransitioning = true; // 锁定状态，防止重复匹配或重复触发
+
             clearInterval(timerInterval);
             consecutiveSpeechErrors = 0; // 重置错误计数
             playSound('success');
@@ -936,6 +944,9 @@
 
         // 判定错误 (扣分/扣心，不跳过当前题，橘黄色显示卡剧烈抖动)
         function handleWrongAnswer(customHintText = "") {
+            if (isTransitioning) return; // 如果正在过渡中，直接忽略
+            isTransitioning = true;
+
             clearInterval(timerInterval);
             playSound('error');
 
@@ -957,6 +968,7 @@
             // 重置倒计时，学生在当前题上可以进行二次发音纠正
             setTimeout(() => {
                 resetWordTimer();
+                isTransitioning = false; // 解除状态锁
             }, 1500);
         }
 
