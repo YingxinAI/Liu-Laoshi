@@ -43,12 +43,28 @@
             animation: float-up 1.5s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 🧱 拼音展示区左右滑开门过渡效果 (物理滑门关闭需要 0.6s) */
+        /* 🧱 拼音展示区左右滑开门过渡效果 (物理滑门关闭与开启均需要 0.6s 硬件加速) */
         #wall-gate-left {
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
         #wall-gate-right {
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* ✨ 闪烁脉冲动画：大门未开启时，拼音和图片会不断轻柔闪烁呼吸 */
+        @keyframes text-pulse-blink {
+            0%, 100% { opacity: 0.35; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+            50% { opacity: 1.0; text-shadow: 0 0 24px rgba(255,255,255,0.9); }
+        }
+        @keyframes emoji-pulse-blink {
+            0%, 100% { opacity: 0.12; transform: scale(0.96); }
+            50% { opacity: 0.45; transform: scale(1.04); }
+        }
+        .pinyin-blinking {
+            animation: text-pulse-blink 1.4s infinite ease-in-out !important;
+        }
+        .emoji-blinking {
+            animation: emoji-pulse-blink 1.4s infinite ease-in-out !important;
         }
     </style>
 </head>
@@ -119,10 +135,10 @@
                         
                         <!-- 拼音置于图片之上布局且具有“左右拉门式隔离墙门”（高度保持 h-48 不变） -->
                         <div class="relative flex items-center justify-center h-48 my-2 overflow-hidden rounded-2xl border border-amber-700/30 bg-amber-950/20 px-2">
-                            <!-- 对应物品大图片/Emoji (半透明背景，尺寸 text-[10rem]) -->
-                            <div id="target-emoji" class="text-[10rem] leading-none select-none opacity-25 transition-all duration-300 transform scale-100">🥔</div>
-                            <!-- 对应的拼音文本（覆盖在Emoji上方，强阴影，添加 whitespace-nowrap 强制不换行） -->
-                            <div id="target-pinyin" class="absolute text-5xl font-black text-white tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.95)] font-game z-10 transition-all duration-300 whitespace-nowrap px-1">tǔ dòu</div>
+                            <!-- 对应物品大图片/Emoji (半透明背景，尺寸 text-[10rem]，初始添加呼吸闪烁) -->
+                            <div id="target-emoji" class="text-[10rem] leading-none select-none opacity-25 transition-all duration-300 transform scale-100 emoji-blinking">🥔</div>
+                            <!-- 对应的拼音文本（覆盖在Emoji上方，强阴影，添加 whitespace-nowrap 强制不换行，初始添加呼吸闪烁) -->
+                            <div id="target-pinyin" class="absolute text-5xl font-black text-white tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.95)] font-game z-10 transition-all duration-300 whitespace-nowrap px-1 pinyin-blinking">tǔ dòu</div>
 
                             <!-- 🧱 左右拉门式堵门墙 (左侧门) —— 完美硬件加速动画，开局完全遮挡 -->
                             <div id="wall-gate-left" class="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-orange-700 to-orange-850 border-r-2 border-orange-950 z-20 grid grid-rows-3 grid-cols-2 gap-0.5 p-1">
@@ -270,30 +286,36 @@
                         '吐 du': '变成 吐都 😢 啦，‘豆’要读第四声哦！',
                         '吐都': '变成 吐都 😢 啦，‘豆’要读第四声哦！',
                         '兔兜': '哎呀，声调全跑偏啦，变成 兔兜 😭 啦！',
-                        '图都': '注意声调！那是 图都 🥺 噢！'
+                        '图都': '注意声调！那是 图都 🥺 噢！',
+                        '图豆': '‘土’是第三声哦，不要读成第二声的 图 🥺！',
+                        '吐豆': '‘土’是第三声哦，不要读成第四声的 吐 🥺！'
                     }
                 },
                 { 
                     word: '西兰花', pinyin: 'xī lán huā', emoji: '🥦',
                     accept: ['西兰花', '希兰花', '吸兰花', '希腊花', '锡兰花'],
                     tones: {
-                        '西蓝画': '注意最后一个字是第一声哦 😢！',
-                        '细兰花': '‘西’是一声 (xī)，不要读成四声的 细 😭 噢！'
+                        '西蓝画': '注意最后一个字是第一声花(huā)哦 😢！',
+                        '西蓝花儿': '不要加儿化音哦！',
+                        '细兰花': '‘西’是一声 (xī)，不要读成四声的 细 😭 噢！',
+                        '喜兰花': '‘西’是一声 (xī)，不要读成三声的 喜 😭 噢！'
                     }
                 },
                 { 
                     word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
                     accept: ['西红柿', '西红市', '吸红柿', '希红柿'],
                     tones: {
-                        '西红十': '注意！是柿子(shì)，不是数字十(shí) 🥺！',
-                        '细红柿': '‘西’是一声 (xī)，注意声调 😭！'
+                        '西红十': '注意！是柿子(shì)四声，不是数字十(shí)二声 🥺！',
+                        '细红柿': '‘西’是一声 (xī)，注意声调 😭！',
+                        '洗红柿': '‘西’是一声 (xī)，注意声调 😭！'
                     }
                 },
                 { 
                     word: '西瓜', pinyin: 'xī guā', emoji: '🍉',
                     accept: ['西瓜', '希瓜', '吸瓜'],
                     tones: {
-                        '细挂': '西瓜不是 细挂 😢 噢！'
+                        '细挂': '西瓜不是 细挂 😢 噢！两个都是第一声！',
+                        '西挂': '‘瓜’是第一声 (guā) 噢 😭！'
                     }
                 },
                 { 
@@ -301,7 +323,8 @@
                     accept: ['香蕉', '相蕉', '向蕉', '乡蕉', '香交'],
                     tones: {
                         '想叫': '天哪，变成 想叫 😭 啦！ Boardwalk 唷！',
-                        '相脚': '‘蕉’是平声，不是脚(jiǎo) 🥺！'
+                        '相脚': '‘蕉’是平声第一声，不是三声的 脚(jiǎo) 🥺！',
+                        '想焦': '‘香’是一声 (xiāng) 喔！'
                     }
                 },
                 { 
@@ -309,14 +332,15 @@
                     accept: ['胡萝卜', '红萝卜', '糊萝卜', '胡罗卜', '红罗卜'],
                     tones: {
                         '户落破': '读太重啦，‘萝卜’要读轻声 😢！',
-                        '虎萝卜': '‘胡’是二声，不是老虎的虎(hǔ) 😭！'
+                        '虎萝卜': '‘胡’是二声 (hú)，不是三声老虎的虎(hǔ) 😭！'
                     }
                 },
                 { 
                     word: '玉米', pinyin: 'yù mǐ', emoji: '🌽',
                     accept: ['玉米', '玉米国', '育米', '御米'],
                     tones: {
-                        '鱼米': '‘玉’是第四声 (yù) 唷 🥺！'
+                        '鱼米': '‘玉’是第四声 (yù) 喔 🥺！',
+                        '雨米': '‘玉’是第四声 (yù) 喔 🥺！'
                     }
                 },
                 { 
@@ -332,7 +356,8 @@
                     accept: ['菠萝', '波罗', '波萝', '菠罗'],
                     tones: {
                         '波落': '变成 波落 😢 啦，‘萝’是二声(luó)哦！',
-                        '博落': '声调跑偏啦 😭！'
+                        '博落': '声调跑偏啦 😭！',
+                        '玻落': '‘萝’是二声 (luó) 喔！'
                     }
                 },
                 { 
@@ -340,7 +365,8 @@
                     accept: ['苹果', '平果', '屏果', '凭果'],
                     tones: {
                         '病国': '不要读成四声的 病国 😭 噢！',
-                        '凭国': '‘果’是第三声(guǒ)哦 🥺！'
+                        '凭国': '‘果’是第三声(guǒ)哦 🥺！',
+                        '平过': '注意‘果’是三声(guǒ)！'
                     }
                 }
             ],
@@ -349,71 +375,84 @@
                     word: '鼠', pinyin: 'shǔ', emoji: '🐭',
                     accept: ['鼠', '老鼠', '小老鼠', '树', '数', '书'],
                     tones: {
-                        '老书': '‘鼠’要读第三声哦 😢！',
-                        '老树': '‘鼠’是三声哦 🥺！'
+                        '老书': '‘鼠’要读第三声(shǔ)哦 😢！',
+                        '老树': '‘鼠’是三声哦 🥺！',
+                        '书': '是一声(shū)了，请读三声(shǔ)！',
+                        '树': '是四声(shù)了，请读三声(shǔ)！'
                     }
                 },
                 { 
                     word: '牛', pinyin: 'niú', emoji: '🐮',
                     accept: ['牛', '小牛', '大黄牛', '留', '流', '刘'],
                     tones: {
-                        '扭': '‘牛’是第二声哦 😢！'
+                        '扭': '‘牛’是第二声(niú)哦 😢！',
+                        '纽': '‘牛’是二声(niú)喔！'
                     }
                 },
                 { 
                     word: '虎', pinyin: 'hǔ', emoji: '🐯',
                     accept: ['虎', '老虎', '小老虎', '大老虎', '呼', '湖', '护'],
                     tones: {
-                        '老呼': '‘虎’是三声哦 🥺！'
+                        '老呼': '‘虎’是三声(hǔ)哦 🥺！',
+                        '胡': '‘虎’是三声(hǔ)哦，不是二声！',
+                        '护': '那是四声，请读三声！'
                     }
                 },
                 { 
                     word: '兔', pinyin: 'tù', emoji: '🐰',
                     accept: ['兔', '兔子', '小兔', '小兔子', '吐', '图'],
                     tones: {
-                        '图': '‘兔’是第四声哦 😢！'
+                        '图': '‘兔’是第四声(tù)哦 😢！',
+                        '吐': '‘兔’是第四声(tù)，读重一些！'
                     }
                 },
                 { 
                     word: '龙', pinyin: 'lóng', emoji: '🐲',
                     accept: ['龙', '大龙', '小龙', '咙', '笼', '拢'],
                     tones: {
-                        '隆': '注意发音声调哦 🥺！'
+                        '隆': '注意发音声调哦 🥺！',
+                        '拢': '那是第三声，请读第二声！'
                     }
                 },
                 { 
                     word: '蛇', pinyin: 'shé', emoji: '🐍',
                     accept: ['蛇', '小蛇', '大蛇', '折', '舌', '舍'],
                     tones: {
-                        '社': '‘蛇’是第二声哦 😢！'
+                        '社': '‘蛇’是第二声(shé)哦 😢！',
+                        '舍': '声调跑偏啦！'
                     }
                 },
                 { 
                     word: '马', pinyin: 'mǎ', emoji: '🐴',
                     accept: ['马', '小马', '大马', '玛', '妈', '骂'],
                     tones: {
-                        '小妈': '‘马’是第三声哦 😢！'
+                        '小妈': '‘马’是第三声(mǎ)哦 😢！',
+                        '妈': '‘马’是第三声(mǎ)哦，别读成一声！',
+                        '骂': '不要读成四声喔！'
                     }
                 },
                 { 
                     word: '羊', pinyin: 'yáng', emoji: '🐑',
                     accept: ['羊', '小羊', '大羊', '绵羊', '山羊', '洋', '阳', '杨'],
                     tones: {
-                        '小样': '‘羊’是二声，不要读成 小样 🥺！'
+                        '小样': '‘羊’是二声(yáng)，不要读成四声的小样 🥺！',
+                        '样': '‘羊’是第二声哦！'
                     }
                 },
                 { 
                     word: '猴', pinyin: 'hóu', emoji: '🐒',
                     accept: ['猴', '猴子', '小猴', '小猴子', '大猴', '喉', '候', '后'],
                     tones: {
-                        '厚': '‘猴’是第二声哦 😢！'
+                        '厚': '‘猴’是第二声(hóu)哦 😢！',
+                        '后': '‘猴’是第二声(hóu)喔！'
                     }
                 },
                 { 
                     word: '狗', pinyin: 'gǒu', emoji: '🐶',
                     accept: ['狗', '小狗', '大狗', '狗狗', '苟', '够', '沟'],
                     tones: {
-                        '小够': '‘狗’是第三声哦 🥺！'
+                        '小够': '‘狗’是第三声(gǒu)哦 🥺！',
+                        '够': '那是四声，请读第三声！'
                     }
                 }
             ]
@@ -630,21 +669,21 @@
             const currentItem = currentWords[currentWordIndex];
             if (!currentItem) return;
 
-            // 智能容错匹配
+            // 🌟 核心提升：强制优先进行严格的四声调报错匹配，不给“混过去”的机会！
+            for (let errorWord in currentItem.tones) {
+                if (speechText.includes(errorWord)) {
+                    handleWrongAnswer(currentItem.tones[errorWord]); 
+                    return;
+                }
+            }
+
+            // 2. 然后再进行完全对的判定
             const isMatched = speechText.includes(currentItem.word) || 
                               (currentItem.accept && currentItem.accept.some(val => speechText.includes(val)));
 
             if (isMatched) {
                 handleCorrectAnswer();
                 return;
-            }
-
-            // 智能声调报错过滤
-            for (let errorWord in currentItem.tones) {
-                if (speechText.includes(errorWord)) {
-                    handleWrongAnswer(currentItem.tones[errorWord]); 
-                    return;
-                }
             }
 
             // 声调或拼音完全不着边际
@@ -751,7 +790,7 @@
             elements.overlayDesc.innerText = "请大声读出屏幕上的拼音。如果发音和声调都正确，大门墙就会开启！";
             elements.btnStartText.innerText = "开始挑战";
 
-            // 🌟 核心修复：彻底消除通关后重开需要双击两次的 Bug
+            // 彻底消除通关后重开需要双击两次的 Bug
             // 只要退回到主菜单，就强制把大按钮的绑定恢复成原本的“开始游戏”！
             elements.btnStart.onclick = () => {
                 initAudio();
@@ -852,20 +891,24 @@
             clearInterval(timerInterval);
             elements.timerBar.style.width = '100%';
 
-            // 2. 延迟加载数据并开门 (等待滑门在650ms内完全关闭，确保学生绝不穿帮看到上一个拼音)
+            // 2. 延迟加载数据并开门 (等待滑门在650ms内完全关闭)
             setTimeout(() => {
                 elements.targetPinyin.innerText = currentItem.pinyin;
                 elements.targetEmoji.innerText = currentItem.emoji;
                 elements.wordLen.innerText = currentItem.word.length;
 
+                // 🌟 开启拼音和 Emoji 图片的呼吸闪烁状态
+                elements.targetPinyin.classList.add('pinyin-blinking');
+                elements.targetEmoji.classList.add('emoji-blinking');
+
                 // 🌟 动态调整拼音的字体大小，进行舒适微调，确保不管拼音长短，100%保持在单行显示！
                 const pinyinLength = currentItem.pinyin.length;
                 if (pinyinLength > 11) {
-                    elements.targetPinyin.style.fontSize = '1.6rem'; // 微调缩放至 25.6px，适配长词，完全防溢出
+                    elements.targetPinyin.style.fontSize = '1.6rem'; // 长词
                 } else if (pinyinLength > 8) {
-                    elements.targetPinyin.style.fontSize = '2.0rem'; // 微调缩放至 32px，适配中词，两端呼吸感极佳
+                    elements.targetPinyin.style.fontSize = '2.0rem'; // 中词
                 } else {
-                    elements.targetPinyin.style.fontSize = '2.5rem'; // 微调缩放至 40px，适配短词，醒目舒适
+                    elements.targetPinyin.style.fontSize = '2.5rem'; // 短词
                 }
 
                 // 播放石门滑开声效
@@ -924,6 +967,12 @@
 
             const currentItem = currentWords[currentWordIndex];
 
+            // 🌟 读准后，立刻停止闪烁，锁定完全可见的不透明度 (直到新词再合拢)
+            elements.targetPinyin.classList.remove('pinyin-blinking');
+            elements.targetEmoji.classList.remove('emoji-blinking');
+            elements.targetPinyin.style.opacity = '1.0';
+            elements.targetEmoji.style.opacity = '0.3'; // 通关时的正常半透明状态
+
             // 下方蓝色赛道上直接爆出高保真和可爱的 Emoji 实物
             elements.victoryEmoji.innerText = currentItem.emoji;
             elements.victoryText.innerText = currentItem.word;
@@ -962,14 +1011,32 @@
             // 增加连续发音超时或错误的判定计数
             consecutiveSpeechErrors++;
 
-            // 触发趣味伤心弹幕
+            // 🧱 每次读错，3D滑门石门都会重重合拢，然后再重新滑开，作为极具动感的反复物理惩罚
+            elements.wallGateLeft.style.transform = 'translateX(0)';
+            elements.wallGateRight.style.transform = 'translateX(0)';
+            playSound('slide');
+
+            // 触发趣味伤心弹幕 (闪烁继续进行，不被中断)
             spawnFeedbackText(false, customHintText);
 
-            // 重置倒计时，学生在当前题上可以进行二次发音纠正
+            // 延时 1000ms（石门关紧1秒后，让学生能够清晰看到反馈提示并听到错误音效）再重新自动滑开，并重置倒计时
             setTimeout(() => {
-                resetWordTimer();
-                isTransitioning = false; // 解除状态锁
-            }, 1500);
+                if (isPlaying) {
+                    playSound('slide');
+                    elements.wallGateLeft.style.transform = 'translateX(-101%)';
+                    elements.wallGateRight.style.transform = 'translateX(101%)';
+
+                    // 门完全重新拉开后再解除锁定并重设计时器
+                    setTimeout(() => {
+                        if (isPlaying) {
+                            resetWordTimer();
+                            isTransitioning = false; // 解除状态锁
+                        }
+                    }, 600);
+                } else {
+                    isTransitioning = false;
+                }
+            }, 1000);
         }
 
         // 更新生命值 UI
@@ -1004,8 +1071,9 @@
             elements.overlayEmoji.innerText = "🏆";
             elements.overlayTitle.innerText = "祝贺你挑战成功！";
             elements.overlayDesc.innerHTML = `
-                <div class="flex flex-col items-center space-y-4 py-2">
-                    <span class="text-8xl animate-bounce">🏆👍</span>
+                <div class="flex flex-col items-center space-y-4 py-2 font-sans">
+                    <!-- 🏆🌟 精简视觉：卡片内部原有的🏆图标已经替换，现在内部卡片只保留一个大大的👍点赞动画，干净不重叠 -->
+                    <span class="text-8xl animate-bounce">👍</span>
                     <p class="text-xl font-bold text-yellow-300 font-game">发音精准！所有拼音通关！</p>
                     <p class="text-sm text-slate-300 mb-2">完美获得：<strong class="text-yellow-400 text-lg">${score}</strong> 积分</p>
                     
