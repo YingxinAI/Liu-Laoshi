@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>老外中文拼音大挑战 - Pinyin Challenge</title>
+    <title>中文拼音闯关挑战 - Pinyin Challenge</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -283,7 +283,7 @@
                     word: '土豆', pinyin: 'tǔ dòu', emoji: '🥔',
                     accept: ['土豆', '土逗', '图豆', '吐逗'],
                     tones: {
-                        '吐 du': '注意声调！西红柿(xī hóng shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
+                        '吐 du': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '吐都': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '兔兜': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '图都': '注意声调！土豆的 tǔ 是 3 声调哦！',
@@ -302,7 +302,7 @@
                     }
                 },
                 { 
-                    word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
+                    word: '西红柿', pinyin: 'xī hóng_shì', emoji: '🍅',
                     accept: ['西红柿', '西红市', '吸红柿', '希红柿'],
                     tones: {
                         '西红十': '注意声调！西红柿(xī hóng shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
@@ -531,6 +531,61 @@
             }
         }
 
+        // 🌟 核心改进：Web Audio API 实时合成完美的击掌和欢呼声（解决本地 MP3 CORS 及 404 问题）
+        function playSyntheticApplause() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            
+            // 1. 合成 45 个密集的掌声波形包络
+            for (let i = 0; i < 45; i++) {
+                const timeOffset = Math.random() * 2.2; // 在 2.2 秒内随机爆发出掌声
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                // 击掌高频和低频模拟
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(140 + Math.random() * 80, now + timeOffset);
+                
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(1200 + Math.random() * 600, now + timeOffset);
+                filter.Q.setValueAtTime(3.0, now + timeOffset);
+                
+                // 爆破声衰减包络
+                gain.gain.setValueAtTime(0.0, now + timeOffset);
+                gain.gain.linearRampToValueAtTime(0.08 + Math.random() * 0.12, now + timeOffset + 0.008);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.08 + Math.random() * 0.08);
+                
+                osc.start(now + timeOffset);
+                osc.stop(now + timeOffset + 0.25);
+            }
+
+            // 2. 合成一点高频啸叫来作为背景人群的微弱欢呼
+            for (let i = 0; i < 3; i++) {
+                const cheerOffset = Math.random() * 0.5;
+                const oscCheer = audioCtx.createOscillator();
+                const gainCheer = audioCtx.createGain();
+                
+                oscCheer.connect(gainCheer);
+                gainCheer.connect(audioCtx.destination);
+                
+                oscCheer.type = 'sine';
+                oscCheer.frequency.setValueAtTime(600 + Math.random() * 200, now + cheerOffset);
+                oscCheer.frequency.exponentialRampToValueAtTime(900 + Math.random() * 100, now + cheerOffset + 1.2);
+                
+                gainCheer.gain.setValueAtTime(0.0, now + cheerOffset);
+                gainCheer.gain.linearRampToValueAtTime(0.04, now + cheerOffset + 0.2);
+                gainCheer.gain.exponentialRampToValueAtTime(0.001, now + cheerOffset + 1.8);
+                
+                oscCheer.start(now + cheerOffset);
+                oscCheer.stop(now + cheerOffset + 1.8);
+            }
+        }
+
         function playSound(type) {
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') {
@@ -581,7 +636,6 @@
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                // 🔊 浑厚的滑动门声效
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(75, now);
                 osc.frequency.linearRampToValueAtTime(130, now + 0.5);
@@ -604,10 +658,14 @@
                     oscNote.stop(now + idx * 0.08 + 0.5);
                 });
             } else if (type === 'applause') {
-                // 🔊 播放热烈的鼓掌 MP3 音效
+                // 🔊 优先尝试播放同目录下的本地 applause.mp3 音效
                 const applause = new Audio('applause.mp3');
                 applause.volume = 0.6;
-                applause.play().catch(e => console.warn("Applause audio play blocked:", e));
+                applause.play().catch(e => {
+                    console.warn("本地 applause.mp3 载入未成功或被拦截，正在通过 Web Audio API 智能实时合成群掌欢呼声...", e);
+                    // 🌟 100% 成功兜底：在浏览器沙盒运行中实时生成高拟真掌声音频！
+                    playSyntheticApplause();
+                });
             }
         }
 
