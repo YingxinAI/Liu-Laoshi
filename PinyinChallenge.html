@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中文拼音闯关挑战 - Pinyin Challenge</title>
+    <title>老外中文拼音大挑战 - Pinyin Challenge</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -302,10 +302,10 @@
                     }
                 },
                 { 
-                    word: '西红柿', pinyin: 'xī hóng_shì', emoji: '🍅',
+                    word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
                     accept: ['西红柿', '西红市', '吸红柿', '希红柿'],
                     tones: {
-                        '西红十': '注意声调！西红柿(xī hóng shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
+                        '西红十': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
                         '细红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，不可读成 4 声调细哦！',
                         '洗红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，不可读成 3 声调洗哦！'
                     }
@@ -475,6 +475,7 @@
         let timeLeft = 15;
         let consecutiveSpeechErrors = 0; // 记录连续发音失败或超时的次数
         let isTransitioning = false; // 是否处于开门/关门过渡期
+        let fireworkTimer = null; // 烟花循环定时器
 
         // 音频上下文
         let audioCtx = null;
@@ -531,7 +532,7 @@
             }
         }
 
-        // 🌟 核心改进：Web Audio API 实时合成完美的击掌和欢呼声（解决本地 MP3 CORS 及 404 问题）
+        // Web Audio API 实时合成完美的击掌和欢呼声（解决本地 MP3 CORS 及 404 问题）
         function playSyntheticApplause() {
             if (!audioCtx) return;
             const now = audioCtx.currentTime;
@@ -583,6 +584,50 @@
                 
                 oscCheer.start(now + cheerOffset);
                 oscCheer.stop(now + cheerOffset + 1.8);
+            }
+        }
+
+        // 🎇 动态创造烟花礼花绽放粒子特效
+        function launchFireworkPart() {
+            const holder = document.getElementById('fireworks-holder');
+            if (!holder) return;
+            const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f43f5e', '#a855f7', '#06b6d4', '#eab308'];
+            const burstCount = 18;
+            
+            // 产生爆炸的圆心坐标 (微调在框内中心)
+            const originX = holder.clientWidth / 2;
+            const originY = holder.clientHeight / 2;
+
+            for (let i = 0; i < burstCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'absolute rounded-full pointer-events-none transition-all duration-1000';
+                
+                const size = Math.random() * 6 + 3; // 3px 到 9px 之间的微粒
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${originX}px`;
+                particle.style.top = `${originY}px`;
+                particle.style.boxShadow = '0 0 8px currentColor';
+                
+                // 极坐标随机飞溅
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 70 + 25;
+                const targetX = Math.cos(angle) * distance;
+                const targetY = Math.sin(angle) * distance;
+                
+                particle.style.transition = 'transform 1s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 1s ease-out';
+                holder.appendChild(particle);
+                
+                // 渲染微粒发射动画
+                requestAnimationFrame(() => {
+                    particle.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
+                    particle.style.opacity = '0';
+                });
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
             }
         }
 
@@ -658,12 +703,12 @@
                     oscNote.stop(now + idx * 0.08 + 0.5);
                 });
             } else if (type === 'applause') {
-                // 🔊 优先尝试播放同目录下的本地 applause.mp3 音效
+                // 优先尝试播放同目录下的本地 applause.mp3 音效
                 const applause = new Audio('applause.mp3');
                 applause.volume = 0.6;
                 applause.play().catch(e => {
                     console.warn("本地 applause.mp3 载入未成功或被拦截，正在通过 Web Audio API 智能实时合成群掌欢呼声...", e);
-                    // 🌟 100% 成功兜底：在浏览器沙盒运行中实时生成高拟真掌声音频！
+                    // 100% 成功兜底：在浏览器沙盒运行中实时生成高拟真掌声音频！
                     playSyntheticApplause();
                 });
             }
@@ -857,6 +902,10 @@
             isTransitioning = false;
             consecutiveSpeechErrors = 0;
             clearInterval(timerInterval);
+            if (fireworkTimer) {
+                clearInterval(fireworkTimer);
+                fireworkTimer = null;
+            }
             stopWebcam();
 
             if (recognition) {
@@ -1061,7 +1110,7 @@
 
             // 下方蓝色赛道上直接爆出高保真和可爱的 Emoji 实物
             elements.victoryEmoji.innerText = currentItem.emoji;
-            // 🌟 升级：爆出奖励时将拼音显示在下面，而不是汉字词汇！
+            // 🌟 升级：爆出奖励时将拼音显示 in Below
             elements.victoryText.innerText = formatPinyinForDisplay(currentItem.pinyin);
             elements.victoryItem.className = "absolute bottom-12 z-30 text-8xl transform scale-125 opacity-100 pointer-events-none flex flex-col items-center transition-all duration-500 ease-out";
 
@@ -1106,24 +1155,11 @@
             // 触发趣味伤心弹幕 (闪烁继续进行，不被中断)
             spawnFeedbackText(false, customHintText);
 
-            // 延时 1000ms（石门关紧1秒后，让学生能够清晰看到反馈提示并听到错误音效）再重新自动滑开，并重置倒计时
+            // 重置倒计时，学生在当前题上可以进行二次发音纠正
             setTimeout(() => {
-                if (isPlaying) {
-                    playSound('slide');
-                    elements.wallGateLeft.style.transform = 'translateX(-101%)';
-                    elements.wallGateRight.style.transform = 'translateX(101%)';
-
-                    // 门完全重新拉开后再解除锁定并重设计时器
-                    setTimeout(() => {
-                        if (isPlaying) {
-                            resetWordTimer();
-                            isTransitioning = false; // 解除状态锁
-                        }
-                    }, 600);
-                } else {
-                    isTransitioning = false;
-                }
-            }, 1000);
+                resetWordTimer();
+                isTransitioning = false; // 解除状态锁
+            }, 1500);
         }
 
         // 更新生命值 UI
@@ -1142,7 +1178,7 @@
             lucide.createIcons();
         }
 
-        // 终极通关：大奖杯大拇指庆典，增添“返回主菜单 (Back to Menu)”专属交互
+        // 终极通关：烟花礼花绽放庆典，英文化文案
         function showGameWonScreen() {
             isPlaying = false;
             clearInterval(timerInterval);
@@ -1155,14 +1191,18 @@
             // 隐藏底部的游戏设置选单，防止推开界面高度
             elements.gameSetup.classList.add('hidden');
 
+            // 🏆🌟 顶栏大杯，卡片内部重构
             elements.overlayEmoji.innerText = "🏆";
-            elements.overlayTitle.innerText = "祝贺你挑战成功！";
+            // “祝贺你挑战成功！” 换成英文
+            elements.overlayTitle.innerText = "Congratulations on Completing the Challenge!";
             elements.overlayDesc.innerHTML = `
                 <div class="flex flex-col items-center space-y-4 py-2 font-sans">
-                    <!-- 🏆🌟 精简视觉：卡片内部原有的🏆图标已经替换，现在内部卡片只保留一个大大的👍点赞动画，干净不重叠 -->
-                    <span class="text-8xl animate-bounce">👍</span>
-                    <p class="text-xl font-bold text-yellow-300 font-game">发音精准！所有拼音通关！</p>
-                    <p class="text-sm text-slate-300 mb-2">完美获得：<strong class="text-yellow-400 text-lg">${score}</strong> 积分</p>
+                    <!-- 🎇 烟花粒子动态容器 (Blinking border and circular firework burst base) -->
+                    <div id="fireworks-holder" class="relative w-36 h-36 flex items-center justify-center bg-slate-900/60 rounded-full border-2 border-dashed border-yellow-400/40 shadow-xl overflow-hidden">
+                        <span class="text-6xl animate-pulse z-10">✨</span>
+                    </div>
+                    <!-- 去掉了“发音精准和所有拼音通关”的汉字句子 -->
+                    <p class="text-sm text-slate-300 mb-2">Total Score: <strong class="text-yellow-400 text-lg">${score}</strong> Points</p>
                     
                     <!-- 极其醒目、高优先级的卡片内专属“返回主菜单”交互按钮，排版规格与主按钮完全一致，杜绝换行 -->
                     <button id="btn-play-again-inner" class="w-full max-w-xs bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 active:scale-95 text-slate-950 font-black text-xl py-4 rounded-2xl shadow-lg shadow-emerald-500/20 tracking-widest transition-all mb-4 border-b-4 border-green-700 flex items-center justify-center space-x-2 font-game pointer-events-auto">
@@ -1175,6 +1215,18 @@
 
             elements.overlayScreen.classList.remove('hidden');
 
+            // 启动定时发射绚丽烟花粒子效果
+            if (fireworkTimer) clearInterval(fireworkTimer);
+            launchFireworkPart(); // 首次瞬发
+            fireworkTimer = setInterval(() => {
+                if (elements.overlayScreen.classList.contains('hidden')) {
+                    clearInterval(fireworkTimer);
+                    fireworkTimer = null;
+                    return;
+                }
+                launchFireworkPart();
+            }, 600);
+
             // 播放凯旋及热烈鼓掌音频
             playSound('fanfare');
             playSound('applause');
@@ -1186,11 +1238,19 @@
             const playAgainBtn = document.getElementById('btn-play-again-inner');
             if (playAgainBtn) {
                 playAgainBtn.onclick = () => {
+                    if (fireworkTimer) {
+                        clearInterval(fireworkTimer);
+                        fireworkTimer = null;
+                    }
                     resetGameToMainScreen();
                 };
             }
             // 主开始按钮点击在结算页中时同样也绑定为返回主屏
             elements.btnStart.onclick = () => {
+                if (fireworkTimer) {
+                    clearInterval(fireworkTimer);
+                    fireworkTimer = null;
+                }
                 resetGameToMainScreen();
             };
         }
