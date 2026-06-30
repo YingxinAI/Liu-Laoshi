@@ -117,11 +117,11 @@
                 </div>
                 
                 <!-- 中：玩家实时 live 摄像头头像 (无文本提示气泡，纯净专注头像，尺寸升级放大) -->
-                <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
+                <div class="relative w-20 h-20 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
                     <video id="webcam-avatar" class="w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
                     <!-- 默认备用小图标 (没开摄像头时显示，等比调大 icon) -->
                     <div id="avatar-fallback" class="absolute inset-0 flex items-center justify-center bg-slate-800 transition-opacity duration-300">
-                        <i data-lucide="user" class="text-slate-400 w-7 h-7"></i>
+                        <i data-lucide="user" class="text-slate-400 w-8 h-8"></i>
                     </div>
                 </div>
 
@@ -317,7 +317,7 @@
                     }
                 },
                 { 
-                    word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
+                    word: '西红柿', pinyin: 'xī hóng_shì', emoji: '🍅',
                     accept: ['西红柿'], 
                     tones: {
                         '西红十': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
@@ -354,7 +354,7 @@
                     word: '玉米', pinyin: 'yù mǐ', emoji: '🌽',
                     accept: ['玉米'], 
                     tones: {
-                        '鱼米': '注意声调！玉米(yù mǐ)的 yù 是 4 声调，mǐ 是 3 声调！不可读成 2 声调鱼哦！',
+                        '鱼米': '注意声调！玉米(yù mǐ)的 yù 是 4 声调, mǐ 是 3 声调！不可读成 2 声调鱼哦！',
                         '雨米': '注意声调！玉米(yù mǐ)的 yù 是 4 声调，mǐ 是 3 声调！不可读成 3 声调雨哦！'
                     }
                 },
@@ -362,7 +362,7 @@
                     word: '草莓', pinyin: 'cǎo méi', emoji: '🍓',
                     accept: ['草莓'], 
                     tones: {
-                        '吵妹': '注意声调！草莓(cǎo méi)的 cǎo 是 3 声调，méi 是 2 声调哦！',
+                        '吵妹': '注意声调！草莓(cǎo méi)的 cǎo 是 3 声调, méi 是 2 声调哦！',
                         '超美': '注意声调！草莓(cǎo méi)的 cǎo 是 3 声调，不可读成 1 声调超哦！'
                     }
                 },
@@ -370,7 +370,7 @@
                     word: '菠萝', pinyin: 'bō luó', emoji: '🍍',
                     accept: ['菠萝'], 
                     tones: {
-                        '波落': '注意声调！菠萝(bō luó)的 bō 是 1 声调，luó 是 2 声调！不可读成 4 声调落哦！',
+                        '波落': '注意声调！菠萝(bō luó)的 bō 是 1 声调, luó 是 2 声调！不可读成 4 声调落哦！',
                         '博落': '注意声调！菠萝(bō luó)的 bō 是 1 声调，luó 是 2 声调哦！',
                         '玻落': '注意声调！菠萝(bō luó)的 luó 是 2 声调哦！'
                     }
@@ -467,7 +467,7 @@
                     accept: ['狗'],
                     tones: {
                         '小够': '注意声调！狗(gǒu)是 3 声调, 不可读成 4  声调够哦！',
-                        '够': '注意声调！狗(gǒu)是 3 声调哦！'
+                        '够': '注意声调！狗(gǒu)是 3 声调, 不可读成 4  声调够哦！'
                     }
                 }
             ]
@@ -595,7 +595,7 @@
                 gainCheer.gain.linearRampToValueAtTime(0.04, now + cheerOffset + 0.2);
                 gainCheer.gain.exponentialRampToValueAtTime(0.001, now + cheerOffset + 1.8);
                 
-                oscCheer.start(now + cheerOffset);
+                oscCheese.start(now + cheerOffset);
                 oscCheer.stop(now + cheerOffset + 1.8);
             }
         }
@@ -816,7 +816,7 @@
         }
 
         // 创建飘字反馈
-        function spawnFeedbackText(isCorrect, customText = "") {
+        spawnFeedbackText = (isCorrect, customText = "") => {
             elements.textFeedbackContainer.innerHTML = '';
             const textSpan = document.createElement('div');
             
@@ -1079,7 +1079,7 @@
                 updateTimerBar();
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    handleWrongAnswer("对不起，时间到 😢！");
+                    handleWrongAnswer("时间到 😢！声调不要犹豫噢！⏳");
                 }
             }, 100);
         }
@@ -1210,13 +1210,13 @@
 
             // 🏆🌟 顶栏大杯，卡片内部重构
             elements.overlayEmoji.innerText = "🏆";
-            // “祝贺你挑战成功！” 换成英文
-            elements.overlayTitle.innerText = "Congratulations!";
+            // “祝贺你挑战成功！” 换成英文，并精简大标题为 "Congratulations"
+            elements.overlayTitle.innerText = "Congratulations";
             elements.overlayDesc.innerHTML = `
                 <div class="flex flex-col items-center space-y-4 py-2 font-sans max-h-[70vh] overflow-y-auto">
-                    <!-- 🎇 烟花粒子动态容器 (Blinking border and circular firework burst base) -->
-                    <div id="fireworks-holder" class="relative w-36 h-36 flex items-center justify-center bg-slate-900/60 rounded-full border-2 border-dashed border-yellow-400/40 shadow-xl overflow-hidden">
-                        <span class="text-6xl animate-pulse z-10">✨</span>
+                    <!-- 🎇 星星动态容器 (由于缩小要求，采用 w-20 h-20，星星 ✨) -->
+                    <div id="fireworks-holder" class="relative w-20 h-20 flex items-center justify-center bg-slate-900/60 rounded-full border-2 border-dashed border-yellow-400/40 shadow-xl overflow-hidden">
+                        <span class="text-3xl z-10 animate-pulse">✨</span>
                     </div>
                     <!-- 去掉了“发音精准和所有拼音通关”的汉字句子 -->
                     <p class="text-sm text-slate-300 mb-2">Total Score: <strong class="text-yellow-400 text-lg">${score}</strong> Points</p>
