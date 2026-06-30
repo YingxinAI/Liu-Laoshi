@@ -116,12 +116,12 @@
                     </button>
                 </div>
                 
-                <!-- 中：玩家实时 live 摄像头头像 (无文本提示气泡，纯净专注头像) -->
-                <div class="relative w-12 h-14 sm:w-14 sm:h-14 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
+                <!-- 中：玩家实时 live 摄像头头像 (无文本提示气泡，纯净专注头像，尺寸升级放大) -->
+                <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
                     <video id="webcam-avatar" class="w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
-                    <!-- 默认备用小图标 (没开摄像头时显示) -->
+                    <!-- 默认备用小图标 (没开摄像头时显示，等比调大 icon) -->
                     <div id="avatar-fallback" class="absolute inset-0 flex items-center justify-center bg-slate-800 transition-opacity duration-300">
-                        <i data-lucide="user" class="text-slate-400 w-6 h-6"></i>
+                        <i data-lucide="user" class="text-slate-400 w-7 h-7"></i>
                     </div>
                 </div>
 
@@ -302,7 +302,7 @@
                         '吐都': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '兔兜': '注意声调！土豆(tǔ dòu)的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '图都': '注意声调！土豆的 tǔ 是 3 声调哦！',
-                        '图豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 2 声调的图哦！',
+                        '图豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 2 声调 of 图哦！',
                         '吐豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 4 声调 of 吐哦！'
                     }
                 },
