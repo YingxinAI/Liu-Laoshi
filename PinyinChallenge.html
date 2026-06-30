@@ -1079,7 +1079,7 @@
                 updateTimerBar();
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    handleWrongAnswer("时间到 😢！声调不要犹豫噢！⏳");
+                    handleWrongAnswer("对不起，时间到 😢！");
                 }
             }, 100);
         }
@@ -1211,7 +1211,7 @@
             // 🏆🌟 顶栏大杯，卡片内部重构
             elements.overlayEmoji.innerText = "🏆";
             // “祝贺你挑战成功！” 换成英文
-            elements.overlayTitle.innerText = "Congratulations on Completing the Challenge!";
+            elements.overlayTitle.innerText = "Congratulations!";
             elements.overlayDesc.innerHTML = `
                 <div class="flex flex-col items-center space-y-4 py-2 font-sans max-h-[70vh] overflow-y-auto">
                     <!-- 🎇 烟花粒子动态容器 (Blinking border and circular firework burst base) -->
