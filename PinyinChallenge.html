@@ -67,6 +67,17 @@
             animation: emoji-pulse-blink 1.4s infinite ease-in-out !important;
         }
 
+        /* 🌟 星星旋转与闪烁组合动画 */
+        @keyframes star-spin {
+            0% { transform: rotate(0deg) scale(0.9); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(0.9); }
+        }
+        .star-spinning {
+            animation: star-spin 5s linear infinite;
+            display: inline-block; /* 确保旋转原心处于 Emoji 中央 */
+        }
+
         /* 📱 深度自适应：针对中、短高度屏幕进行媒体查询动态缩放，确保在iPad、小屏幕电脑和手机上都完美显示 */
         @media (max-height: 740px) {
             .orange-card-height { height: 10rem !important; }
@@ -322,7 +333,7 @@
                     tones: {
                         '西红十': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
                         '细红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，不可读成 4 声调细哦！',
-                        '洗红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，不可读成 3 声调洗哦！'
+                        '洗红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调, 不可读成 3 声调洗哦！',
                     }
                 },
                 { 
@@ -604,7 +615,7 @@
                 gainCheer.gain.linearRampToValueAtTime(0.04, now + cheerOffset + 0.2);
                 gainCheer.gain.exponentialRampToValueAtTime(0.001, now + cheerOffset + 1.8);
                 
-                oscCheese.start(now + cheerOffset);
+                oscCheer.start(now + cheerOffset);
                 oscCheer.stop(now + cheerOffset + 1.8);
             }
         }
@@ -1223,9 +1234,9 @@
             elements.overlayTitle.innerText = "Congratulations";
             elements.overlayDesc.innerHTML = `
                 <div class="flex flex-col items-center space-y-4 py-2 font-sans max-h-[70vh] overflow-y-auto">
-                    <!-- 🎇 星星动态容器 (由于缩小要求，采用 w-20 h-20，星星 ✨) -->
+                    <!-- 🎇 星星动态容器 (由于缩小要求，采用 w-20 h-20，星星 ✨，并添加 star-spinning 旋转效果) -->
                     <div id="fireworks-holder" class="relative w-20 h-20 flex items-center justify-center bg-slate-900/60 rounded-full border-2 border-dashed border-yellow-400/40 shadow-xl overflow-hidden">
-                        <span class="text-3xl z-10 animate-pulse">✨</span>
+                        <span class="text-3xl z-10 star-spinning">✨</span>
                     </div>
                     <!-- 去掉了“发音精准和所有拼音通关”的汉字句子 -->
                     <p class="text-sm text-slate-300 mb-2">Total Score: <strong class="text-yellow-400 text-lg">${score}</strong> Points</p>
