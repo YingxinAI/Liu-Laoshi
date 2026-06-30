@@ -66,12 +66,27 @@
         .emoji-blinking {
             animation: emoji-pulse-blink 1.4s infinite ease-in-out !important;
         }
+
+        /* 📱 深度自适应：针对中、短高度屏幕进行媒体查询动态缩放，确保在iPad、小屏幕电脑和手机上都完美显示 */
+        @media (max-height: 740px) {
+            .orange-card-height { height: 10rem !important; }
+            .emoji-size-scale { font-size: 8rem !important; }
+            .top-bar-padding { padding: 0.5rem !important; }
+            .main-spacing { py-1.5 !important; }
+        }
+        @media (max-height: 640px) {
+            .orange-card-height { height: 8.5rem !important; }
+            .emoji-size-scale { font-size: 6rem !important; }
+            .mat-hints-text { font-size: 9px !important; padding: 0.15rem 0.5rem !important; }
+            .main-spacing { py-1 !important; }
+            .top-bar-padding { padding: 0.4rem !important; }
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-2 sm:p-4 font-sans select-none overflow-hidden">
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-1 sm:p-4 font-sans select-none overflow-hidden">
 
-    <!-- 主容器：手机长宽比 -->
-    <div class="relative w-full max-w-md h-[92vh] max-h-[850px] bg-slate-950 rounded-3xl border-4 border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+    <!-- 主容器：手机长宽比，采用响应式宽度 95vw 和 94vh 高度，防止任何环境下的滚动条溢出 -->
+    <div class="relative w-[95vw] max-w-md h-[94vh] max-h-[820px] bg-slate-950 rounded-3xl border-4 border-slate-700 shadow-2xl flex flex-col overflow-hidden">
         
         <!-- 背景：摄像头画面 / 备用渐变背景 -->
         <div class="absolute inset-0 z-0">
@@ -85,10 +100,10 @@
         </div>
 
         <!-- 游戏层：采用纯 Flex 垂直流式布局，自适应间距，杜绝重叠 -->
-        <div class="relative z-10 flex flex-col h-full justify-between p-3 sm:p-4 pointer-events-none">
+        <div class="relative z-10 flex flex-col h-full justify-between p-2.5 sm:p-4 pointer-events-none">
             
             <!-- 1. 顶部栏：整合得分、玩家实时头像、生命值 -->
-            <div class="p-3 bg-black/60 rounded-2xl border border-slate-800 backdrop-blur-md pointer-events-auto flex justify-between items-center w-full z-30">
+            <div class="top-bar-padding p-3 bg-black/60 rounded-2xl border border-slate-800 backdrop-blur-md pointer-events-auto flex justify-between items-center w-full z-30">
                 <!-- 左：得分 -->
                 <div class="flex items-center space-x-2">
                     <div class="flex items-center space-x-1 bg-black/30 px-2 py-1 rounded-xl border border-slate-700/20">
@@ -102,7 +117,7 @@
                 </div>
                 
                 <!-- 中：玩家实时 live 摄像头头像 (无文本提示气泡，纯净专注头像) -->
-                <div class="relative w-14 h-14 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
+                <div class="relative w-12 h-14 sm:w-14 sm:h-14 rounded-full border-2 border-emerald-500 overflow-hidden bg-slate-800 shadow-inner flex items-center justify-center pointer-events-auto">
                     <video id="webcam-avatar" class="w-full h-full object-cover scale-x-[-1]" autoplay playsinline></video>
                     <!-- 默认备用小图标 (没开摄像头时显示) -->
                     <div id="avatar-fallback" class="absolute inset-0 flex items-center justify-center bg-slate-800 transition-opacity duration-300">
@@ -119,24 +134,24 @@
             </div>
 
             <!-- 2. 中间主区域：使用自然流自适应布局，拒绝绝对位置重叠 -->
-            <div class="flex-1 flex flex-col items-center justify-between py-2.5 relative w-full overflow-hidden">
+            <div class="main-spacing flex-1 flex flex-col items-center justify-between py-2 sm:py-3.5 relative w-full overflow-hidden">
                 <!-- 趣味浮动文字反馈 -->
                 <div id="text-feedback-container" class="absolute top-2 w-full flex flex-col items-center pointer-events-none z-40"></div>
 
-                <!-- 【上部展示群组】：自上而下自适应排列，加大了间距以适应大卡片 -->
-                <div class="w-full flex flex-col items-center space-y-4 px-1.5 pointer-events-auto z-20">
+                <!-- 【上部展示群组】：自上而下自适应排列，使用 w-[92%] 完美预防各种短宽屏两端挤爆 -->
+                <div class="w-full flex flex-col items-center space-y-3 px-1 pointer-events-auto z-20">
                     
-                    <!-- 橘黄色显示区 (横向完美拉宽至 max-w-[424px]，垂直高度保持不变，大圆角 rounded-3xl) -->
-                    <div id="orange-display-card" class="w-full max-w-[424px] bg-gradient-to-r from-amber-500 to-orange-600 border-4 border-white rounded-3xl shadow-2xl p-3 text-center transform -rotate-1 relative transition-all duration-300">
+                    <!-- 橘黄色显示区 (横向完美自适应 w-[92%]，大圆角 rounded-3xl) -->
+                    <div id="orange-display-card" class="w-[92%] max-w-[400px] bg-gradient-to-r from-amber-500 to-orange-600 border-4 border-white rounded-3xl shadow-2xl p-2.5 sm:p-3 text-center transform -rotate-1 relative transition-all duration-300">
                         <!-- 进度条 -->
                         <div class="absolute top-0 left-0 h-1.5 bg-yellow-400 rounded-full transition-all duration-100 ease-linear" id="timer-bar" style="width: 100%;"></div>
                         
-                        <div class="text-[10px] font-semibold tracking-widest text-yellow-100 uppercase mt-1">请大声读出</div>
+                        <div class="text-[10px] font-semibold tracking-widest text-yellow-100 uppercase mt-0.5">请大声读出</div>
                         
-                        <!-- 拼音置于图片之上布局且具有“左右拉门式隔离墙门”（高度保持 h-48 不变） -->
-                        <div class="relative flex items-center justify-center h-48 my-2 overflow-hidden rounded-2xl border border-amber-700/30 bg-amber-950/20 px-2">
-                            <!-- 对应物品大图片/Emoji (半透明背景，尺寸 text-[10rem]，初始添加呼吸闪烁) -->
-                            <div id="target-emoji" class="text-[10rem] leading-none select-none opacity-25 transition-all duration-300 transform scale-100 emoji-blinking">🥔</div>
+                        <!-- 拼音置于图片之上布局 (高度绑定响应式 orange-card-height 类，高自适应，默认 h-48) -->
+                        <div class="orange-card-height relative flex items-center justify-center h-48 my-1.5 overflow-hidden rounded-2xl border border-amber-700/30 bg-amber-950/20 px-2">
+                            <!-- 对应物品大图片/Emoji (半透明背景，带自适应缩放类 emoji-size-scale，默认 text-[10rem]) -->
+                            <div id="target-emoji" class="emoji-size-scale text-[10rem] leading-none select-none opacity-25 transition-all duration-300 transform scale-100 emoji-blinking">🥔</div>
                             <!-- 对应的拼音文本（覆盖在Emoji上方，强阴影，添加 whitespace-nowrap 强制不换行，初始添加呼吸闪烁) -->
                             <div id="target-pinyin" class="absolute text-5xl font-black text-white tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.95)] font-game z-10 transition-all duration-300 whitespace-nowrap px-1 pinyin-blinking">tǔ dòu</div>
 
@@ -163,7 +178,7 @@
                     </div>
 
                     <!-- 提示部分 -->
-                    <div id="mat-hints" class="flex justify-center space-x-2 text-[10px] text-blue-100 bg-blue-950/85 py-1 px-3 rounded-full border border-blue-400/30 backdrop-blur-md">
+                    <div id="mat-hints" class="mat-hints-text flex justify-center space-x-2 text-[10px] text-blue-100 bg-blue-950/85 py-1 px-3 rounded-full border border-blue-400/30 backdrop-blur-md">
                         <span>字数: <strong id="word-len" class="text-yellow-300 font-bold">2</strong></span>
                         <span>•</span>
                         <span class="text-cyan-200 font-medium">提示：读准声调与发音</span>
@@ -172,10 +187,10 @@
                 </div>
 
                 <!-- 【下部赛道群组】：蓝色垫子移至最底部，不设置静态重叠砖墙 -->
-                <div class="relative w-full h-24 flex items-center justify-center mt-auto pointer-events-auto">
+                <div class="relative w-full h-20 flex items-center justify-center mt-auto pointer-events-auto">
                     <!-- 3D 道路 (蓝色垫子) -->
                     <div class="road-container absolute inset-0 w-full h-full flex justify-center overflow-hidden pointer-events-none">
-                        <div class="road w-[150%] h-[80px] border-t-4 border-yellow-400/50 flex flex-col justify-between p-2">
+                        <div class="road w-[150%] h-[75px] border-t-4 border-yellow-400/50 flex flex-col justify-between p-2">
                             <!-- 车道线 -->
                             <div class="w-full h-full border-l-4 border-r-4 border-dashed border-white/30 flex justify-center">
                                 <div class="w-1 h-full bg-white/20"></div>
@@ -184,15 +199,15 @@
                     </div>
 
                     <!-- 爆炸特效爆出物 (答对时直接在蓝色跑道上爆出来) -->
-                    <div id="victory-item" class="absolute bottom-6 z-30 text-8xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center">
+                    <div id="victory-item" class="absolute bottom-5 z-30 text-7xl transition-all duration-700 transform scale-0 opacity-0 pointer-events-none flex flex-col items-center">
                         <span id="victory-emoji">🥔</span>
-                        <span id="victory-text" class="text-2xl font-black bg-black/85 px-4 py-1 rounded-full text-yellow-300 mt-2 border border-yellow-400 font-game shadow-lg">tǔ dòu</span>
+                        <span id="victory-text" class="text-xl font-black bg-black/85 px-4 py-1 rounded-full text-yellow-300 mt-2 border border-yellow-400 font-game shadow-lg">tǔ dòu</span>
                     </div>
                 </div>
             </div>
 
             <!-- 3. 底部控制栏：控制台、麦克风指示、手动操作 -->
-            <div class="p-4 bg-gradient-to-t from-black/90 via-black/70 to-transparent space-y-3 pb-8 pointer-events-auto">
+            <div class="p-3 bg-gradient-to-t from-black/90 via-black/70 to-transparent space-y-2.5 pb-6 sm:pb-8 pointer-events-auto">
                 
                 <!-- 教师/学生操作区域 -->
                 <div class="flex justify-between items-center gap-2 w-full">
@@ -231,42 +246,42 @@
         <div id="overlay-screen" class="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-between p-6 text-center font-game">
             
             <!-- 顶部装饰 -->
-            <div class="mt-8">
+            <div class="mt-6">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 tracking-wider font-game drop-shadow-md">
                     拼音大挑战
                 </h1>
                 <p class="text-sm text-slate-400 mt-2 uppercase tracking-widest">Pinyin Challenge Game</p>
             </div>
 
-            <!-- 主内容区 -->
-            <div id="overlay-content" class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-                <div class="text-5xl" id="overlay-emoji">🎮</div>
-                <h2 class="text-2xl font-bold text-white font-game" id="overlay-title">挑战开始！</h2>
-                <div id="overlay-desc" class="text-sm text-slate-300 leading-relaxed font-sans">
+            <!-- 主内容区 (加入自适应最大高度与滚动保护，确保在任何短屏设备上不溢出) -->
+            <div id="overlay-content" class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 max-h-[58vh] overflow-y-auto">
+                <div class="text-4xl" id="overlay-emoji">🎮</div>
+                <h2 class="text-xl font-bold text-white font-game" id="overlay-title">挑战开始！</h2>
+                <div id="overlay-desc" class="text-xs text-slate-300 leading-relaxed font-sans">
                     请大声读出屏幕上的拼音。如果发音和声调都正确，滑动的挡门墙就会开启！
                 </div>
 
                 <!-- 游戏配置 -->
-                <div class="space-y-3 pt-2 text-left font-sans" id="game-setup">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">选择词库类型</label>
+                <div class="space-y-3 pt-1 text-left font-sans" id="game-setup">
+                    <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">选择词库类型</label>
                     <div class="grid grid-cols-2 gap-2">
-                        <button class="cat-btn py-2.5 px-3 rounded-xl border-2 border-yellow-500 bg-yellow-500/10 text-yellow-300 text-sm font-semibold transition-all flex items-center justify-center space-x-1" data-cat="veggies">
+                        <button class="cat-btn py-2 px-3 rounded-xl border-2 border-yellow-500 bg-yellow-500/10 text-yellow-300 text-xs font-semibold transition-all flex items-center justify-center space-x-1" data-cat="veggies">
                             <span>🥔 蔬菜水果</span>
                         </button>
-                        <button class="cat-btn py-2.5 px-3 rounded-xl border-2 border-slate-700 hover:border-slate-500 bg-slate-800/50 text-slate-300 text-sm font-semibold transition-all flex items-center justify-center space-x-1" data-cat="animals">
+                        <button class="cat-btn py-2 px-3 rounded-xl border-2 border-slate-700 hover:border-slate-500 bg-slate-800/50 text-slate-300 text-xs font-semibold transition-all flex items-center justify-center space-x-1" data-cat="animals">
                             <span>🦁 趣味动物</span>
                         </button>
                     </div>
                     
-                    <div class="flex items-center space-x-2 pt-2">
-                        <input type="checkbox" id="use-camera" class="w-4 h-4 rounded text-blue-600 bg-slate-800 border-slate-700 focus:ring-blue-500" checked>
-                        <label for="use-camera" class="text-xs text-slate-300 cursor-pointer">开启摄像头头像</label>
+                    <div class="flex items-center space-x-2 pt-1">
+                        <input type="checkbox" id="use-camera" class="w-3.5 h-3.5 rounded text-blue-600 bg-slate-800 border-slate-700 focus:ring-blue-500" checked>
+                        <label for="use-camera" class="text-[11px] text-slate-300 cursor-pointer">开启摄像头头像</label>
                     </div>
                 </div>
             </div>
 
             <!-- 开始/重来按钮 -->
-            <button id="btn-start" class="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 active:scale-95 text-slate-950 font-black text-xl py-4 rounded-2xl shadow-lg shadow-yellow-500/20 tracking-widest transition-all mb-8 border-b-4 border-amber-700 flex items-center justify-center space-x-2 font-game">
+            <button id="btn-start" class="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 active:scale-95 text-slate-950 font-black text-xl py-3.5 rounded-2xl shadow-lg shadow-yellow-500/20 tracking-widest transition-all mb-4 border-b-4 border-amber-700 flex items-center justify-center space-x-2 font-game">
                 <i data-lucide="play-circle" class="w-6 h-6 fill-current"></i>
                 <span id="btn-start-text">开始挑战</span>
             </button>
@@ -281,19 +296,19 @@
             veggies: [
                 { 
                     word: '土豆', pinyin: 'tǔ dòu', emoji: '🥔',
-                    accept: ['土豆'], // 🌟 极致严格判定：彻底剔除同音字容错
+                    accept: ['土豆'], 
                     tones: {
                         '吐 du': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '吐都': '注意声调！土豆的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '兔兜': '注意声调！土豆(tǔ dòu)的 tǔ 是 3 声调，dòu 是 4 声调哦！',
                         '图都': '注意声调！土豆的 tǔ 是 3 声调哦！',
                         '图豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 2 声调的图哦！',
-                        '吐豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 4 声调的吐哦！'
+                        '吐豆': '注意声调！土豆的 tǔ 是 3 声调，不要读成 4 声调 of 吐哦！'
                     }
                 },
                 { 
                     word: '西兰花', pinyin: 'xī lán huā', emoji: '🥦',
-                    accept: ['西兰花'], // 🌟 极致严格判定：只接受标准汉字，不包容同音字
+                    accept: ['西兰花'], 
                     tones: {
                         '西蓝画': '注意声调！西兰花(xī lán huā)的 xī 是 1 声调，lán 是 2 声调，huā 是 1 声调！最后一个字不可读成 4 声调画哦！',
                         '西蓝花儿': '不要读成儿化音哦！',
@@ -302,8 +317,8 @@
                     }
                 },
                 { 
-                    word: '西红柿', pinyin: 'xī hóng shì', emoji: '🍅',
-                    accept: ['西红柿'], // 🌟 极致严格判定：只接受标准汉字
+                    word: '西红柿', pinyin: 'xī hóng_shì', emoji: '🍅',
+                    accept: ['西红柿'], 
                     tones: {
                         '西红十': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，hóng 是 2 声调，shì 是 4 声调！不是 2 声调十(shí)哦！',
                         '细红柿': '注意声调！西红柿(xī hóng_shì)的 xī 是 1 声调，不可读成 4 声调细哦！',
@@ -312,7 +327,7 @@
                 },
                 { 
                     word: '西瓜', pinyin: 'xī guā', emoji: '🍉',
-                    accept: ['西瓜'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['西瓜'], 
                     tones: {
                         '细挂': '注意声调！西瓜(xī guā)都是 1 声调哦，不可读成 4 声调！',
                         '西挂': '注意声调！西瓜(xī guā)的 guā 是 1 声调哦！'
@@ -320,7 +335,7 @@
                 },
                 { 
                     word: '香蕉', pinyin: 'xiāng jiāo', emoji: '🍌',
-                    accept: ['香蕉'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['香蕉'], 
                     tones: {
                         '想叫': '注意声调！香蕉(xiāng jiāo)都是 1 声调(平声)哦！',
                         '相脚': '注意声调！香蕉(xiāng jiāo)的 xiāng 是 1 声调，jiāo 是 1 声调！不可读成 3 声调脚哦！',
@@ -329,7 +344,7 @@
                 },
                 { 
                     word: '胡萝卜', pinyin: 'hú luó bo', emoji: '🥕',
-                    accept: ['胡萝卜'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['胡萝卜'], 
                     tones: {
                         '户落破': '注意声调！胡萝卜(hú luó bo)中 hú 是 2 声调，luó 是 2 声调，bo 是轻声哦！',
                         '虎萝卜': '注意声调！胡萝卜的 hú 是 2 声调，不可读成 3 声调虎(hǔ)哦！'
@@ -337,7 +352,7 @@
                 },
                 { 
                     word: '玉米', pinyin: 'yù mǐ', emoji: '🌽',
-                    accept: ['玉米'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['玉米'], 
                     tones: {
                         '鱼米': '注意声调！玉米(yù mǐ)的 yù 是 4 声调，mǐ 是 3 声调！不可读成 2 声调鱼哦！',
                         '雨米': '注意声调！玉米(yù mǐ)的 yù 是 4 声调，mǐ 是 3 声调！不可读成 3 声调雨哦！'
@@ -345,7 +360,7 @@
                 },
                 { 
                     word: '草莓', pinyin: 'cǎo méi', emoji: '🍓',
-                    accept: ['草莓'], // 🌟 极致严格判定：只接受“草莓”，绝对不接受“曹莓”、“草梅”等同音字！
+                    accept: ['草莓'], 
                     tones: {
                         '吵妹': '注意声调！草莓(cǎo méi)的 cǎo 是 3 声调，méi 是 2 声调哦！',
                         '超美': '注意声调！草莓(cǎo méi)的 cǎo 是 3 声调，不可读成 1 声调超哦！'
@@ -353,7 +368,7 @@
                 },
                 { 
                     word: '菠萝', pinyin: 'bō luó', emoji: '🍍',
-                    accept: ['菠萝'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['菠萝'], 
                     tones: {
                         '波落': '注意声调！菠萝(bō luó)的 bō 是 1 声调，luó 是 2 声调！不可读成 4 声调落哦！',
                         '博落': '注意声调！菠萝(bō luó)的 bō 是 1 声调，luó 是 2 声调哦！',
@@ -362,7 +377,7 @@
                 },
                 { 
                     word: '苹果', pinyin: 'píng guǒ', emoji: '🍎',
-                    accept: ['苹果'], // 🌟 极致严格判定：只接受标准汉字
+                    accept: ['苹果'], 
                     tones: {
                         '病国': '注意声调！苹果(píng guǒ)的 píng 是 2 声调, guǒ 是 3 声调哦！',
                         '凭国': '注意声调！苹果(píng guǒ)的 píng 是 2 声调，不可读成 4 声调凭哦！',
@@ -373,7 +388,7 @@
             animals: [
                 { 
                     word: '鼠', pinyin: 'shǔ', emoji: '🐭',
-                    accept: ['鼠'], // 🌟 极致严格判定：只接受标准单字
+                    accept: ['鼠'],
                     tones: {
                         '老书': '注意声调！鼠(shǔ)是 3 声调，不可读成 1 声调书哦！',
                         '老树': '注意声调！鼠(shǔ)是 3 声调，不可读成 4 声调树哦！',
@@ -451,8 +466,8 @@
                     word: '狗', pinyin: 'gǒu', emoji: '🐶',
                     accept: ['狗'],
                     tones: {
-                        '小够': '注意声调！狗(gǒu)是 3 声调，不可读成 4  声调够哦！',
-                        '够': '注意声调！狗(gǒu)是 3 声调，不可读成 4  声调够哦！'
+                        '小够': '注意声调！狗(gǒu)是 3 声调, 不可读成 4  声调够哦！',
+                        '够': '注意声调！狗(gǒu)是 3 声调哦！'
                     }
                 }
             ]
@@ -532,14 +547,14 @@
             }
         }
 
-        // Web Audio API 实时合成完美的击掌和欢呼声（解决本地 MP3 CORS 及 404 问题）
+        // Web Audio API 实时合成完美的击掌和欢呼声
         function playSyntheticApplause() {
             if (!audioCtx) return;
             const now = audioCtx.currentTime;
             
             // 1. 合成 45 个密集的掌声波形包络
             for (let i = 0; i < 45; i++) {
-                const timeOffset = Math.random() * 2.2; // 在 2.2 秒内随机爆发出掌声
+                const timeOffset = Math.random() * 2.2; 
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 const filter = audioCtx.createBiquadFilter();
@@ -548,7 +563,6 @@
                 filter.connect(gain);
                 gain.connect(audioCtx.destination);
                 
-                // 击掌高频和低频模拟
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(140 + Math.random() * 80, now + timeOffset);
                 
@@ -556,7 +570,6 @@
                 filter.frequency.setValueAtTime(1200 + Math.random() * 600, now + timeOffset);
                 filter.Q.setValueAtTime(3.0, now + timeOffset);
                 
-                // 爆破声衰减包络
                 gain.gain.setValueAtTime(0.0, now + timeOffset);
                 gain.gain.linearRampToValueAtTime(0.08 + Math.random() * 0.12, now + timeOffset + 0.008);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.08 + Math.random() * 0.08);
@@ -594,7 +607,6 @@
             const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f43f5e', '#a855f7', '#06b6d4', '#eab308'];
             const burstCount = 18;
             
-            // 产生爆炸的圆心坐标 (微调在框内中心)
             const originX = holder.clientWidth / 2;
             const originY = holder.clientHeight / 2;
 
@@ -602,7 +614,7 @@
                 const particle = document.createElement('div');
                 particle.className = 'absolute rounded-full pointer-events-none transition-all duration-1000';
                 
-                const size = Math.random() * 6 + 3; // 3px 到 9px 之间的微粒
+                const size = Math.random() * 6 + 3; 
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
                 particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -610,7 +622,6 @@
                 particle.style.top = `${originY}px`;
                 particle.style.boxShadow = '0 0 8px currentColor';
                 
-                // 极坐标随机飞溅
                 const angle = Math.random() * Math.PI * 2;
                 const distance = Math.random() * 70 + 25;
                 const targetX = Math.cos(angle) * distance;
@@ -619,7 +630,6 @@
                 particle.style.transition = 'transform 1s cubic-bezier(0.1, 0.8, 0.25, 1), opacity 1s ease-out';
                 holder.appendChild(particle);
                 
-                // 渲染微粒发射动画
                 requestAnimationFrame(() => {
                     particle.style.transform = `translate(${targetX}px, ${targetY}px) scale(0)`;
                     particle.style.opacity = '0';
@@ -703,12 +713,10 @@
                     oscNote.stop(now + idx * 0.08 + 0.5);
                 });
             } else if (type === 'applause') {
-                // 优先尝试播放同目录下的本地 applause.mp3 音效
                 const applause = new Audio('applause.mp3');
                 applause.volume = 0.6;
                 applause.play().catch(e => {
-                    console.warn("本地 applause.mp3 载入未成功或被拦截，正在通过 Web Audio API 智能实时合成群掌欢欢呼声...", e);
-                    // 100% 成功兜底：在浏览器沙盒运行中实时生成高拟真掌声音频！
+                    console.warn("本地 applause.mp3 载入未成功，正在通过 Web Audio API 智能实时合成群掌欢呼声...", e);
                     playSyntheticApplause();
                 });
             }
@@ -733,7 +741,6 @@
             };
 
             recognition.onerror = (e) => {
-                // 过滤无害的 aborted 和 no-speech 错误，防范控制台报错
                 if (e.error === 'aborted' || e.error === 'no-speech') {
                     return;
                 }
@@ -743,7 +750,6 @@
             recognition.onend = () => {
                 isListening = false;
                 if (isPlaying && !isManualMode) {
-                    // 增加 300 毫秒的延时缓冲再重启，避免麦克风锁冲突导致 aborted 报错
                     setTimeout(() => {
                         if (isPlaying && !isManualMode && !isListening) {
                             try {
@@ -774,8 +780,6 @@
 
                 if (interimTranscript.length > 0 || finalTranscript.length > 0) {
                     const text = finalTranscript || interimTranscript;
-                    
-                    // 去除多余标点和空格
                     const cleanText = text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()？.！，\s]/g, "");
                     checkSpeechAnswer(cleanText);
                 }
@@ -784,7 +788,7 @@
 
         // 检验拼音发音以及声调
         function checkSpeechAnswer(speechText) {
-            if (isTransitioning) return; // 过渡期间不处理新的语音输入
+            if (isTransitioning) return; 
             const currentItem = currentWords[currentWordIndex];
             if (!currentItem) return;
 
@@ -1039,11 +1043,11 @@
                 // 🌟 动态调整拼音的字体大小，进行舒适微调，确保不管拼音长短，100%保持在单行显示！
                 const pinyinLength = currentItem.pinyin.length;
                 if (pinyinLength > 11) {
-                    elements.targetPinyin.style.fontSize = '1.6rem'; // 长词
+                    elements.targetPinyin.style.fontSize = '1.3rem'; // 长词在小屏设备微调字号
                 } else if (pinyinLength > 8) {
-                    elements.targetPinyin.style.fontSize = '2.0rem'; // 中词
+                    elements.targetPinyin.style.fontSize = '1.7rem'; // 中词
                 } else {
-                    elements.targetPinyin.style.fontSize = '2.5rem'; // 短词
+                    elements.targetPinyin.style.fontSize = '2.2rem'; // 短词
                 }
 
                 // 播放石门滑开声效
@@ -1209,19 +1213,13 @@
             // “祝贺你挑战成功！” 换成英文
             elements.overlayTitle.innerText = "Congratulations on Completing the Challenge!";
             elements.overlayDesc.innerHTML = `
-                <div class="flex flex-col items-center space-y-4 py-2 font-sans">
+                <div class="flex flex-col items-center space-y-4 py-2 font-sans max-h-[70vh] overflow-y-auto">
                     <!-- 🎇 烟花粒子动态容器 (Blinking border and circular firework burst base) -->
                     <div id="fireworks-holder" class="relative w-36 h-36 flex items-center justify-center bg-slate-900/60 rounded-full border-2 border-dashed border-yellow-400/40 shadow-xl overflow-hidden">
                         <span class="text-6xl animate-pulse z-10">✨</span>
                     </div>
                     <!-- 去掉了“发音精准和所有拼音通关”的汉字句子 -->
                     <p class="text-sm text-slate-300 mb-2">Total Score: <strong class="text-yellow-400 text-lg">${score}</strong> Points</p>
-                    
-                    <!-- 极其醒目、高优先级的卡片内专属“返回主菜单”交互按钮，排版规格与主按钮完全一致，杜绝换行 -->
-                    <button id="btn-play-again-inner" class="w-full max-w-xs bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 active:scale-95 text-slate-950 font-black text-xl py-4 rounded-2xl shadow-lg shadow-emerald-500/20 tracking-widest transition-all mb-4 border-b-4 border-green-700 flex items-center justify-center space-x-2 font-game pointer-events-auto">
-                        <i data-lucide="home" class="w-6 h-6"></i>
-                        <span>返回主菜单</span>
-                    </button>
                 </div>
             `;
             elements.btnStartText.innerText = "返回主菜单"; // 同时改变下方主按钮文本
@@ -1247,18 +1245,7 @@
             // 动态刷新图标
             lucide.createIcons();
 
-            // 绑定全新增加的内部中心按钮点击事件，返回最开端
-            const playAgainBtn = document.getElementById('btn-play-again-inner');
-            if (playAgainBtn) {
-                playAgainBtn.onclick = () => {
-                    if (fireworkTimer) {
-                        clearInterval(fireworkTimer);
-                        fireworkTimer = null;
-                    }
-                    resetGameToMainScreen();
-                };
-            }
-            // 主开始按钮点击在结算页中时同样也绑定为返回主屏
+            // 主开始按钮点击在结算页中时同样也绑定为返回主屏 (这里大按钮起到了返回主菜单的作用)
             elements.btnStart.onclick = () => {
                 if (fireworkTimer) {
                     clearInterval(fireworkTimer);
