@@ -103,7 +103,7 @@
       background-color: #ffffff;
       padding: 10px 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) gradients;
     }
     .stat-number {
       font-size: 24px;
@@ -233,17 +233,38 @@
       coloring: "🎨 星空涂色"
     };
 
-    // 获取云端配置变量（平台发布网页时会自动注入）
+    // ==========================================
+    // 💡 提示：您填写的 Firebase 配置信息已在此生效
+    // ==========================================
+    const myFirebaseConfig = {
+      apiKey: "AIzaSyDs9iOAHiMNo7ctYyDKMBz-Dw3fy_-B5B8",
+      authDomain: "teacher-liu-games.firebaseapp.com",
+      projectId: "teacher-liu-games",
+      storageBucket: "teacher-liu-games.firebasestorage.app",
+      messagingSenderId: "222580118563",
+      appId: "1:222580118563:web:3eb545c49e87096eb14d96",
+      measurementId: "G-MQ8ENXP4JV"
+    };
+
+    // 获取平台注入的配置变量
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'liu-teacher-ai-games';
     
     let firebaseConfig = null;
+    
+    // 1. 如果检测到平台环境配置，优先使用
     if (typeof __firebase_config !== 'undefined') {
       try {
         firebaseConfig = JSON.parse(__firebase_config);
       } catch (e) {
-        console.error("解析 Firebase 配置失败:", e);
+        console.error("解析 Firebase 注入配置失败:", e);
       }
     }
+    
+    // 2. 如果没有平台配置（例如在 GitHub 运行），直接使用我们刚才填入的配置
+    if (!firebaseConfig && myFirebaseConfig && myFirebaseConfig.apiKey !== "YOUR_API_KEY") {
+      firebaseConfig = myFirebaseConfig;
+    }
+
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
     let db = null;
@@ -258,8 +279,8 @@
           const auth = getAuth(app);
           db = getFirestore(app);
 
-          // 规则 3: 必须首先完成身份验证，再进行数据库读写
-          if (initialAuthToken) {
+          // 完成匿名登录认证（学生免登录直接看点击率）
+          if (initialAuthToken && firebaseConfig !== myFirebaseConfig) {
             await signInWithCustomToken(auth, initialAuthToken);
           } else {
             await signInAnonymously(auth);
@@ -297,7 +318,6 @@
     function setupCloudListeners(user) {
       if (!user) return;
       
-      // 规则 1: 使用严格符合规范的公共数据存储路径
       const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'site_stats', 'global');
       
       // 首次载入时，全网总访问量加 1
@@ -347,7 +367,7 @@
       }
     }
 
-    // 4. 本地兼容方案 (离线或无配置双击打开时)
+    // 4. 本地兼容方案
     function setupLocalFallback() {
       useCloud = false;
       updateStatusIndicator(false, "本地存储模式");
@@ -407,7 +427,6 @@
     }
 
     // 6. 核心拦截跳转机制
-    // 阻止按钮的立即跳转，确保数据发送至云端后再跳转，彻底避免点击漏记
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.game-button').forEach(btn => {
         btn.addEventListener('click', async (e) => {
