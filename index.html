@@ -25,6 +25,9 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    .game-links {
+      margin-top: 25px;
+    }
     .game-button {
       display: inline-block;
       margin: 15px auto;
@@ -38,13 +41,109 @@
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.1s ease;
     }
     .game-button:hover {
       background-color: #cf711f;
+      transform: translateY(-2px);
     }
+    
+    /* 点击率统计面板样式 */
+    .stats-container {
+      background-color: #fff3e6;
+      border: 2px dashed #e67e22;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 40px auto 20px auto;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    .stats-title {
+      font-size: 20px;
+      color: #d35400;
+      margin-bottom: 15px;
+      font-weight: bold;
+      border-bottom: 1px solid #ffd8b3;
+      padding-bottom: 8px;
+    }
+    
+    /* 实时数据库连接状态指示灯 */
+    .cloud-status {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 11px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #999;
+      display: inline-block;
+    }
+    .status-dot.online {
+      background-color: #2ecc71;
+      box-shadow: 0 0 6px #2ecc71;
+    }
+    .status-dot.offline {
+      background-color: #e74c3c;
+    }
+
+    .stats-grid {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 15px;
+    }
+    .stat-box {
+      background-color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .stat-number {
+      font-size: 24px;
+      color: #e67e22;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .click-rank-list {
+      text-align: left;
+      display: inline-block;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 0;
+      list-style: none;
+    }
+    .click-rank-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dotted #ffd8b3;
+      font-size: 16px;
+      color: #555;
+    }
+    .click-rank-item:last-child {
+      border-bottom: none;
+    }
+    .rank-count {
+      color: #e67e22;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+    }
+
     footer {
-      margin-top: 50px;
+      margin-top: 30px;
       font-size: 14px;
       color: #888;
       line-height: 1.5;
@@ -67,25 +166,44 @@
 
   <!-- 游戏链接列表 -->
   <div class="game-links">
-    <a href="restaurant-game.html" class="game-button">🍜 模拟 餐馆点餐系统</a>
-    <a href="找“我”字小游戏.html" class="game-button">🔍 找“我”字小游戏</a>
-    <a href="天气预报.html" class="game-button">🌤️ 天气预报小助手</a>
-    <a href="ChineseSentenceBuilderGame.html" class="game-button">🎮 有趣中文组词 句</a> 
-    <a href="Wuziqi.html" class="game-button">⚫⚪️五子棋 游戏 </a>
-    <a href="购物.html" class="game-button"> 🛍 模拟 网络购物系统 </a>
-<a href="PinyinChallenge.html" class="game-button"> 🗣️ 拼音挑战 </a>
-    <a href="讨价还价.html" class="game-button"> 🤑 模拟 讨价还价聊天机器人 </a>
+    <!-- 每一个游戏链接都使用 data-game 属性来识别，以便由 JS 统一管理点击并实时同步 -->
+    <a href="restaurant-game.html" class="game-button" data-game="restaurant">🍜 模拟 餐馆点餐系统</a>
+    <a href="找“我”字小游戏.html" class="game-button" data-game="findMe">🔍 找“我”字小游戏</a>
+    <a href="天气预报.html" class="game-button" data-game="weather">🌤️ 天气预报小助手</a>
+    <a href="ChineseSentenceBuilderGame.html" class="game-button" data-game="sentenceBuilder">🎮 有趣中文组词 句</a> 
+    <a href="Wuziqi.html" class="game-button" data-game="wuziqi">⚫⚪️五子棋 游戏 </a>
+    <a href="购物.html" class="game-button" data-game="shopping"> 🛍 模拟 网络购物系统 </a>
+    <a href="PinyinChallenge.html" class="game-button" data-game="pinyin"> 🗣️ 拼音挑战 </a>
+    <a href="讨价还价.html" class="game-button" data-game="bargain"> 🤑 模拟 讨价还价聊天机器人 </a>
+    <a href="麻将.html" class="game-button" data-game="mahjong"> 🀄️ 模拟 麻将练习 </a>
+    <a href="star_night_coloring.html" class="game-button" data-game="coloring"> 🎨 星空涂色 </a>
+  </div>
 
-<a href="麻将.html" class="game-button"> 🀄️ 模拟 麻将练习 </a>
-     
- <a href="star_night_coloring.html" class="game-button"> 🎨 星空涂色 </a>
+  <!-- 点击率与访问量统计看板 -->
+  <div class="stats-container">
+    <!-- 云端连接状态指示灯 -->
+    <div class="cloud-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">正在初始化...</span>
+    </div>
+
+    <div class="stats-title">📊 课件人气与访问统计</div>
     
-    <!-- 预留位置：未来添加更多游戏 -->
-    <!-- 示例： -->
-    <!-- <a href="Chinese Sentence Builder Game.html" class="game-button">🎮有趣中文组词 句</a> -->
-  
-  
-  
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-number" id="visit-count">0</div>
+        <div class="stat-label">全网总访问量</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="total-clicks">0</div>
+        <div class="stat-label">课件总点击次数</div>
+      </div>
+    </div>
+
+    <div style="font-size: 16px; font-weight: bold; color: #d35400; margin-bottom: 10px;">🌟 热门游戏点击榜 (全网实时)</div>
+    <ul class="click-rank-list" id="rank-list">
+      <!-- 动态加载排行列表 -->
+    </ul>
   </div>
 
   <!-- 联系方式与版权 -->
@@ -95,5 +213,228 @@
     <p style="margin-top: 20px;">&copy; 2025 刘老师AI教学探索项目</p>
   </footer>
 
+  <!-- 引入云端数据库 SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // 游戏对应名称对照表
+    const gameNames = {
+      restaurant: "🍜 模拟 餐馆点餐系统",
+      findMe: "🔍 找“我”字小游戏",
+      weather: "🌤️ 天气预报小助手",
+      sentenceBuilder: "🎮 有趣中文组词句",
+      wuziqi: "⚫⚪️五子棋 游戏",
+      shopping: "🛍 模拟 网络购物系统",
+      pinyin: "🗣️ 拼音挑战",
+      bargain: "🤑 模拟 讨价还价聊天机器人",
+      mahjong: "🀄️ 模拟 麻将练习",
+      coloring: "🎨 星空涂色"
+    };
+
+    // 获取云端配置变量（平台发布网页时会自动注入）
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'liu-teacher-ai-games';
+    
+    let firebaseConfig = null;
+    if (typeof __firebase_config !== 'undefined') {
+      try {
+        firebaseConfig = JSON.parse(__firebase_config);
+      } catch (e) {
+        console.error("解析 Firebase 配置失败:", e);
+      }
+    }
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db = null;
+    let useCloud = false;
+    let hasTrackedVisit = false;
+
+    // 1. 初始化统计系统
+    async function initStats() {
+      if (firebaseConfig) {
+        try {
+          const app = initializeApp(firebaseConfig);
+          const auth = getAuth(app);
+          db = getFirestore(app);
+
+          // 规则 3: 必须首先完成身份验证，再进行数据库读写
+          if (initialAuthToken) {
+            await signInWithCustomToken(auth, initialAuthToken);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              useCloud = true;
+              updateStatusIndicator(true, "云端实时同步中");
+              setupCloudListeners(user);
+            } else {
+              setupLocalFallback();
+            }
+          });
+        } catch (e) {
+          console.error("无法连接到云端数据库，切换到本地存储模式:", e);
+          setupLocalFallback();
+        }
+      } else {
+        setupLocalFallback();
+      }
+    }
+
+    // 更新连接状态指示灯
+    function updateStatusIndicator(isOnline, text) {
+      const dot = document.getElementById('status-dot');
+      const textEl = document.getElementById('status-text');
+      if (dot && textEl) {
+        dot.className = `status-dot ${isOnline ? 'online' : 'offline'}`;
+        textEl.innerText = text;
+      }
+    }
+
+    // 2. 监听云数据库变化（实现跨设备实时更新）
+    function setupCloudListeners(user) {
+      if (!user) return;
+      
+      // 规则 1: 使用严格符合规范的公共数据存储路径
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'site_stats', 'global');
+      
+      // 首次载入时，全网总访问量加 1
+      if (!hasTrackedVisit) {
+        hasTrackedVisit = true;
+        setDoc(docRef, { 
+          visits: increment(1) 
+        }, { merge: true }).catch(err => console.error("递增访问量失败:", err));
+      }
+
+      // 实时监听云端数据变化
+      onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          renderStats(data.visits || 0, data.clicks || {});
+        } else {
+          // 初始化空白云端结构
+          setDoc(docRef, { visits: 1, clicks: {} }, { merge: true });
+        }
+      }, (error) => {
+        console.error("订阅云端数据更新失败:", error);
+        updateStatusIndicator(false, "云端连接受限");
+        setupLocalFallback();
+      });
+    }
+
+    // 3. 统计点击事件的核心函数
+    async function trackClick(gameKey) {
+      if (useCloud && db) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'site_stats', 'global');
+          const updateData = {};
+          updateData[`clicks.${gameKey}`] = increment(1);
+          // 写入云端
+          await setDoc(docRef, updateData, { merge: true });
+        } catch (e) {
+          console.error("云端点击统计失败:", e);
+        }
+      } else {
+        // 本地降级存储
+        let clicks = JSON.parse(localStorage.getItem('game_clicks') || '{}');
+        clicks[gameKey] = (clicks[gameKey] || 0) + 1;
+        localStorage.setItem('game_clicks', JSON.stringify(clicks));
+        
+        let visits = parseInt(localStorage.getItem('site_visits') || '0');
+        renderStats(visits, clicks);
+      }
+    }
+
+    // 4. 本地兼容方案 (离线或无配置双击打开时)
+    function setupLocalFallback() {
+      useCloud = false;
+      updateStatusIndicator(false, "本地存储模式");
+      
+      let visits = parseInt(localStorage.getItem('site_visits') || '0');
+      if (!hasTrackedVisit) {
+        hasTrackedVisit = true;
+        visits += 1;
+        localStorage.setItem('site_visits', visits);
+      }
+
+      let clicks = JSON.parse(localStorage.getItem('game_clicks') || '{}');
+      for (let key in gameNames) {
+        if (clicks[key] === undefined) {
+          clicks[key] = 0;
+        }
+      }
+      localStorage.setItem('game_clicks', JSON.stringify(clicks));
+
+      renderStats(visits, clicks);
+    }
+
+    // 5. 渲染数据和生成排行榜
+    function renderStats(visits, clicks) {
+      document.getElementById('visit-count').innerText = visits;
+
+      let totalClicks = 0;
+      let rankArray = [];
+      for (let key in gameNames) {
+        const count = clicks[key] || 0;
+        totalClicks += count;
+        rankArray.push({
+          key: key,
+          name: gameNames[key],
+          count: count
+        });
+      }
+      document.getElementById('total-clicks').innerText = totalClicks;
+
+      // 按照点击量从大到小排序
+      rankArray.sort((a, b) => b.count - a.count);
+
+      // 动态绘制排行榜列表
+      const rankListEl = document.getElementById('rank-list');
+      if (rankListEl) {
+        rankListEl.innerHTML = '';
+        rankArray.forEach((item, index) => {
+          const li = document.createElement('li');
+          li.className = 'click-rank-item';
+          li.innerHTML = `
+            <span>${index + 1}. ${item.name}</span>
+            <span class="rank-count">${item.count} 次点击</span>
+          `;
+          rankListEl.appendChild(li);
+        });
+      }
+    }
+
+    // 6. 核心拦截跳转机制
+    // 阻止按钮的立即跳转，确保数据发送至云端后再跳转，彻底避免点击漏记
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.game-button').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault(); // 拦截默认立即跳转
+          
+          const gameKey = btn.getAttribute('data-game');
+          const destinationHref = btn.getAttribute('href');
+
+          // 给予临时点击反馈，防止学生重复点击
+          btn.style.pointerEvents = 'none';
+          btn.style.opacity = '0.7';
+
+          try {
+            // 先写入点击量数据
+            await trackClick(gameKey);
+          } catch (err) {
+            console.error("记录点击时出错:", err);
+          }
+
+          // 安全跳转到子游戏页面
+          window.location.href = destinationHref;
+        });
+      });
+    });
+
+    // 启动系统
+    initStats();
+  </script>
 </body>
 </html>
